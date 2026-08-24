@@ -1,0 +1,51 @@
+"use client";
+
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import Link from "next/link";
+import { useRef } from "react";
+import { asset } from "@/lib/site";
+import { Arrow } from "./Arrow";
+import { WhatsAppLink } from "./WhatsAppLink";
+
+export function Hero() {
+  const ref = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 72]);
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -24]);
+
+  return (
+    <section ref={ref} className="hero">
+      <div className="hero__grain" aria-hidden="true"/>
+      <div className="container hero__grid">
+        <motion.div className="hero__copy" style={{ y: copyY }}>
+          <motion.p className="eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7, delay: .15 }}>
+            The Français Hub · by Yana Budhiraja
+          </motion.p>
+          <motion.h1 initial={{ opacity: 0, y: 34 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .95, delay: .24, ease: [0.22, 1, 0.36, 1] }}>
+            French,<br/><em>with direction.</em>
+          </motion.h1>
+          <motion.p className="hero__dek" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .8, delay: .42 }}>
+            Personal online French coaching for TEF, TCF and DELF learners guided by a C1-level certified tutor.
+          </motion.p>
+          <motion.div className="hero__actions" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7, delay: .58 }}>
+            <Link className="button button--accent" href="/#programs"><span>Explore programs</span><Arrow/></Link>
+            <WhatsAppLink className="button button--ghost">Start on WhatsApp</WhatsAppLink>
+          </motion.div>
+          <motion.div className="hero__meta" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: .8, delay: .78 }}>
+            <span>TEF / TCF · CLB 7+</span><span>DELF · A1–B2</span><span>Online only</span>
+          </motion.div>
+        </motion.div>
+
+        <motion.div className="hero__visual" style={{ y: imageY }} initial={{ opacity: 0, scale: .985 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.1, delay: .22, ease: [0.22, 1, 0.36, 1] }}>
+          <div className="hero__image-wrap">
+            <img src={asset("/images/yana-hero.webp")} alt="Yana Budhiraja seated at a desk with a laptop and French study books" className="hero__image"/>
+            <div className="hero__image-label"><span>Bonjour,</span><strong>I&apos;m Yana.</strong></div>
+          </div>
+          <div className="hero__micro" aria-hidden="true">ç<span>.</span></div>
+        </motion.div>
+      </div>
+      <a className="hero__scroll" href="#programs" aria-label="Scroll to programs"><span>Scroll</span><i/></a>
+    </section>
+  );
+}
