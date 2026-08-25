@@ -32,9 +32,6 @@ export function Hero() {
             <Link className="button button--accent" href="/#programs"><span>Explore programs</span><Arrow/></Link>
             <WhatsAppLink className="button button--ghost">Start on WhatsApp</WhatsAppLink>
           </motion.div>
-          <motion.div className="hero__meta" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: .8, delay: .78 }}>
-            <span>TEF / TCF · CLB 7+</span><span>DELF · A1–B2</span><span>Online only</span>
-          </motion.div>
         </motion.div>
 
         <motion.div className="hero__visual" style={{ y: imageY }} initial={{ opacity: 0, scale: .985 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.1, delay: .22, ease: [0.22, 1, 0.36, 1] }}>
@@ -42,6 +39,9 @@ export function Hero() {
             <img src={asset("/images/yana-hero.webp")} alt="Yana Budhiraja seated at a desk with a laptop and French study books" className="hero__image"/>
             <div className="hero__image-label"><span>Bonjour,</span><strong>I&apos;m Yana.</strong></div>
           </div>
+          <motion.div className="hero__credentials" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: .8, delay: .78 }}>
+            <span>TEF / TCF · CLB 7+</span><span>DELF · A1–B2</span><span>Online only</span>
+          </motion.div>
           <div className="hero__micro" aria-hidden="true">ç<span>.</span></div>
         </motion.div>
       </div>

@@ -10,7 +10,7 @@ import { IntelligenceExperience, ProgressExperience } from "./LeHubIntelligenceP
 const reveal = {
   initial: { opacity: 0, y: 34 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-12%" },
+  viewport: { once: false, margin: "-12%" },
   transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
 };
 
@@ -207,7 +207,7 @@ export function LeHubShowcase() {
             <h2>Not just translation.<br/><em>Understanding.</em></h2>
             <p>A word becomes pronunciation, conjugation, context, an example, and something worth revisiting later.</p>
             <div className={polish.lexiqueFeatureGrid}>
-              {lexiqueTools.map(([type,title,detail],i)=><motion.div className={polish.lexiqueFeatureCard} key={title} initial={{opacity:0,y:18}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.45,delay:.08*i}} whileHover={{y:-6}}>
+              {lexiqueTools.map(([type,title,detail],i)=><motion.div className={polish.lexiqueFeatureCard} key={title} initial={{opacity:0,y:18}} whileInView={{opacity:1,y:0}} viewport={{once:false}} transition={{duration:.45,delay:.08*i}} whileHover={{y:-6}}>
                 <span className={polish.lexiqueIcon}><ToolIcon type={type}/></span>
                 <strong>{title}</strong>
                 <small>{detail}</small>
@@ -234,7 +234,7 @@ export function LeHubShowcase() {
               <p>One continuous loop instead of scattered links, folders and messages.</p>
             </div>
             <div className={polish.learningFlow}>
-              {learningFlow.map(([number,title,detail],i)=><motion.div className={polish.flowStep} key={title} initial={{opacity:0,y:16}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.45,delay:.08*i}}>
+              {learningFlow.map(([number,title,detail],i)=><motion.div className={polish.flowStep} key={title} initial={{opacity:0,y:16}} whileInView={{opacity:1,y:0}} viewport={{once:false}} transition={{duration:.45,delay:.08*i}}>
                 <div className={polish.flowIndex}>{number}</div>
                 <strong>{title}</strong>
                 <small>{detail}</small>
@@ -244,7 +244,7 @@ export function LeHubShowcase() {
 
           <div className={`${styles.screenStory} ${styles.screenStoryReverse} ${polish.courseStory}`}>
             <motion.div className={`${styles.screenCopy} ${polish.courseStoryCopy}`} {...reveal}><span>03</span><small>CURRENT COURSE</small><h3>Class doesn&apos;t disappear <em>after Zoom.</em></h3><p>Lessons, recordings, notes, words of the week and tests become one continuous course instead of five different folders.</p></motion.div>
-            <motion.div className={`${styles.screenFrame} ${polish.safeFrame} ${polish.courseStoryFrame}`} initial={{opacity:0,y:34,scale:.97}} whileInView={{opacity:1,y:0,scale:1}} viewport={{once:true,margin:"-12%"}} transition={{duration:.8,ease:[.22,1,.36,1]}}><CourseScreen /></motion.div>
+            <motion.div className={`${styles.screenFrame} ${polish.safeFrame} ${polish.courseStoryFrame}`} initial={{opacity:0,y:34,scale:.97}} whileInView={{opacity:1,y:0,scale:1}} viewport={{once:false,margin:"-12%"}} transition={{duration:.8,ease:[.22,1,.36,1]}}><CourseScreen /></motion.div>
           </div>
         </div>
       </section>
@@ -255,7 +255,7 @@ export function LeHubShowcase() {
             <div><p className="eyebrow eyebrow--light">The workspace</p><h2>Practice goes in.<br/><em>Yana comes back.</em></h2></div>
             <p>Write it. Upload it. Record it. Yana can mark it, comment on it, leave a voice note, or ask you to try again. The technology extends the teaching — it never replaces it.</p>
           </motion.div>
-          <motion.div className={`${styles.workspaceFrame} ${polish.workspaceFrameRefined}`} initial={{opacity:0,y:36,scale:.975}} whileInView={{opacity:1,y:0,scale:1}} viewport={{once:true,margin:"-12%"}} transition={{duration:.85,ease:[.22,1,.36,1]}}><WorkspaceScreen /></motion.div>
+          <motion.div className={`${styles.workspaceFrame} ${polish.workspaceFrameRefined}`} initial={{opacity:0,y:36,scale:.975}} whileInView={{opacity:1,y:0,scale:1}} viewport={{once:false,margin:"-12%"}} transition={{duration:.85,ease:[.22,1,.36,1]}}><WorkspaceScreen /></motion.div>
           <div className={styles.practiceTypes}><span>Homework</span><span>Reading</span><span>Writing</span><span>Speaking</span><span>Listening</span><span>Practice</span></div>
         </div>
       </section>

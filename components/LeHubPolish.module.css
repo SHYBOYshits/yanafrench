@@ -4,7 +4,7 @@
 @keyframes tfhMarquee{from{transform:translateX(0)}to{transform:translateX(-25%)}}
 
 .dashboardEyebrow{display:flex;align-items:center;gap:.7rem}
-.dashboardEyebrow:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--bordeaux);box-shadow:0 0 0 7px rgba(138,41,56,.08)}
+:global(.eyebrow).dashboardEyebrow:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--bordeaux);box-shadow:0 0 0 7px rgba(138,41,56,.08);opacity:1}
 .dashboardMicroRow{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-top:2rem;max-width:560px}
 .dashboardMicro{border-top:1px solid var(--stone);padding-top:.8rem;display:flex;flex-direction:column;gap:.18rem}
 .dashboardMicro span{font-size:.5rem;letter-spacing:.15em;color:var(--bordeaux);font-weight:700}
@@ -39,10 +39,10 @@
 .learningFlow:after{content:"";position:absolute;top:27px;left:5%;width:7px;height:7px;border-radius:50%;background:var(--bordeaux);animation:flowDot 8s linear infinite;box-shadow:0 0 0 7px rgba(138,41,56,.08)}
 @keyframes flowDot{from{left:5%}to{left:94%}}
 .flowStep{position:relative;z-index:1;padding-top:0}
-.flowIndex{width:60px;height:60px;border-radius:50%;background:#f1ece4;border:1px solid rgba(23,40,59,.2);display:grid;place-items:center;font-family:var(--serif);font-size:1rem;color:var(--blue);margin-bottom:1rem;transition:background .3s ease,color .3s ease,transform .3s ease}
+.flowIndex{width:60px;height:60px;border-radius:50%;background:var(--porcelain-2);border:1px solid rgba(23,40,59,.2);display:grid;place-items:center;font-family:var(--serif);font-size:1rem;color:var(--blue);margin-bottom:1rem;transition:background .3s ease,color .3s ease,transform .3s ease}
 .flowStep:hover .flowIndex{background:var(--blue);color:#fff;transform:translateY(-4px)}
 .flowStep strong{display:block;font-family:var(--serif);font-size:1.15rem;font-weight:400;color:var(--blue)}
-.flowStep small{display:block;margin-top:.35rem;color:#777;line-height:1.45;font-size:.52rem;max-width:125px}
+.flowStep small{display:block;margin-top:.35rem;color:var(--text-faint);line-height:1.45;font-size:.52rem;max-width:125px}
 
 .safeFrame{min-width:0!important;overflow:hidden;border:1px solid rgba(23,40,59,.1);background:#fbfaf7;box-shadow:0 30px 80px rgba(23,23,25,.09)}
 .storyWindow{min-width:0!important;width:100%!important;transform:none!important;box-shadow:none!important}

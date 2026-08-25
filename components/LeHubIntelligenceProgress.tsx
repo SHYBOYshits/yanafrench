@@ -54,7 +54,7 @@ export function IntelligenceExperience() {
           className={ui.intelligenceHead}
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-12%" }}
+          viewport={{ once: false, margin: "-12%" }}
           transition={{ duration: .75, ease: [.22, 1, .36, 1] }}
         >
           <p className={`eyebrow ${ui.intelligenceEyebrow}`}>Intelligence, quietly built in</p>
@@ -66,7 +66,7 @@ export function IntelligenceExperience() {
           className={ui.intelligenceStage}
           initial={{ opacity: 0, y: 30, scale: .985 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-10%" }}
+          viewport={{ once: false, margin: "-10%" }}
           transition={{ duration: .85, ease: [.22, 1, .36, 1] }}
         >
           <svg className={ui.signalMap} viewBox="0 0 1200 590" preserveAspectRatio="none" aria-hidden="true">
@@ -76,7 +76,7 @@ export function IntelligenceExperience() {
               "M 285 470 C 420 430 485 365 600 283",
               "M 920 465 C 790 425 720 355 600 283",
             ].map((d, i) => (
-              <motion.path key={d} d={d} initial={{ pathLength: 0, opacity: 0 }} whileInView={{ pathLength: 1, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.1, delay: .16 + i * .1 }} />
+              <motion.path key={d} d={d} initial={{ pathLength: 0, opacity: 0 }} whileInView={{ pathLength: 1, opacity: 1 }} viewport={{ once: false }} transition={{ duration: 1.1, delay: .16 + i * .1 }} />
             ))}
           </svg>
 
@@ -98,7 +98,7 @@ export function IntelligenceExperience() {
               onClick={() => setActive(index)}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ duration: .55, delay: .12 + index * .09 }}
               whileHover={{ y: -6 }}
             >
@@ -140,7 +140,7 @@ export function ProgressExperience() {
           className={ui.progressHead}
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-12%" }}
+          viewport={{ once: false, margin: "-12%" }}
           transition={{ duration: .75, ease: [.22, 1, .36, 1] }}
         >
           <p className={`eyebrow ${ui.progressEyebrow}`}>Mon Parcours</p>
@@ -152,7 +152,7 @@ export function ProgressExperience() {
           className={ui.journeyStage}
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
+          viewport={{ once: false, margin: "-10%" }}
           transition={{ duration: .8, ease: [.22, 1, .36, 1] }}
         >
           <svg className={ui.journeySvg} viewBox="0 0 1200 500" preserveAspectRatio="none" aria-hidden="true">
@@ -162,7 +162,7 @@ export function ProgressExperience() {
               d="M 96 350 C 190 330 240 270 324 260 S 500 320 600 310 S 780 210 864 195 S 1020 130 1092 120"
               initial={{ pathLength: 0 }}
               whileInView={{ pathLength: .53 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ duration: 1.8, ease: [.22, 1, .36, 1] }}
             />
           </svg>
@@ -178,7 +178,7 @@ export function ProgressExperience() {
               onClick={() => setActive(index)}
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ duration: .5, delay: .25 + index * .12 }}
             >
               {index === 2 && <span className={ui.youAreHere}>YOU ARE HERE</span>}
@@ -187,13 +187,13 @@ export function ProgressExperience() {
             </motion.button>
           ))}
 
-          <motion.div className={`${ui.journeyMetric} ${ui.metricOne}`} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: .65 }}>
+          <motion.div className={`${ui.journeyMetric} ${ui.metricOne}`} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false }} transition={{ delay: .65 }}>
             <span>LISTENING</span><strong>+18%</strong><small>over the last 6 weeks</small>
           </motion.div>
-          <motion.div className={`${ui.journeyMetric} ${ui.metricTwo}`} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: .8 }}>
+          <motion.div className={`${ui.journeyMetric} ${ui.metricTwo}`} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false }} transition={{ delay: .8 }}>
             <span>SPEAKING</span><strong>7.8 / 10</strong><small>latest assessment</small>
           </motion.div>
-          <motion.div className={`${ui.journeyMetric} ${ui.metricThree}`} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: .95 }}>
+          <motion.div className={`${ui.journeyMetric} ${ui.metricThree}`} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false }} transition={{ delay: .95 }}>
             <span>TEST TARGETS</span><strong>4 / 5</strong><small>currently reached</small>
           </motion.div>
 

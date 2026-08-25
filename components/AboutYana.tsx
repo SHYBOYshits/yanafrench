@@ -7,7 +7,11 @@ export function AboutYana() {
   return (
     <section className="section yana-section">
       <div className="container yana-section__grid">
-        <Reveal className="yana-section__image-wrap"><img src={asset("/images/yana-editorial.webp")} alt="Yana Budhiraja in a warm study setting" className="yana-section__image"/><span className="yana-section__caption">Based in Delhi · teaching online</span></Reveal>
+        <Reveal className="yana-section__image-wrap">
+          <img src={asset("/images/yana-editorial.webp")} alt="Yana Budhiraja in a warm study setting" className="yana-section__image"/>
+          <span className="yana-section__caption">Based in Delhi · teaching online</span>
+          <div className="yana-section__badge"><strong>C1</strong><span>Certified<br/>French tutor</span></div>
+        </Reveal>
         <Reveal className="yana-section__copy" delay={.12}>
           <p className="eyebrow">Meet your tutor</p>
           <h2>Bonjour,<br/><em>I&apos;m Yana.</em></h2>
