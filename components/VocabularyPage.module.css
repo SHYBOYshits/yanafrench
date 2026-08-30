@@ -1,0 +1,94 @@
+.head small { font-size: .58rem; letter-spacing: .16em; color: var(--bordeaux); font-weight: 700; }
+
+.head h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 4.6vw, 3.6rem);
+  line-height: .96;
+  color: var(--blue);
+  margin: .5rem 0 .6rem;
+}
+
+.head p { font-size: .82rem; color: var(--ink-soft); margin: 0 0 1.6rem; }
+
+.viewTabs { display: flex; gap: 1.6rem; border-bottom: 1px solid var(--stone); margin-bottom: 1.6rem; }
+
+.tab, .tabActive { border: 0; background: none; padding: 0 0 .8rem; font-size: .74rem; font-weight: 700; color: var(--text-faint); margin-bottom: -1px; }
+.tabActive { color: var(--text-primary); border-bottom: 2px solid var(--bordeaux); }
+
+.controls { margin-bottom: .5rem; }
+
+.search { width: 100%; max-width: 420px; border: 1px solid var(--hairline-ink); border-radius: 999px; padding: .75rem 1.2rem; font-size: .8rem; background: var(--card-surface); margin-bottom: 1rem; }
+.search:focus { outline: none; border-color: var(--blue); }
+
+.filterRow { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+.chip, .chipActive { border: 1px solid var(--hairline-ink); background: var(--card-surface); border-radius: 999px; padding: .4rem .9rem; font-size: .68rem; font-weight: 600; color: var(--text-faint); }
+.chipActive { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+.section { margin-top: 2rem; }
+
+.section h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin: 0 0 1.1rem;
+  padding-bottom: .7rem;
+  border-bottom: 1px solid var(--stone);
+}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; }
+
+.card {
+  position: relative;
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-lg);
+  background: var(--card-surface);
+  padding: 1.2rem 1.3rem;
+  box-shadow: var(--shadow-lift);
+}
+
+.fav, .favActive { position: absolute; top: .9rem; right: .9rem; border: 0; background: none; font-size: 1rem; color: var(--stone); }
+.favActive { color: var(--bordeaux); }
+
+.category { font-size: .53rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--bordeaux); }
+.card strong { display: block; font-family: var(--serif); font-style: italic; font-size: 1.25rem; color: var(--blue); margin: .5rem 0 .1rem; }
+.pron { display: block; font-size: .68rem; color: var(--text-faint); }
+.meaning { font-size: .8rem; color: var(--text-primary); font-weight: 600; margin: .6rem 0 .3rem; }
+.example { font-size: .72rem; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+
+.empty { border: 1px dashed var(--hairline-ink-hover); border-radius: var(--r-lg); padding: 3rem 1.5rem; text-align: center; }
+.empty p { font-size: .8rem; color: var(--text-faint); margin: 0; }
+
+.flashcardWrap { display: flex; flex-direction: column; align-items: center; margin-top: 1rem; }
+
+.flashcard {
+  width: min(420px, 100%);
+  min-height: 260px;
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-lg);
+  background: linear-gradient(165deg, var(--blue-2), var(--blue));
+  color: #fff;
+  box-shadow: var(--shadow-lift);
+  padding: 2.2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: .5rem;
+}
+
+.flashcard .category { color: rgba(255,255,255,.65); }
+.flashWord { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 2.4rem; color: #fff; }
+.flashcard .pron { color: rgba(255,255,255,.72); }
+.flashcard .meaning { color: #fff; font-size: 1.1rem; }
+.flashcard .example { color: rgba(255,255,255,.75); }
+
+.flipHint { margin-top: 1.2rem; font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+
+.flashNav { display: flex; align-items: center; gap: 1.4rem; margin-top: 1.4rem; }
+.flashNav button { border: 0; background: none; font-size: .76rem; font-weight: 700; color: var(--blue); }
+.flashNav button:hover { color: var(--bordeaux); }
+.flashNav span { font-size: .72rem; color: var(--text-faint); }
