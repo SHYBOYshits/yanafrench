@@ -1,0 +1,93 @@
+.head small { font-size: .58rem; letter-spacing: .16em; color: var(--bordeaux); font-weight: 700; }
+
+.head h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1.02;
+  color: var(--blue);
+  margin: .5rem 0 1.8rem;
+}
+
+.overallCard {
+  background: linear-gradient(165deg, var(--blue-2), var(--blue));
+  border-radius: var(--r-lg);
+  color: #fff;
+  padding: 1.8rem 2rem;
+  box-shadow: var(--shadow-lift);
+  max-width: 620px;
+  margin-bottom: 1.6rem;
+}
+
+.overallCard span { font-size: .58rem; font-weight: 700; letter-spacing: .14em; color: rgba(255,255,255,.65); }
+.overallCard strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 3rem; margin-top: .5rem; }
+.overallCard strong small { font-size: 1.2rem; color: rgba(255,255,255,.6); }
+
+.scoreGrid {
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-lg);
+  background: var(--card-surface);
+  box-shadow: var(--shadow-lift);
+  padding: 1.6rem 1.8rem;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.scoreRow { display: flex; flex-direction: column; gap: .4rem; }
+.scoreRowHead { display: flex; align-items: center; justify-content: space-between; font-size: .74rem; }
+.scoreRowHead span { color: var(--text-primary); }
+.scoreRowHead strong { font-family: var(--serif); color: var(--blue); font-weight: 400; font-size: .9rem; }
+
+.scoreBar { height: 6px; border-radius: 999px; background: var(--porcelain-2); overflow: hidden; }
+.scoreBar span { display: block; height: 100%; background: var(--bordeaux); border-radius: 999px; }
+
+.feedbackRow { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.6rem 0; max-width: 620px; }
+
+.feedbackCard { border: 1px solid var(--hairline-ink); border-radius: var(--r-lg); background: var(--card-surface); padding: 1.3rem 1.4rem; }
+.feedbackLabel { font-size: .55rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--bordeaux); }
+.feedbackCard p { font-size: .82rem; line-height: 1.7; color: var(--text-primary); margin: .6rem 0 0; }
+
+.section { max-width: 620px; margin-top: 2rem; }
+
+.section h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin: 0 0 1rem;
+  padding-bottom: .7rem;
+  border-bottom: 1px solid var(--stone);
+}
+
+.correctionsList { display: flex; flex-direction: column; gap: .8rem; }
+
+.correctionCard { border: 1px solid var(--hairline-ink); border-radius: var(--r-md); padding: 1rem 1.1rem; background: var(--card-surface); }
+
+.correctionRow { display: flex; align-items: baseline; gap: .6rem; margin-bottom: .35rem; }
+
+.correctionLabelBad, .correctionLabelGood { font-size: .55rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; flex: 0 0 auto; width: 62px; }
+.correctionLabelBad { color: var(--text-faint); }
+.correctionLabelGood { color: var(--bordeaux); }
+
+.correctionBad { margin: 0; font-size: .82rem; color: var(--text-faint); text-decoration: line-through; text-decoration-color: rgba(23,25,28,.25); }
+.correctionGood { margin: 0; font-size: .82rem; color: var(--text-primary); font-weight: 600; }
+
+.correctionCard small { display: block; font-size: .7rem; color: var(--ink-soft); margin-top: .5rem; padding-top: .5rem; border-top: 1px solid var(--hairline-ink); line-height: 1.6; }
+
+.improvedCard { background: var(--porcelain-2); border-radius: var(--r-lg); padding: 1.4rem 1.6rem; border: 1px solid var(--hairline-ink); }
+.improvedCard span { font-size: .55rem; font-weight: 700; letter-spacing: .1em; color: var(--bordeaux); }
+.improvedCard p { font-family: var(--serif); font-style: italic; font-size: 1.15rem; line-height: 1.6; color: var(--blue); margin: .6rem 0 0; }
+
+.actions { display: flex; align-items: center; gap: 1.4rem; margin-top: 2.4rem; max-width: 620px; }
+
+.practiceAgain { border: 0; background: var(--blue); color: #fff; padding: .9rem 1.6rem; border-radius: 999px; font-size: .78rem; font-weight: 700; }
+.practiceAgain:hover { background: var(--blue-2); }
+
+.viewHistory { font-size: .76rem; font-weight: 700; color: var(--blue); }
+.viewHistory:hover { color: var(--bordeaux); }
+
+@media (max-width: 560px) {
+  .feedbackRow { grid-template-columns: 1fr; }
+}

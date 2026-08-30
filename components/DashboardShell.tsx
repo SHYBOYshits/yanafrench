@@ -20,7 +20,7 @@ const navItems: { type: string; label: string; href?: string }[] = [
   { type: "lessons", label: "Lessons" },
   { type: "videos", label: "Videos", href: "/student-hub/videos" },
   { type: "documents", label: "Documents", href: "/student-hub/documents" },
-  { type: "speaking", label: "Speaking Practice" },
+  { type: "speaking", label: "Speaking Practice", href: "/student-hub/speaking" },
   { type: "tests", label: "Tests & Assignments" },
   { type: "vocabulary", label: "Vocabulary" },
   { type: "progress", label: "Progress" },
