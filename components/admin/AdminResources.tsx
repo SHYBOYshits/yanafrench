@@ -35,16 +35,32 @@ export function AdminResources() {
     if (file) {
       setUploading(true);
       try {
-        const formData = new FormData();
-        formData.append("file", file);
-        const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
-        if (!res.ok) {
-          setError(await res.text());
+        const presignRes = await fetch("/api/admin/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
+        });
+        if (!presignRes.ok) {
+          setError(await presignRes.text());
           setUploading(false);
           return;
         }
-        const data = await res.json();
-        fileUrl = data.url;
+        const { uploadUrl, fileUrl: presignedFileUrl } = await presignRes.json();
+
+        // Uploads straight to R2 from the browser, bypassing our server
+        // entirely — avoids Vercel's request body size limit for large files.
+        const putRes = await fetch(uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type || "application/octet-stream" },
+          body: file,
+        });
+        if (!putRes.ok) {
+          setError("Upload to storage failed. Please try again.");
+          setUploading(false);
+          return;
+        }
+
+        fileUrl = presignedFileUrl;
       } catch {
         setError("Upload failed. Check your connection and try again.");
         setUploading(false);
