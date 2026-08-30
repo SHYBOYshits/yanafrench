@@ -26,14 +26,6 @@
 
 .floatingWord{left:-1.2rem;bottom:7%;width:160px;background:var(--blue)}
 
-.getHubButton{position:absolute;left:6%;top:-3.2rem;z-index:6;display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 1.4rem;border-radius:999px;background:var(--bordeaux);color:#fff;font-size:.78rem;font-weight:700;box-shadow:0 18px 40px rgba(182,58,58,.28);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
-
-.getHubButton:hover{transform:translateY(-3px);box-shadow:0 22px 46px rgba(182,58,58,.34)}
-
-.getHubButton span{transition:transform .25s var(--ease)}
-
-.getHubButton:hover span{transform:translateX(3px)}
-
 .floatingNote span,.floatingWord span{font-size:.52rem;letter-spacing:.16em;opacity:.72;margin-bottom:.55rem}
 
 .floatingNote strong,.floatingWord strong{font-family:var(--serif);font-weight:400;font-size:1.35rem;line-height:1}
@@ -336,7 +328,6 @@
 .workspaceFrame{height:420px;overflow:hidden}
 .floatingNote{right:0;top:3%}
 .floatingWord{left:0;bottom:2%}
-.getHubButton{position:static;margin-bottom:1rem}
 .workspaceIntro{gap:1.5rem}
 .practiceTypes{grid-template-columns:repeat(3,1fr)}
 .humanGrid{grid-template-columns:1fr}
