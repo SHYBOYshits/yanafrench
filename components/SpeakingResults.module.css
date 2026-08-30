@@ -23,6 +23,18 @@
 .overallCard strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 3rem; margin-top: .5rem; }
 .overallCard strong small { font-size: 1.2rem; color: rgba(255,255,255,.6); }
 
+.transcriptCard {
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-md);
+  background: var(--porcelain-2);
+  padding: 1rem 1.3rem;
+  max-width: 620px;
+  margin-bottom: 1.6rem;
+}
+
+.transcriptCard span { font-size: .53rem; font-weight: 700; letter-spacing: .1em; color: var(--text-faint); }
+.transcriptCard p { font-family: var(--serif); font-style: italic; font-size: .95rem; color: var(--text-primary); margin: .5rem 0 0; line-height: 1.6; }
+
 .scoreGrid {
   border: 1px solid var(--hairline-ink);
   border-radius: var(--r-lg);

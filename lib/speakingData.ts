@@ -1,10 +1,8 @@
 // Data layer for the Speaking Practice feature.
 //
-// evaluateAttempt() is the seam where a real pipeline plugs in later:
-// audio -> speech-to-text -> AI analysis -> scores -> corrections -> feedback.
-// It's async and shaped like a real API call so swapping the body for a
-// fetch() to a real evaluation route is a small, contained change — nothing
-// upstream (the recorder, the results page) needs to know the difference.
+// evaluateAttempt() calls /api/speaking/evaluate, which sends the recorded
+// audio directly to Gemini (audio -> AI analysis -> scores -> corrections ->
+// feedback, in one multimodal call) and returns a structured evaluation.
 
 export type SkillScores = {
   pronunciation: number;
@@ -18,6 +16,7 @@ export type SkillScores = {
 export type Correction = { said: string; better: string; explanation: string };
 
 export type SpeakingEvaluation = {
+  transcript: string;
   overall: number;
   scores: SkillScores;
   wellDone: string;
@@ -43,6 +42,7 @@ export const prompts = [
 ];
 
 const placeholderEvaluation: SpeakingEvaluation = {
+  transcript: "Je pense que cette expérience m'a beaucoup appris, parce que j'ai dû sortir de ma zone de confort.",
   overall: 7.8,
   scores: {
     pronunciation: 7.6,
@@ -61,12 +61,16 @@ const placeholderEvaluation: SpeakingEvaluation = {
   improvedAnswer: "Je pense que cette expérience m'a beaucoup appris, notamment parce qu'elle m'a poussé à sortir de ma zone de confort.",
 };
 
-// Simulates the pipeline latency of a real evaluation call.
-export async function evaluateAttempt(_audio: Blob, _promptText: string): Promise<SpeakingEvaluation> {
-  await new Promise((resolve) => setTimeout(resolve, 900));
-  // TODO: replace with a real pipeline — upload audio, transcribe, send
-  // transcript + prompt to an LLM for scoring, return structured evaluation.
-  return placeholderEvaluation;
+export async function evaluateAttempt(audio: Blob, promptText: string): Promise<SpeakingEvaluation> {
+  const formData = new FormData();
+  formData.append("audio", audio, "attempt.webm");
+  formData.append("prompt", promptText);
+
+  const res = await fetch("/api/speaking/evaluate", { method: "POST", body: formData });
+  if (!res.ok) {
+    throw new Error(res.status === 429 ? "RATE_LIMITED" : "EVALUATION_FAILED");
+  }
+  return res.json();
 }
 
 export const speakingHistory: SpeakingAttempt[] = [

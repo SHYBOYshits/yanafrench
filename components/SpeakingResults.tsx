@@ -52,6 +52,13 @@ export function SpeakingResults() {
         <strong>{evaluation.overall.toFixed(1)} <small>/ 10</small></strong>
       </div>
 
+      {evaluation.transcript && (
+        <div className={styles.transcriptCard}>
+          <span>WHAT YOU SAID</span>
+          <p>&ldquo;{evaluation.transcript}&rdquo;</p>
+        </div>
+      )}
+
       <div className={styles.scoreGrid}>
         {(Object.keys(skillLabels) as (keyof SkillScores)[]).map((key) => (
           <ScoreBar key={key} label={skillLabels[key]} value={evaluation.scores[key]} />

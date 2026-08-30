@@ -167,18 +167,28 @@ export function SpeakingPractice() {
   async function handleSubmit() {
     if (!audioBlobRef.current) return;
     setState("submitting");
-    const evaluation = await evaluateAttempt(audioBlobRef.current, prompt.text);
-    const id = `attempt-${Date.now()}`;
-    saveAttempt({
-      id,
-      date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" }),
-      topic: prompt.topic,
-      prompt: prompt.text,
-      durationLabel: formatDuration(elapsedMs),
-      status: "Reviewed",
-      evaluation,
-    });
-    router.push(`/student-hub/speaking/results?attempt=${id}`);
+    setError(null);
+    try {
+      const evaluation = await evaluateAttempt(audioBlobRef.current, prompt.text);
+      const id = `attempt-${Date.now()}`;
+      saveAttempt({
+        id,
+        date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" }),
+        topic: prompt.topic,
+        prompt: prompt.text,
+        durationLabel: formatDuration(elapsedMs),
+        status: "Reviewed",
+        evaluation,
+      });
+      router.push(`/student-hub/speaking/results?attempt=${id}`);
+    } catch (err) {
+      setError(
+        err instanceof Error && err.message === "RATE_LIMITED"
+          ? "Getting a lot of evaluations right now — please try again in a minute."
+          : "Couldn't evaluate that recording. Please try again."
+      );
+      setState("recorded");
+    }
   }
 
   return (
