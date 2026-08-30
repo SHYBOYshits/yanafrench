@@ -18,8 +18,8 @@ const navItems: { type: string; label: string; href?: string }[] = [
   { type: "dashboard", label: "Dashboard", href: "/student-hub" },
   { type: "course", label: "My Course", href: "/student-hub/course" },
   { type: "lessons", label: "Lessons" },
-  { type: "videos", label: "Videos" },
-  { type: "documents", label: "Documents" },
+  { type: "videos", label: "Videos", href: "/student-hub/videos" },
+  { type: "documents", label: "Documents", href: "/student-hub/documents" },
   { type: "speaking", label: "Speaking Practice" },
   { type: "tests", label: "Tests & Assignments" },
   { type: "vocabulary", label: "Vocabulary" },
@@ -125,7 +125,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
           <nav aria-label="Student platform navigation">
             {navItems.map((item) => {
-              const active = item.href === pathname;
+              const active = item.href != null && (item.href === "/student-hub" ? pathname === item.href : pathname?.startsWith(item.href));
               const className = active ? styles.navActive : styles.navItem;
               return item.href ? (
                 <Link key={item.label} href={item.href} className={className} onClick={() => setMobileNavOpen(false)}>
