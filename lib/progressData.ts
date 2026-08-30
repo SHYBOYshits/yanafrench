@@ -1,4 +1,6 @@
-import { notifyAdminChange } from "./adminEvents";
+import type { Lesson } from "./courseData";
+import type { Assignment } from "./testData";
+import type { SkillScores, SpeakingAttempt } from "./speakingData";
 
 export type CefrLevel = {
   code: "A1" | "A2" | "B1" | "B2" | "C1";
@@ -61,48 +63,6 @@ export const cefrLevels: CefrLevel[] = [
   },
 ];
 
-const seedLevelCode: CefrLevel["code"] = "B1";
-const LEVEL_KEY = "admin-cefr-level";
-const STREAK_KEY = "admin-streak";
-
-export function getCurrentLevelCode(): CefrLevel["code"] {
-  if (typeof window === "undefined") return seedLevelCode;
-  try {
-    const stored = localStorage.getItem(LEVEL_KEY);
-    return (stored as CefrLevel["code"]) || seedLevelCode;
-  } catch {
-    return seedLevelCode;
-  }
-}
-
-export function setCurrentLevelCode(code: CefrLevel["code"]) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(LEVEL_KEY, code);
-    notifyAdminChange();
-  } catch {}
-}
-
-const seedStreak = 12;
-
-export function getStreak(): number {
-  if (typeof window === "undefined") return seedStreak;
-  try {
-    const stored = localStorage.getItem(STREAK_KEY);
-    return stored ? Number(stored) : seedStreak;
-  } catch {
-    return seedStreak;
-  }
-}
-
-export function setStreak(days: number) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(STREAK_KEY, String(days));
-    notifyAdminChange();
-  } catch {}
-}
-
 export function getCefrLevels() {
   return cefrLevels;
 }
@@ -123,11 +83,10 @@ export type SkillMetric = {
 // speaking evaluations (Speaking Practice, scored by the AI pipeline) —
 // rather than being a fixed number. Nothing here is fabricated: a skill
 // with no underlying activity yet says so instead of showing a fake stat.
-
-import { getLessons } from "./courseData";
-import { getAssignments, type Assignment } from "./testData";
-import { getSpeakingHistory } from "./speakingData";
-import { getSavedWords, getVocabulary } from "./vocabData";
+//
+// These are pure functions that take the already-merged (seed + admin
+// overrides) lessons/assignments as input, so they work the same whether
+// that data came from useAdminState() or anywhere else.
 
 function parseScoreFraction(score?: string): number | null {
   if (!score) return null;
@@ -138,37 +97,33 @@ function parseScoreFraction(score?: string): number | null {
   return denom ? num / denom : null;
 }
 
-function avgAssignmentFraction(category: Assignment["category"]): number | null {
-  const fractions = getAssignments()
+function avgAssignmentFraction(assignments: Assignment[], category: Assignment["category"]): number | null {
+  const fractions = assignments
     .filter((a) => a.category === category)
     .map((a) => parseScoreFraction(a.score))
     .filter((v): v is number => v != null);
   return fractions.length ? fractions.reduce((a, b) => a + b, 0) / fractions.length : null;
 }
 
-function avgSpeakingSkill(key: keyof import("./speakingData").SkillScores): number | null {
-  const history = getSpeakingHistory();
+function avgSpeakingSkill(history: SpeakingAttempt[], key: keyof SkillScores): number | null {
   if (history.length === 0) return null;
   return history.reduce((sum, a) => sum + a.evaluation.scores[key], 0) / history.length;
 }
 
-export function getLessonProgress() {
-  const lessons = getLessons();
+export function computeLessonProgress(lessons: Lesson[]) {
   const completed = lessons.filter((l) => l.completed).length;
   return { completed, total: lessons.length, pct: lessons.length ? completed / lessons.length : 0 };
 }
 
-function assignmentCompletionPct() {
-  const assignments = getAssignments();
+function assignmentCompletionPct(assignments: Assignment[]) {
   if (assignments.length === 0) return 0;
   const done = assignments.filter((a) => a.status === "Reviewed" || a.status === "Completed").length;
   return done / assignments.length;
 }
 
-export function getOverallProgress() {
-  const lessonPct = getLessonProgress().pct;
-  const assignmentPct = assignmentCompletionPct();
-  const speakingHistory = getSpeakingHistory();
+export function computeOverallProgress(lessons: Lesson[], assignments: Assignment[], speakingHistory: SpeakingAttempt[]) {
+  const lessonPct = computeLessonProgress(lessons).pct;
+  const assignmentPct = assignmentCompletionPct(assignments);
   const speakingPct = speakingHistory.length
     ? speakingHistory.reduce((sum, a) => sum + a.evaluation.overall, 0) / speakingHistory.length / 10
     : null;
@@ -178,27 +133,27 @@ export function getOverallProgress() {
   return Math.round((signals.reduce((a, b) => a + b, 0) / signals.length) * 100);
 }
 
-export function getSkillProgress(): SkillMetric[] {
-  const speakingHistory = getSpeakingHistory();
+export function computeSkillProgress(assignments: Assignment[], speakingHistory: SpeakingAttempt[], vocabCount: number): SkillMetric[] {
   const latestSpeaking = speakingHistory[0];
-  const vocabCount = getVocabulary().length + getSavedWords().length;
 
   const scoreOrEmpty = (fraction: number | null, detail: string): { type: "score"; value: string; detail: string } => {
     if (fraction == null) return { type: "score", value: "—", detail: "no scored work yet" };
     return { type: "score", value: `${(fraction * 10).toFixed(1)} / 10`, detail };
   };
 
-  const listening = scoreOrEmpty(avgAssignmentFraction("Listening"), "average assignment score");
-  const reading = scoreOrEmpty(avgAssignmentFraction("Reading"), "average assignment score");
-  const writing = scoreOrEmpty(avgAssignmentFraction("Writing"), "average assignment score");
+  const listening = scoreOrEmpty(avgAssignmentFraction(assignments, "Listening"), "average assignment score");
+  const reading = scoreOrEmpty(avgAssignmentFraction(assignments, "Reading"), "average assignment score");
+  const writing = scoreOrEmpty(avgAssignmentFraction(assignments, "Writing"), "average assignment score");
 
-  const grammarAssignment = avgAssignmentFraction("Grammar");
-  const grammarSpeaking = avgSpeakingSkill("grammar");
+  const grammarAssignment = avgAssignmentFraction(assignments, "Grammar");
+  const grammarSpeaking = avgSpeakingSkill(speakingHistory, "grammar");
   const grammarSignals = [grammarAssignment != null ? grammarAssignment * 10 : null, grammarSpeaking].filter((v): v is number => v != null);
   const grammar: SkillMetric =
     grammarSignals.length > 0
       ? { skill: "Grammar", type: "score", value: `${(grammarSignals.reduce((a, b) => a + b, 0) / grammarSignals.length).toFixed(1)} / 10`, detail: "from assignments and speaking practice" }
       : { skill: "Grammar", type: "score", value: "—", detail: "no scored work yet" };
+
+  const pronunciation = avgSpeakingSkill(speakingHistory, "pronunciation");
 
   return [
     { skill: "Listening", ...listening },
@@ -209,8 +164,8 @@ export function getSkillProgress(): SkillMetric[] {
     { skill: "Writing", ...writing },
     grammar,
     { skill: "Vocabulary", type: "count", value: `${vocabCount} words`, detail: "known and saved" },
-    avgSpeakingSkill("pronunciation") != null
-      ? { skill: "Pronunciation", type: "score", value: `${avgSpeakingSkill("pronunciation")!.toFixed(1)} / 10`, detail: "average across speaking attempts" }
+    pronunciation != null
+      ? { skill: "Pronunciation", type: "score", value: `${pronunciation.toFixed(1)} / 10`, detail: "average across speaking attempts" }
       : { skill: "Pronunciation", type: "score", value: "—", detail: "no speaking attempts yet" },
   ];
 }

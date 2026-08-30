@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { categories, courses, getDocuments, type Document } from "@/lib/documentData";
-import { useAdminValue } from "@/lib/useAdminValue";
+import { categories, courses, type Document } from "@/lib/documentData";
+import { useAdminState } from "@/lib/useAdminState";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./DocumentsPage.module.css";
 
 export function DocumentsPage() {
-  const documents = useAdminValue(getDocuments);
+  const { documents } = useAdminState();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<(typeof categories)[number]>("All");
   const [course, setCourse] = useState<(typeof courses)[number]>("All");

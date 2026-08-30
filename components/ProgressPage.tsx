@@ -4,13 +4,14 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import {
   cefrLevels,
-  getCurrentLevelCode,
-  getOverallProgress,
-  getSkillProgress,
+  computeOverallProgress,
+  computeSkillProgress,
   testTarget,
   type CefrLevel,
 } from "@/lib/progressData";
-import { useAdminValue } from "@/lib/useAdminValue";
+import { getSpeakingHistory } from "@/lib/speakingData";
+import { getSavedWords, getVocabulary } from "@/lib/vocabData";
+import { useAdminState } from "@/lib/useAdminState";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./ProgressPage.module.css";
 
@@ -27,13 +28,15 @@ function buildPath() {
 }
 
 export function ProgressPage() {
-  const currentLevelCode = useAdminValue(getCurrentLevelCode);
+  const { lessons, assignments, currentLevelCode } = useAdminState();
   const currentIndex = cefrLevels.findIndex((l) => l.code === currentLevelCode);
   const nextLevel = cefrLevels[currentIndex + 1];
   const currentLevel = cefrLevels[currentIndex];
   const [selected, setSelected] = useState<CefrLevel | null>(null);
-  const skills = useAdminValue(getSkillProgress);
-  const overallProgress = useAdminValue(getOverallProgress);
+  const speakingHistory = getSpeakingHistory();
+  const vocabCount = getVocabulary().length + getSavedWords().length;
+  const skills = computeSkillProgress(assignments, speakingHistory, vocabCount);
+  const overallProgress = computeOverallProgress(lessons, assignments, speakingHistory);
 
   return (
     <DashboardShell>

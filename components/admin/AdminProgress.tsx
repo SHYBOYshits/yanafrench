@@ -1,43 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getLessons, setLessonCompleted, type Lesson } from "@/lib/courseData";
-import { getAssignments, updateAssignment, type Assignment, type AssignmentStatus } from "@/lib/testData";
-import { cefrLevels, getCurrentLevelCode, getStreak, setCurrentLevelCode, setStreak } from "@/lib/progressData";
+import { cefrLevels } from "@/lib/progressData";
+import { type Assignment, type AssignmentStatus } from "@/lib/testData";
+import { useAdminState } from "@/lib/useAdminState";
 import { AdminShell } from "../AdminShell";
 import styles from "./AdminProgress.module.css";
 
 const statuses: AssignmentStatus[] = ["Not started", "In progress", "Submitted", "Reviewed", "Completed"];
 
 export function AdminProgress() {
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [level, setLevel] = useState(getCurrentLevelCode());
-  const [streak, setStreakValue] = useState(getStreak());
-
-  useEffect(() => {
-    setLessons(getLessons());
-    setAssignments(getAssignments());
-  }, []);
-
-  function toggleLesson(number: number, completed: boolean) {
-    setLessonCompleted(number, completed);
-    setLessons(getLessons());
-  }
+  const {
+    lessons,
+    assignments,
+    currentLevelCode,
+    streak,
+    setLessonCompleted,
+    updateAssignment,
+    setCurrentLevelCode,
+    setStreak,
+  } = useAdminState();
 
   function patchAssignment(id: string, patch: Partial<Assignment>) {
     updateAssignment(id, patch);
-    setAssignments(getAssignments());
-  }
-
-  function handleLevelChange(code: string) {
-    setLevel(code as typeof level);
-    setCurrentLevelCode(code as typeof level);
-  }
-
-  function handleStreakChange(value: number) {
-    setStreakValue(value);
-    setStreak(value);
   }
 
   return (
@@ -53,7 +37,7 @@ export function AdminProgress() {
         <div className={styles.levelRow}>
           <label>
             <span>CEFR level</span>
-            <select value={level} onChange={(e) => handleLevelChange(e.target.value)}>
+            <select value={currentLevelCode} onChange={(e) => setCurrentLevelCode(e.target.value as typeof currentLevelCode)}>
               {cefrLevels.map((l) => (
                 <option key={l.code} value={l.code}>{l.code} — {l.label}</option>
               ))}
@@ -61,7 +45,7 @@ export function AdminProgress() {
           </label>
           <label>
             <span>Streak (days)</span>
-            <input type="number" min={0} value={streak} onChange={(e) => handleStreakChange(Number(e.target.value))} />
+            <input type="number" min={0} value={streak} onChange={(e) => setStreak(Number(e.target.value))} />
           </label>
         </div>
       </section>
@@ -76,7 +60,7 @@ export function AdminProgress() {
                 <small>{l.date} · {l.duration}</small>
               </div>
               <label className={styles.checkLabel}>
-                <input type="checkbox" checked={l.completed} onChange={(e) => toggleLesson(l.number, e.target.checked)} />
+                <input type="checkbox" checked={l.completed} onChange={(e) => setLessonCompleted(l.number, e.target.checked)} />
                 Completed
               </label>
             </div>

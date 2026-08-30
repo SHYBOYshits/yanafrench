@@ -2,20 +2,19 @@
 
 import Link from "next/link";
 import { profile } from "@/lib/profileData";
-import { getCurrentLevelCode, getLessonProgress, getOverallProgress, getStreak } from "@/lib/progressData";
-import { getAssignments } from "@/lib/testData";
+import { computeLessonProgress, computeOverallProgress } from "@/lib/progressData";
 import { getSpeakingHistory } from "@/lib/speakingData";
+import { useAdminState } from "@/lib/useAdminState";
 import { AdminShell } from "../AdminShell";
 import styles from "./AdminOverview.module.css";
 
 export function AdminOverview() {
-  const overall = getOverallProgress();
-  const lessonProgress = getLessonProgress();
-  const level = getCurrentLevelCode();
-  const streak = getStreak();
-  const assignments = getAssignments();
+  const { lessons, assignments, currentLevelCode, streak } = useAdminState();
+  const speakingHistory = getSpeakingHistory();
+  const overall = computeOverallProgress(lessons, assignments, speakingHistory);
+  const lessonProgress = computeLessonProgress(lessons);
   const pendingAssignments = assignments.filter((a) => a.status === "Not started" || a.status === "In progress" || a.status === "Submitted").length;
-  const speakingCount = getSpeakingHistory().length;
+  const speakingCount = speakingHistory.length;
   const initials = profile.name.slice(0, 2).toUpperCase();
 
   return (
@@ -41,7 +40,7 @@ export function AdminOverview() {
         </div>
         <div className={styles.stat}>
           <span>CEFR LEVEL</span>
-          <strong>{level}</strong>
+          <strong>{currentLevelCode}</strong>
         </div>
         <div className={styles.stat}>
           <span>LESSONS DONE</span>

@@ -1,5 +1,3 @@
-import { notifyAdminChange } from "./adminEvents";
-
 export type AssignmentStatus = "Not started" | "In progress" | "Submitted" | "Reviewed" | "Completed";
 
 export type Assignment = {
@@ -13,6 +11,9 @@ export type Assignment = {
   feedback?: string;
 };
 
+// Seed assignments. Admin edits (status/score/feedback) come from the
+// shared R2-backed admin state (see lib/adminState.ts / lib/useAdminState.ts)
+// and are merged onto this list there.
 export const assignments: Assignment[] = [
   { id: "listening-04", title: "Listening · Task 04", description: "Interview about travel plans — answer the comprehension questions.", category: "Listening", deadline: "Due tomorrow", status: "In progress" },
   { id: "writing-03", title: "Writing · Opinion essay", description: "250-word opinion piece on remote learning, using at least 4 connectors.", category: "Writing", deadline: "Due in 3 days", status: "Not started" },
@@ -26,33 +27,3 @@ export const assignments: Assignment[] = [
 ];
 
 export const assignmentCategories = ["All", "Homework", "Listening", "Reading", "Writing", "Speaking", "Grammar", "TEF Preparation"] as const;
-
-const ASSIGNMENT_OVERRIDES_KEY = "admin-assignment-overrides";
-
-function readAssignmentOverrides(): Record<string, Partial<Assignment>> {
-  if (typeof window === "undefined") return {};
-  try {
-    const stored = localStorage.getItem(ASSIGNMENT_OVERRIDES_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
-  }
-}
-
-// Admin-settable: editing an assignment's status/score/feedback from the
-// admin dashboard overrides its seed value and feeds into the progress
-// computation in lib/progressData.ts.
-export function updateAssignment(id: string, patch: Partial<Assignment>) {
-  if (typeof window === "undefined") return;
-  try {
-    const overrides = readAssignmentOverrides();
-    const next = { ...overrides, [id]: { ...overrides[id], ...patch } };
-    localStorage.setItem(ASSIGNMENT_OVERRIDES_KEY, JSON.stringify(next));
-    notifyAdminChange();
-  } catch {}
-}
-
-export function getAssignments() {
-  const overrides = readAssignmentOverrides();
-  return assignments.map((a) => (a.id in overrides ? { ...a, ...overrides[a.id] } : a));
-}

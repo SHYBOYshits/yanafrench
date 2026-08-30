@@ -1,10 +1,9 @@
 // The browser's native "storage" event only fires in *other* tabs, never the
-// tab that made the write — so a same-tab admin edit (or a student marking
-// a lesson complete) wouldn't otherwise trigger a re-render. Every setter in
-// adminContent/courseData/testData/progressData/speakingData/vocabData/
-// documentData calls this after writing, and useAdminValue listens for it
-// alongside the real "storage" event, so both same-tab and cross-tab
-// changes show up immediately.
+// tab that made the write — so a same-tab write wouldn't otherwise trigger a
+// re-render. speakingData.ts and vocabData.ts (per-student local data, not
+// admin content — see lib/useAdminState.ts for that) call this after
+// writing, and useAdminValue listens for it alongside the real "storage"
+// event, so both same-tab and cross-tab changes show up immediately.
 const EVENT_NAME = "admin-content-change";
 
 export function notifyAdminChange() {

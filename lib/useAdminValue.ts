@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { onAdminChange } from "./adminEvents";
 
-// Admin-editable content lives in localStorage (see lib/adminContent.ts and
-// the override helpers in courseData/testData/progressData/speakingData/
-// vocabData/documentData). Reading those getters directly in a render body
-// only ever sees the value from the very first render — this hook re-reads
-// on mount (so client-side data always wins over any server-prerendered
-// default) and again whenever anything changes it, in this tab or another.
+// For data that's genuinely per-browser/per-student (saved speaking
+// attempts, saved vocabulary — see speakingData.ts/vocabData.ts), not
+// admin-authored content. Admin-editable content now lives in the shared
+// R2-backed admin state instead (see lib/useAdminState.ts), so it syncs
+// across devices; this hook only covers same-tab/cross-tab localStorage
+// reactivity for the local-only data that's left.
 export function useAdminValue<T>(getter: () => T): T {
   const [value, setValue] = useState<T>(getter);
 

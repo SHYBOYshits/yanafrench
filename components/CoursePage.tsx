@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { getLessons } from "@/lib/courseData";
-import { useAdminValue } from "@/lib/useAdminValue";
+import { useAdminState } from "@/lib/useAdminState";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./CoursePage.module.css";
 
@@ -19,7 +18,7 @@ const emptyStates: Record<Exclude<Tab, "Lessons">, string> = {
 
 export function CoursePage() {
   const [activeTab, setActiveTab] = useState<Tab>("Lessons");
-  const lessons = useAdminValue(getLessons);
+  const { lessons } = useAdminState();
   const sorted = [...lessons].sort((a, b) => b.number - a.number);
 
   return (

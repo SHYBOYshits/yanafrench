@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { getAdjacentLessons, getLesson, setLessonCompleted } from "@/lib/courseData";
-import { useAdminValue } from "@/lib/useAdminValue";
+import { useAdminState } from "@/lib/useAdminState";
 import styles from "./LessonDetail.module.css";
 
 export function LessonDetail({ lessonNumber }: { lessonNumber: number }) {
-  const lesson = useAdminValue(() => getLesson(lessonNumber));
+  const { getLesson, getAdjacentLessons, setLessonCompleted } = useAdminState();
+  const lesson = getLesson(lessonNumber);
 
   if (!lesson) {
     return (

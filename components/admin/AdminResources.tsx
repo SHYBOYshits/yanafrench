@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-import { addResource, categories, courses, getDocuments, removeResource, type Document } from "@/lib/documentData";
+import { useState, type FormEvent } from "react";
+import { categories, courses, type Document } from "@/lib/documentData";
+import { useAdminState } from "@/lib/useAdminState";
 import { AdminShell } from "../AdminShell";
 import styles from "./AdminResources.module.css";
 
@@ -10,7 +11,7 @@ const realCategories = categories.filter((c) => c !== "All");
 const realCourses = courses.filter((c) => c !== "All");
 
 export function AdminResources() {
-  const [resources, setResources] = useState<Document[]>([]);
+  const { documents: resources, addResource, removeResource } = useAdminState();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<Document["category"]>(realCategories[0]);
   const [course, setCourse] = useState<Document["course"]>(realCourses[0]);
@@ -20,10 +21,6 @@ export function AdminResources() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setResources(getDocuments());
-  }, []);
 
   async function handleAdd(e: FormEvent) {
     e.preventDefault();
@@ -80,7 +77,6 @@ export function AdminResources() {
       fileUrl: fileUrl || undefined,
     };
     addResource(doc);
-    setResources(getDocuments());
     setTitle("");
     setPages("");
     setUrl("");
@@ -89,7 +85,6 @@ export function AdminResources() {
 
   function handleRemove(id: string) {
     removeResource(id);
-    setResources(getDocuments());
   }
 
   return (

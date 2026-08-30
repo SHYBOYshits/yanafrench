@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "motion/react";
-import { getTodaysNote, getWeeklyFocus, getWordOfWeek } from "@/lib/adminContent";
-import { getCurrentLevelCode, getLessonProgress, getOverallProgress, getStreak } from "@/lib/progressData";
-import { useAdminValue } from "@/lib/useAdminValue";
+import { computeLessonProgress, computeOverallProgress } from "@/lib/progressData";
+import { getSpeakingHistory } from "@/lib/speakingData";
+import { useAdminState } from "@/lib/useAdminState";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./StudentDashboard.module.css";
 
@@ -55,13 +55,10 @@ function ProgressRing({ value }: { value: number }) {
 }
 
 export function StudentDashboard() {
-  const overallProgress = useAdminValue(getOverallProgress);
-  const lessonProgress = useAdminValue(getLessonProgress);
-  const currentLevelCode = useAdminValue(getCurrentLevelCode);
-  const streak = useAdminValue(getStreak);
-  const weeklyFocus = useAdminValue(getWeeklyFocus);
-  const wordOfWeek = useAdminValue(getWordOfWeek);
-  const teacherNote = useAdminValue(getTodaysNote);
+  const { lessons, assignments, weeklyFocus, wordOfWeek, todaysNote: teacherNote, currentLevelCode, streak } = useAdminState();
+  const speakingHistory = getSpeakingHistory();
+  const lessonProgress = computeLessonProgress(lessons);
+  const overallProgress = computeOverallProgress(lessons, assignments, speakingHistory);
 
   return (
     <DashboardShell>

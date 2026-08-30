@@ -1,22 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import {
-  getTodaysNote,
-  getWeeklyFocus,
-  getWordOfWeek,
-  setTodaysNote,
-  setWeeklyFocus,
-  setWordOfWeek,
-} from "@/lib/adminContent";
+import { useEffect, useRef, useState } from "react";
+import { useAdminState } from "@/lib/useAdminState";
 import { AdminShell } from "../AdminShell";
 import styles from "./AdminContent.module.css";
 
 export function AdminContent() {
-  const [focus, setFocus] = useState(getWeeklyFocus());
-  const [word, setWord] = useState(getWordOfWeek());
-  const [note, setNote] = useState(getTodaysNote());
+  const { weeklyFocus, wordOfWeek, todaysNote, loaded, setWeeklyFocus, setWordOfWeek, setTodaysNote } = useAdminState();
+  const [focus, setFocus] = useState(weeklyFocus);
+  const [word, setWord] = useState(wordOfWeek);
+  const [note, setNote] = useState(todaysNote);
   const [savedField, setSavedField] = useState<string | null>(null);
+  const initialized = useRef(false);
+
+  // Seed the editable fields once from the first successful load — not on
+  // every poll after that, so a fetch mid-edit doesn't overwrite what the
+  // admin is typing before they hit Save.
+  useEffect(() => {
+    if (loaded && !initialized.current) {
+      setFocus(weeklyFocus);
+      setWord(wordOfWeek);
+      setNote(todaysNote);
+      initialized.current = true;
+    }
+  }, [loaded, weeklyFocus, wordOfWeek, todaysNote]);
 
   function flashSaved(field: string) {
     setSavedField(field);
