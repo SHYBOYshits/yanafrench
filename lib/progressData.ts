@@ -71,24 +71,106 @@ export function getCefrLevel(code: string) {
 
 export type SkillMetric = {
   skill: string;
-  type: "delta" | "score";
+  type: "delta" | "score" | "count";
   value: string;
   detail: string;
 };
 
-export const skillProgress: SkillMetric[] = [
-  { skill: "Listening", type: "delta", value: "+18%", detail: "over the last 6 weeks" },
-  { skill: "Speaking", type: "score", value: "7.8 / 10", detail: "latest assessment" },
-  { skill: "Reading", type: "delta", value: "+14%", detail: "over the last 6 weeks" },
-  { skill: "Writing", type: "score", value: "7.2 / 10", detail: "latest assessment" },
-  { skill: "Grammar", type: "delta", value: "+9%", detail: "over the last 6 weeks" },
-  { skill: "Vocabulary", type: "delta", value: "+22 words", detail: "this month" },
-  { skill: "Pronunciation", type: "score", value: "7.6 / 10", detail: "latest assessment" },
-];
+// Progress is computed from real activity elsewhere in the app — lessons
+// completed (My Course), assignment scores (Tests & Assignments), and
+// speaking evaluations (Speaking Practice, scored by the AI pipeline) —
+// rather than being a fixed number. Nothing here is fabricated: a skill
+// with no underlying activity yet says so instead of showing a fake stat.
 
-export function getSkillProgress() {
-  return skillProgress;
+import { getLessons } from "./courseData";
+import { getAssignments, type Assignment } from "./testData";
+import { getSpeakingHistory } from "./speakingData";
+import { getSavedWords, getVocabulary } from "./vocabData";
+
+function parseScoreFraction(score?: string): number | null {
+  if (!score) return null;
+  const match = score.match(/([\d.]+)\s*\/\s*([\d.]+)/);
+  if (!match) return null;
+  const num = parseFloat(match[1]);
+  const denom = parseFloat(match[2]);
+  return denom ? num / denom : null;
 }
 
-export const overallProgress = 68;
+function avgAssignmentFraction(category: Assignment["category"]): number | null {
+  const fractions = getAssignments()
+    .filter((a) => a.category === category)
+    .map((a) => parseScoreFraction(a.score))
+    .filter((v): v is number => v != null);
+  return fractions.length ? fractions.reduce((a, b) => a + b, 0) / fractions.length : null;
+}
+
+function avgSpeakingSkill(key: keyof import("./speakingData").SkillScores): number | null {
+  const history = getSpeakingHistory();
+  if (history.length === 0) return null;
+  return history.reduce((sum, a) => sum + a.evaluation.scores[key], 0) / history.length;
+}
+
+export function getLessonProgress() {
+  const lessons = getLessons();
+  const completed = lessons.filter((l) => l.completed).length;
+  return { completed, total: lessons.length, pct: lessons.length ? completed / lessons.length : 0 };
+}
+
+function assignmentCompletionPct() {
+  const assignments = getAssignments();
+  if (assignments.length === 0) return 0;
+  const done = assignments.filter((a) => a.status === "Reviewed" || a.status === "Completed").length;
+  return done / assignments.length;
+}
+
+export function getOverallProgress() {
+  const lessonPct = getLessonProgress().pct;
+  const assignmentPct = assignmentCompletionPct();
+  const speakingHistory = getSpeakingHistory();
+  const speakingPct = speakingHistory.length
+    ? speakingHistory.reduce((sum, a) => sum + a.evaluation.overall, 0) / speakingHistory.length / 10
+    : null;
+
+  const signals = [lessonPct, assignmentPct, speakingPct].filter((v): v is number => v != null);
+  if (signals.length === 0) return 0;
+  return Math.round((signals.reduce((a, b) => a + b, 0) / signals.length) * 100);
+}
+
+export function getSkillProgress(): SkillMetric[] {
+  const speakingHistory = getSpeakingHistory();
+  const latestSpeaking = speakingHistory[0];
+  const vocabCount = getVocabulary().length + getSavedWords().length;
+
+  const scoreOrEmpty = (fraction: number | null, detail: string): { type: "score"; value: string; detail: string } => {
+    if (fraction == null) return { type: "score", value: "—", detail: "no scored work yet" };
+    return { type: "score", value: `${(fraction * 10).toFixed(1)} / 10`, detail };
+  };
+
+  const listening = scoreOrEmpty(avgAssignmentFraction("Listening"), "average assignment score");
+  const reading = scoreOrEmpty(avgAssignmentFraction("Reading"), "average assignment score");
+  const writing = scoreOrEmpty(avgAssignmentFraction("Writing"), "average assignment score");
+
+  const grammarAssignment = avgAssignmentFraction("Grammar");
+  const grammarSpeaking = avgSpeakingSkill("grammar");
+  const grammarSignals = [grammarAssignment != null ? grammarAssignment * 10 : null, grammarSpeaking].filter((v): v is number => v != null);
+  const grammar: SkillMetric =
+    grammarSignals.length > 0
+      ? { skill: "Grammar", type: "score", value: `${(grammarSignals.reduce((a, b) => a + b, 0) / grammarSignals.length).toFixed(1)} / 10`, detail: "from assignments and speaking practice" }
+      : { skill: "Grammar", type: "score", value: "—", detail: "no scored work yet" };
+
+  return [
+    { skill: "Listening", ...listening },
+    latestSpeaking
+      ? { skill: "Speaking", type: "score", value: `${latestSpeaking.evaluation.overall.toFixed(1)} / 10`, detail: "latest speaking attempt" }
+      : { skill: "Speaking", type: "score", value: "—", detail: "no speaking attempts yet" },
+    { skill: "Reading", ...reading },
+    { skill: "Writing", ...writing },
+    grammar,
+    { skill: "Vocabulary", type: "count", value: `${vocabCount} words`, detail: "known and saved" },
+    avgSpeakingSkill("pronunciation") != null
+      ? { skill: "Pronunciation", type: "score", value: `${avgSpeakingSkill("pronunciation")!.toFixed(1)} / 10`, detail: "average across speaking attempts" }
+      : { skill: "Pronunciation", type: "score", value: "—", detail: "no speaking attempts yet" },
+  ];
+}
+
 export const testTarget = { reached: 4, of: 5 };

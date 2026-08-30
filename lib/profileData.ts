@@ -4,5 +4,4 @@ export const profile = {
   level: "B1 — Independent",
   course: "TEF Canada",
   goals: "Reach CLB 7+ in expression orale before my TEF exam in January.",
-  progress: 68,
 };

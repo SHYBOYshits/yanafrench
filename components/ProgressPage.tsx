@@ -5,8 +5,8 @@ import { motion } from "motion/react";
 import {
   cefrLevels,
   currentLevelCode,
+  getOverallProgress,
   getSkillProgress,
-  overallProgress,
   testTarget,
   type CefrLevel,
 } from "@/lib/progressData";
@@ -31,6 +31,7 @@ export function ProgressPage() {
   const currentLevel = cefrLevels[currentIndex];
   const [selected, setSelected] = useState<CefrLevel | null>(null);
   const skills = getSkillProgress();
+  const overallProgress = getOverallProgress();
 
   return (
     <DashboardShell>

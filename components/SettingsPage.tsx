@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { profile } from "@/lib/profileData";
+import { getOverallProgress } from "@/lib/progressData";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./SettingsPage.module.css";
 
@@ -24,6 +25,7 @@ function Toggle({ label, defaultOn = false }: { label: string; defaultOn?: boole
 export function SettingsPage() {
   const [tab, setTab] = useState<Tab>("Profile");
   const initials = profile.name.slice(0, 2).toUpperCase();
+  const overallProgress = getOverallProgress();
 
   return (
     <DashboardShell>
@@ -78,7 +80,7 @@ export function SettingsPage() {
               <div className={styles.progressCallout}>
                 <div>
                   <span>OVERALL PROGRESS</span>
-                  <strong>{profile.progress}%</strong>
+                  <strong>{overallProgress}%</strong>
                 </div>
                 <Link href="/student-hub/progress" className={styles.link}>View progress →</Link>
               </div>

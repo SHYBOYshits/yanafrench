@@ -19,6 +19,8 @@ export const assignments: Assignment[] = [
   { id: "reading-05", title: "Reading · Article summary", description: "Summarize the assigned article in your own words, 150 words max.", category: "Reading", deadline: "Submitted 28 Sep", status: "Completed", score: "8.5 / 10" },
   { id: "tef-mock-1", title: "TEF Preparation · Mock oral exam", description: "Full-length timed mock covering all four sections.", category: "TEF Preparation", deadline: "Submitted 20 Sep", status: "Reviewed", score: "7.6 / 10", feedback: "Good pacing. Work on varying your opinion openers in section 2." },
   { id: "homework-listening-3", title: "Homework · Listening practice set 3", description: "Three short audio clips with comprehension questions.", category: "Homework", deadline: "Submitted 14 Sep", status: "Completed", score: "10 / 10" },
+  { id: "listening-03", title: "Listening · Task 03", description: "Radio segment about city transport — answer the comprehension questions.", category: "Listening", deadline: "Submitted 24 Sep", status: "Completed", score: "8 / 10" },
+  { id: "writing-02", title: "Writing · Formal email", description: "Write a formal email requesting information, using appropriate register.", category: "Writing", deadline: "Submitted 18 Sep", status: "Reviewed", score: "7.5 / 10", feedback: "Good structure — keep working on formal vs. informal register." },
 ];
 
 export const assignmentCategories = ["All", "Homework", "Listening", "Reading", "Writing", "Speaking", "Grammar", "TEF Preparation"] as const;

@@ -1,18 +1,18 @@
 "use client";
 
 import { motion } from "motion/react";
+import { currentLevelCode, getLessonProgress, getOverallProgress } from "@/lib/progressData";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./StudentDashboard.module.css";
 
 // Mock data — stands in for what will eventually come from the student's
 // account and the admin-editable content once Le Hub has a real backend.
+// Progress/CEFR/completed-lessons come from lib/progressData.ts instead,
+// computed from actual lesson, assignment and speaking-practice activity.
 const student = {
   name: "Amelia",
   level: "TEF · CLB 7+",
-  progress: 68,
-  cefr: "B2",
   streak: 12,
-  completedLessons: 24,
 };
 
 const weeklyFocus = {
@@ -63,6 +63,9 @@ function ProgressRing({ value }: { value: number }) {
 }
 
 export function StudentDashboard() {
+  const overallProgress = getOverallProgress();
+  const lessonProgress = getLessonProgress();
+
   return (
     <DashboardShell>
       <div className={styles.greeting}>
@@ -107,11 +110,11 @@ export function StudentDashboard() {
         </div>
 
         <div className={`${styles.card} ${styles.cardProgress}`}>
-          <ProgressRing value={student.progress} />
+          <ProgressRing value={overallProgress} />
           <div className={styles.progressFacts}>
-            <div><span>CEFR level</span><strong>{student.cefr}</strong></div>
+            <div><span>CEFR level</span><strong>{currentLevelCode}</strong></div>
             <div><span>Streak</span><strong>{student.streak} days</strong></div>
-            <div><span>Completed</span><strong>{student.completedLessons} lessons</strong></div>
+            <div><span>Completed</span><strong>{lessonProgress.completed} / {lessonProgress.total} lessons</strong></div>
           </div>
         </div>
       </div>
