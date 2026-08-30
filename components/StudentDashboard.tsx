@@ -22,10 +22,10 @@ const weeklyFocus = {
 };
 
 const nextTask = {
-  title: "Listening · Task 04",
-  lesson: "Lesson 12 · Building stronger oral answers",
-  due: "Due tomorrow",
-  duration: "18 min",
+  type: "Listening",
+  title: "Task 04 · Interview about travel plans",
+  dueDate: "Due tomorrow",
+  estimatedTime: "18 min",
   progress: 40,
 };
 
@@ -199,16 +199,28 @@ export function StudentDashboard() {
             <small>{weeklyFocus.tag}</small>
           </div>
 
-          <div className={styles.grid}>
-            <div className={styles.card}>
+          <div className={`${styles.card} ${styles.taskCard}`}>
+            <div className={styles.taskMain}>
               <span className={styles.cardLabel}>NEXT TASK</span>
-              <strong className={styles.cardTitle}>{nextTask.title}</strong>
-              <small className={styles.cardMeta}>{nextTask.lesson}</small>
-              <small className={styles.cardMeta}>{nextTask.due} · {nextTask.duration}</small>
-              <div className={styles.progressBar}><span style={{ width: `${nextTask.progress}%` }} /></div>
-              <button type="button" className={styles.cardCta}>Continue →</button>
+              <span className={styles.taskType}>{nextTask.type}</span>
+              <strong className={styles.taskTitle}>{nextTask.title}</strong>
+              <div className={styles.taskMetaRow}>
+                <span>{nextTask.dueDate}</span>
+                <span className={styles.metaDot} />
+                <span>{nextTask.estimatedTime}</span>
+              </div>
             </div>
+            <div className={styles.taskProgress}>
+              <div className={styles.taskProgressHead}>
+                <span>Progress</span>
+                <strong>{nextTask.progress}%</strong>
+              </div>
+              <div className={styles.progressBar}><span style={{ width: `${nextTask.progress}%` }} /></div>
+              <button type="button" className={styles.cardCtaSolid}>Continue →</button>
+            </div>
+          </div>
 
+          <div className={styles.grid}>
             <div className={styles.card}>
               <span className={styles.cardLabel}>NEXT CLASS</span>
               <strong className={styles.cardTitle}>{nextClass.day}</strong>

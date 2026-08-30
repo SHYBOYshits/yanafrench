@@ -152,7 +152,7 @@
 .focusStrip strong { font-family: var(--serif); font-weight: 400; font-size: 1.2rem; color: var(--text-primary); }
 .focusStrip small { font-size: .62rem; color: var(--text-faint); justify-self: end; }
 
-.grid { display: grid; grid-template-columns: 1.15fr 1fr .95fr; gap: 1rem; margin-top: 1.6rem; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
 
 .card { border: 1px solid var(--hairline-ink); border-radius: var(--r-lg); background: var(--card-surface); padding: 1.4rem; display: flex; flex-direction: column; min-height: 190px; box-shadow: var(--shadow-lift); }
 
@@ -160,8 +160,46 @@
 .cardTitle { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; margin: .5rem 0 .2rem; color: var(--text-primary); }
 .cardMeta { font-size: .66rem; color: var(--text-faint); }
 
-.progressBar { height: 5px; border-radius: 999px; background: var(--porcelain-2); margin-top: 1rem; overflow: hidden; }
+.progressBar { height: 6px; border-radius: 999px; background: var(--porcelain-2); overflow: hidden; }
 .progressBar span { display: block; height: 100%; background: var(--bordeaux); border-radius: 999px; }
+
+/* Next task — large card */
+
+.taskCard {
+  margin-top: 1.6rem;
+  min-height: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  padding: clamp(1.6rem, 3vw, 2.4rem);
+}
+
+.taskMain { display: flex; flex-direction: column; align-items: flex-start; gap: .4rem; }
+
+.taskType {
+  align-self: flex-start;
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: var(--porcelain-2);
+  border-radius: 999px;
+  padding: .3rem .7rem;
+  margin-top: .3rem;
+}
+
+.taskTitle { font-family: var(--serif); font-weight: 400; font-size: clamp(1.5rem, 2.4vw, 2rem); color: var(--text-primary); margin: .2rem 0 0; }
+
+.taskMetaRow { display: flex; align-items: center; gap: .55rem; font-size: .72rem; color: var(--text-faint); margin-top: .3rem; }
+
+.metaDot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-faint); }
+
+.taskProgress { display: flex; flex-direction: column; gap: .7rem; width: min(220px, 100%); flex: 0 0 auto; }
+
+.taskProgressHead { display: flex; align-items: center; justify-content: space-between; font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); }
+.taskProgressHead strong { font-family: var(--sans); font-size: .78rem; color: var(--blue); letter-spacing: normal; text-transform: none; }
 
 .cardCta { margin-top: auto; align-self: flex-start; border: 0; border-bottom: 1px solid var(--ink); background: none; padding: .2rem 0; font-size: .64rem; font-weight: 700; }
 .cardCta:hover { color: var(--bordeaux); border-color: var(--bordeaux); }
@@ -233,4 +271,6 @@
   .grid { grid-template-columns: 1fr; }
   .cardProgress { flex-direction: column; text-align: center; }
   .progressFacts { flex-direction: row; }
+  .taskCard { flex-direction: column; align-items: stretch; }
+  .taskProgress { width: 100%; }
 }
