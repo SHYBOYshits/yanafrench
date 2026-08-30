@@ -141,6 +141,8 @@ h1 em,h2 em { font-weight: 400; font-style: italic; }
 .button--dark:hover { box-shadow: 0 18px 40px rgba(31,58,95,.32); }
 .button--light { background: var(--porcelain); color: var(--blue); }
 .button--light:hover { box-shadow: 0 14px 34px rgba(0,0,0,.18); }
+.button--outline { background: transparent; border-color: var(--hairline-ink-hover); color: var(--blue); }
+.button--outline:hover { background: rgba(31,58,95,.06); border-color: var(--blue); }
 .button--nav { min-height: 44px; padding: .7rem 1.15rem; background: var(--blue); color: white; }
 .button--nav-outline { min-height: 44px; padding: .7rem 1.15rem; background: transparent; border-color: var(--blue); color: var(--blue); }
 .button--nav-outline:hover { background: rgba(31,58,95,.08); }

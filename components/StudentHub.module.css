@@ -1,0 +1,104 @@
+.page {
+  min-height: 100svh;
+  padding-top: 7rem;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(182,58,58,.06), transparent 40%),
+    var(--porcelain);
+  display: flex;
+  align-items: center;
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: 1.05fr 0.65fr;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  align-items: center;
+  padding-top: clamp(2rem, 5vw, 4rem);
+  padding-bottom: clamp(4rem, 8vw, 7rem);
+}
+
+.copy h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(3.2rem, 6.4vw, 6.2rem);
+  line-height: 0.96;
+  color: var(--blue);
+  margin: 1.1rem 0 1.8rem;
+}
+
+.copy h1 em { color: var(--bordeaux); font-style: italic; }
+
+.dek {
+  max-width: 460px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  font-size: clamp(.95rem, 1.1vw, 1.05rem);
+  margin: 0 0 2.4rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--hairline-ink);
+}
+
+.actions { display: flex; gap: .8rem; flex-wrap: wrap; }
+
+.badge {
+  justify-self: center;
+  width: min(280px, 100%);
+  background: linear-gradient(165deg, var(--blue-2), var(--blue));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--r-lg);
+  color: #fff;
+  padding: 1.6rem 1.5rem;
+  box-shadow: var(--shadow-lift);
+}
+
+.badgeTop {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .6rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.72);
+  margin-bottom: 1.6rem;
+}
+
+.badgeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bordeaux-light);
+  box-shadow: 0 0 0 4px rgba(226,137,122,.18);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .45; }
+}
+
+.badge strong {
+  display: block;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 2.2rem;
+  margin-bottom: .9rem;
+}
+
+.badge small {
+  display: block;
+  font-size: .62rem;
+  letter-spacing: .04em;
+  color: rgba(255,255,255,.62);
+  padding-top: .9rem;
+  border-top: 1px solid rgba(255,255,255,.14);
+}
+
+@media (max-width: 900px) {
+  .inner { grid-template-columns: 1fr; }
+  .badge { justify-self: start; width: min(280px, 100%); }
+}
+
+@media (max-width: 620px) {
+  .page { padding-top: 5.5rem; }
+  .actions { flex-direction: column; align-items: stretch; }
+}
