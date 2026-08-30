@@ -275,6 +275,7 @@ export function LeHubShowcase() {
           </motion.div>
           <motion.div className={styles.heroStage} initial={{opacity:0,scale:.96,y:45}} animate={{opacity:1,scale:1,y:0}} transition={{duration:1,delay:.12,ease:[.22,1,.36,1]}}>
             <div className={polish.heroStageGlow}/>
+            <Link href="/le-hub/portal" className={styles.getHubButton}>Get into Hub <span>→</span></Link>
             <MiniDashboard />
             <motion.div className={styles.floatingNote} animate={{y:[0,-9,0]}} transition={{duration:5,repeat:Infinity,ease:"easeInOut"}}><span>YANA&apos;S NOTE</span><strong>Better rhythm today.</strong><small>One thing to revisit →</small></motion.div>
             <motion.div className={styles.floatingWord} animate={{y:[0,8,0]}} transition={{duration:6,repeat:Infinity,ease:"easeInOut",delay:.4}}><span>WORD OF THE WEEK</span><strong>pourtant</strong><small>however · yet</small></motion.div>
