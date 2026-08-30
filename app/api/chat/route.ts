@@ -26,25 +26,31 @@ ${resources.map((r) => `- ${r.title} [${r.category}, ${r.level}, ${r.price}]: ${
 Never invent prices, scores, or programme details that aren't listed above.`;
 
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json();
+  try {
+    const { messages }: { messages: UIMessage[] } = await req.json();
 
-  const result = streamText({
-    model: google("gemini-3.5-flash-lite"),
-    system: SYSTEM_PROMPT,
-    messages: await convertToModelMessages(messages),
-  });
+    const result = streamText({
+      model: google("gemini-3.5-flash-lite"),
+      system: SYSTEM_PROMPT,
+      messages: await convertToModelMessages(messages),
+    });
 
-  return createUIMessageStreamResponse({
-    stream: toUIMessageStream({
-      stream: result.stream,
-      onError: (error) => {
-        const cause = RetryError.isInstance(error) ? error.lastError : error;
-        if (APICallError.isInstance(cause) && cause.statusCode === 429) {
-          return "RATE_LIMITED";
-        }
-        console.error(error);
-        return "An error occurred. Please try again in a moment.";
-      },
-    }),
-  });
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream({
+        stream: result.stream,
+        onError: (error) => {
+          const cause = RetryError.isInstance(error) ? error.lastError : error;
+          if (APICallError.isInstance(cause) && cause.statusCode === 429) {
+            return "RATE_LIMITED";
+          }
+          console.error(error);
+          return `DEBUG: ${cause instanceof Error ? cause.message : String(cause)}`;
+        },
+      }),
+    });
+  } catch (error) {
+    console.error(error);
+    const message = error instanceof Error ? error.message : String(error);
+    return new Response(`DEBUG (setup): ${message}`, { status: 500 });
+  }
 }
