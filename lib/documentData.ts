@@ -3,9 +3,10 @@ export type Document = {
   title: string;
   category: "Grammar" | "Vocabulary" | "TEF Preparation" | "Class Notes" | "Worksheet";
   course: "TEF Canada" | "DELF" | "General French";
-  fileType: "PDF" | "Worksheet";
+  fileType: "PDF" | "Worksheet" | "Video";
   pages?: number;
   date: string;
+  fileUrl?: string;
 };
 
 export const documents: Document[] = [
@@ -18,12 +19,40 @@ export const documents: Document[] = [
   { id: "delf-writing", title: "DELF B2 Writing Frameworks", category: "TEF Preparation", course: "DELF", fileType: "PDF", pages: 9, date: "12 Sep" },
 ];
 
+const ADMIN_RESOURCES_KEY = "admin-resources";
+
+function readAdminResources(): Document[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(ADMIN_RESOURCES_KEY);
+    return stored ? (JSON.parse(stored) as Document[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Admin-added resources (PDFs, videos, worksheets — typically uploaded to
+// R2) are stored client-side for now and merged ahead of the seed library.
+export function addResource(doc: Document) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(ADMIN_RESOURCES_KEY, JSON.stringify([doc, ...readAdminResources()]));
+  } catch {}
+}
+
+export function removeResource(id: string) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(ADMIN_RESOURCES_KEY, JSON.stringify(readAdminResources().filter((d) => d.id !== id)));
+  } catch {}
+}
+
 export function getDocuments() {
-  return documents;
+  return [...readAdminResources(), ...documents];
 }
 
 export function getDocument(id: string) {
-  return documents.find((d) => d.id === id);
+  return getDocuments().find((d) => d.id === id);
 }
 
 export const categories = ["All", "Grammar", "Vocabulary", "TEF Preparation", "Class Notes", "Worksheet"] as const;

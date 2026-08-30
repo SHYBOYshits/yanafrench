@@ -118,16 +118,40 @@ export const lessons: Lesson[] = [
   },
 ];
 
+const COMPLETION_OVERRIDES_KEY = "admin-lesson-completion";
+
+function readCompletionOverrides(): Record<number, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    const stored = localStorage.getItem(COMPLETION_OVERRIDES_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+// Admin-settable: marking a lesson complete/incomplete from the admin
+// dashboard overrides its seed value and feeds directly into the progress
+// computation in lib/progressData.ts.
+export function setLessonCompleted(number: number, completed: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    const next = { ...readCompletionOverrides(), [number]: completed };
+    localStorage.setItem(COMPLETION_OVERRIDES_KEY, JSON.stringify(next));
+  } catch {}
+}
+
 export function getLessons() {
-  return lessons;
+  const overrides = readCompletionOverrides();
+  return lessons.map((l) => (l.number in overrides ? { ...l, completed: overrides[l.number] } : l));
 }
 
 export function getLesson(number: number) {
-  return lessons.find((l) => l.number === number);
+  return getLessons().find((l) => l.number === number);
 }
 
 export function getAdjacentLessons(number: number) {
-  const sorted = [...lessons].sort((a, b) => a.number - b.number);
+  const sorted = [...getLessons()].sort((a, b) => a.number - b.number);
   const index = sorted.findIndex((l) => l.number === number);
   return {
     previous: index > 0 ? sorted[index - 1] : undefined,

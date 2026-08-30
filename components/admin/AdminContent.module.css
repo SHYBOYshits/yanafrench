@@ -1,0 +1,44 @@
+.head small { font-size: .58rem; letter-spacing: .16em; color: var(--bordeaux); font-weight: 700; }
+
+.head h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: .96;
+  color: var(--blue);
+  margin: .5rem 0 .6rem;
+}
+
+.head p { font-size: .8rem; color: var(--ink-soft); margin: 0 0 2rem; }
+
+.card {
+  max-width: 480px;
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-lg);
+  background: var(--card-surface);
+  box-shadow: var(--shadow-lift);
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+}
+
+.card h2 { font-family: var(--serif); font-weight: 400; font-size: 1.05rem; color: var(--text-primary); margin: 0; }
+
+.card label { display: flex; flex-direction: column; gap: .4rem; font-size: .68rem; font-weight: 700; color: var(--text-faint); }
+
+.card input {
+  border: 1px solid var(--hairline-ink);
+  border-radius: 10px;
+  padding: .65rem .85rem;
+  font-size: .82rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  background: var(--porcelain);
+  font-family: var(--sans);
+}
+.card input:focus { outline: none; border-color: var(--blue); }
+
+.save { align-self: flex-start; border: 0; background: var(--blue); color: #fff; padding: .6rem 1.2rem; border-radius: 999px; font-size: .7rem; font-weight: 700; }
+.save:hover { background: var(--blue-2); }

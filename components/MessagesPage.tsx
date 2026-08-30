@@ -1,19 +1,29 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { conversation, seedMessages, type Message } from "@/lib/messageData";
+import { useEffect, useState, type FormEvent } from "react";
+import { addMessage, getMessages, type ThreadMessage } from "@/lib/adminContent";
+import { conversation } from "@/lib/messageData";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./MessagesPage.module.css";
 
 export function MessagesPage() {
-  const [messages, setMessages] = useState<Message[]>(seedMessages);
+  const [messages, setMessages] = useState<ThreadMessage[]>([]);
   const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    setMessages(getMessages());
+    function onStorage() {
+      setMessages(getMessages());
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   function handleSend(e: FormEvent) {
     e.preventDefault();
     const text = draft.trim();
     if (!text) return;
-    setMessages((prev) => [...prev, { id: `local-${Date.now()}`, from: "student", text, time: "Just now" }]);
+    setMessages(addMessage("student", text));
     setDraft("");
   }
 

@@ -59,7 +59,45 @@ export const cefrLevels: CefrLevel[] = [
   },
 ];
 
-export const currentLevelCode: CefrLevel["code"] = "B1";
+const seedLevelCode: CefrLevel["code"] = "B1";
+const LEVEL_KEY = "admin-cefr-level";
+const STREAK_KEY = "admin-streak";
+
+export function getCurrentLevelCode(): CefrLevel["code"] {
+  if (typeof window === "undefined") return seedLevelCode;
+  try {
+    const stored = localStorage.getItem(LEVEL_KEY);
+    return (stored as CefrLevel["code"]) || seedLevelCode;
+  } catch {
+    return seedLevelCode;
+  }
+}
+
+export function setCurrentLevelCode(code: CefrLevel["code"]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LEVEL_KEY, code);
+  } catch {}
+}
+
+const seedStreak = 12;
+
+export function getStreak(): number {
+  if (typeof window === "undefined") return seedStreak;
+  try {
+    const stored = localStorage.getItem(STREAK_KEY);
+    return stored ? Number(stored) : seedStreak;
+  } catch {
+    return seedStreak;
+  }
+}
+
+export function setStreak(days: number) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STREAK_KEY, String(days));
+  } catch {}
+}
 
 export function getCefrLevels() {
   return cefrLevels;

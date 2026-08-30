@@ -30,8 +30,16 @@ export function DocumentsPage() {
         <strong>{doc.title}</strong>
         <small className={styles.meta}>{doc.fileType}{doc.pages ? ` · ${doc.pages} pages` : ""} · {doc.date}</small>
         <div className={styles.cardActions}>
-          <button type="button" className={styles.view} onClick={() => setPreview(doc)}>View →</button>
-          <button type="button" className={styles.download}>Download</button>
+          {doc.fileUrl ? (
+            <a href={doc.fileUrl} target="_blank" rel="noreferrer" className={styles.view}>View →</a>
+          ) : (
+            <button type="button" className={styles.view} onClick={() => setPreview(doc)}>View →</button>
+          )}
+          {doc.fileUrl ? (
+            <a href={doc.fileUrl} download target="_blank" rel="noreferrer" className={styles.download}>Download</a>
+          ) : (
+            <button type="button" className={styles.download}>Download</button>
+          )}
         </div>
       </div>
     );
@@ -98,7 +106,11 @@ export function DocumentsPage() {
                 <strong>{preview.title}</strong>
                 <small>{preview.fileType}{preview.pages ? ` · ${preview.pages} pages` : ""} · {preview.course} · {preview.date}</small>
               </div>
-              <button type="button" className={styles.download}>Download</button>
+              {preview.fileUrl ? (
+                <a href={preview.fileUrl} download target="_blank" rel="noreferrer" className={styles.download}>Download</a>
+              ) : (
+                <button type="button" className={styles.download}>Download</button>
+              )}
             </div>
           </div>
         </div>

@@ -25,6 +25,31 @@ export const assignments: Assignment[] = [
 
 export const assignmentCategories = ["All", "Homework", "Listening", "Reading", "Writing", "Speaking", "Grammar", "TEF Preparation"] as const;
 
+const ASSIGNMENT_OVERRIDES_KEY = "admin-assignment-overrides";
+
+function readAssignmentOverrides(): Record<string, Partial<Assignment>> {
+  if (typeof window === "undefined") return {};
+  try {
+    const stored = localStorage.getItem(ASSIGNMENT_OVERRIDES_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+// Admin-settable: editing an assignment's status/score/feedback from the
+// admin dashboard overrides its seed value and feeds into the progress
+// computation in lib/progressData.ts.
+export function updateAssignment(id: string, patch: Partial<Assignment>) {
+  if (typeof window === "undefined") return;
+  try {
+    const overrides = readAssignmentOverrides();
+    const next = { ...overrides, [id]: { ...overrides[id], ...patch } };
+    localStorage.setItem(ASSIGNMENT_OVERRIDES_KEY, JSON.stringify(next));
+  } catch {}
+}
+
 export function getAssignments() {
-  return assignments;
+  const overrides = readAssignmentOverrides();
+  return assignments.map((a) => (a.id in overrides ? { ...a, ...overrides[a.id] } : a));
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import { currentLevelCode, getLessonProgress, getOverallProgress } from "@/lib/progressData";
+import { getTodaysNote, getWeeklyFocus, getWordOfWeek } from "@/lib/adminContent";
+import { getCurrentLevelCode, getLessonProgress, getOverallProgress, getStreak } from "@/lib/progressData";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./StudentDashboard.module.css";
 
@@ -12,12 +13,6 @@ import styles from "./StudentDashboard.module.css";
 const student = {
   name: "Amelia",
   level: "TEF · CLB 7+",
-  streak: 12,
-};
-
-const weeklyFocus = {
-  text: "Speak with more natural connectors",
-  tag: "TEF · Expression orale",
 };
 
 const nextTask = {
@@ -34,10 +29,6 @@ const nextClass = {
   teacher: "Yana",
   platform: "Google Meet",
 };
-
-const wordOfWeek = { word: "pourtant", meaning: "however · yet" };
-
-const teacherNote = { text: "Better rhythm today.", cta: "One thing to revisit" };
 
 function ProgressRing({ value }: { value: number }) {
   const r = 54;
@@ -65,6 +56,11 @@ function ProgressRing({ value }: { value: number }) {
 export function StudentDashboard() {
   const overallProgress = getOverallProgress();
   const lessonProgress = getLessonProgress();
+  const currentLevelCode = getCurrentLevelCode();
+  const streak = getStreak();
+  const weeklyFocus = getWeeklyFocus();
+  const wordOfWeek = getWordOfWeek();
+  const teacherNote = getTodaysNote();
 
   return (
     <DashboardShell>
@@ -113,7 +109,7 @@ export function StudentDashboard() {
           <ProgressRing value={overallProgress} />
           <div className={styles.progressFacts}>
             <div><span>CEFR level</span><strong>{currentLevelCode}</strong></div>
-            <div><span>Streak</span><strong>{student.streak} days</strong></div>
+            <div><span>Streak</span><strong>{streak} days</strong></div>
             <div><span>Completed</span><strong>{lessonProgress.completed} / {lessonProgress.total} lessons</strong></div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import {
   cefrLevels,
-  currentLevelCode,
+  getCurrentLevelCode,
   getOverallProgress,
   getSkillProgress,
   testTarget,
@@ -26,6 +26,7 @@ function buildPath() {
 }
 
 export function ProgressPage() {
+  const currentLevelCode = getCurrentLevelCode();
   const currentIndex = cefrLevels.findIndex((l) => l.code === currentLevelCode);
   const nextLevel = cefrLevels[currentIndex + 1];
   const currentLevel = cefrLevels[currentIndex];
