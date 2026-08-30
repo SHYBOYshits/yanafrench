@@ -29,7 +29,7 @@ export function ChatWidget() {
       ? null
       : error.message === "RATE_LIMITED"
         ? "I'm getting a lot of questions right now — please try again in a minute."
-        : error.message;
+        : "Something went wrong. Please try again.";
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
