@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { getVocabulary, vocabCategories } from "@/lib/vocabData";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { getSavedWords, getVocabulary, saveWord, vocabCategories, type VocabWord } from "@/lib/vocabData";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./VocabularyPage.module.css";
 
 const FAVORITES_KEY = "student-hub-vocab-favorites";
 type View = "all" | "favorites" | "flashcards";
 
+function slugify(text: string) {
+  return text.toLowerCase().trim().replace(/[^a-z0-9à-ÿ]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 export function VocabularyPage() {
-  const words = getVocabulary();
+  const baseWords = getVocabulary();
+  const [savedWords, setSavedWords] = useState<VocabWord[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<(typeof vocabCategories)[number]>("All");
   const [view, setView] = useState<View>("all");
@@ -17,11 +22,17 @@ export function VocabularyPage() {
   const [cardIndex, setCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
 
+  const [translating, setTranslating] = useState(false);
+  const [translateResult, setTranslateResult] = useState<{ word: string; meaning: string } | null>(null);
+  const [translateError, setTranslateError] = useState("");
+  const [justSavedId, setJustSavedId] = useState<string | null>(null);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem(FAVORITES_KEY);
       if (stored) setFavorites(JSON.parse(stored));
     } catch {}
+    setSavedWords(getSavedWords());
   }, []);
 
   function toggleFavorite(id: string) {
@@ -32,7 +43,8 @@ export function VocabularyPage() {
     });
   }
 
-  const recent = [...words].slice(0, 4);
+  const words = useMemo(() => [...savedWords, ...baseWords], [savedWords, baseWords]);
+  const recent = [...baseWords].slice(0, 4);
 
   const filtered = useMemo(() => {
     return words.filter((w) => {
@@ -55,12 +67,60 @@ export function VocabularyPage() {
     setCardIndex((i) => (i - 1 + flashcardDeck.length) % flashcardDeck.length);
   }
 
+  async function handleTranslate(e: FormEvent) {
+    e.preventDefault();
+    const term = query.trim();
+    if (!term || translating) return;
+
+    const existing = words.find((w) => w.word.toLowerCase() === term.toLowerCase());
+    if (existing) {
+      setTranslateResult(null);
+      setTranslateError("");
+      return;
+    }
+
+    setTranslating(true);
+    setTranslateError("");
+    setTranslateResult(null);
+    setJustSavedId(null);
+    try {
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(term)}&langpair=fr|en`);
+      const data = await res.json();
+      const translated: string | undefined = data?.responseData?.translatedText;
+      if (translated && !/no translation/i.test(translated)) {
+        setTranslateResult({ word: term, meaning: translated.toLowerCase() });
+      } else {
+        setTranslateError("No translation found for that word.");
+      }
+    } catch {
+      setTranslateError("Couldn't reach the translator. Try again.");
+    } finally {
+      setTranslating(false);
+    }
+  }
+
+  function handleSaveTranslation() {
+    if (!translateResult) return;
+    const newWord: VocabWord = {
+      id: slugify(translateResult.word) || `word-${Date.now()}`,
+      word: translateResult.word,
+      pronunciation: "",
+      meaning: translateResult.meaning,
+      example: "",
+      category: "Saved",
+      dateLearned: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" }),
+    };
+    saveWord(newWord);
+    setSavedWords((prev) => [newWord, ...prev.filter((w) => w.id !== newWord.id)]);
+    setJustSavedId(newWord.id);
+  }
+
   return (
     <DashboardShell>
       <div className={styles.head}>
         <small>LE HUB</small>
         <h1>Vocabulary.</h1>
-        <p>Every word from class, organised and ready to review.</p>
+        <p>Every word from class, organised and ready to review — or look up any French word and save it here.</p>
       </div>
 
       <div className={styles.viewTabs}>
@@ -72,13 +132,39 @@ export function VocabularyPage() {
       {view !== "flashcards" && (
         <>
           <div className={styles.controls}>
-            <input
-              className={styles.search}
-              placeholder="Search words or meanings…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label="Search vocabulary"
-            />
+            <form className={styles.searchForm} onSubmit={handleTranslate}>
+              <input
+                className={styles.search}
+                placeholder="Search your words, or type any French word to translate…"
+                value={query}
+                onChange={(e) => { setQuery(e.target.value); setTranslateResult(null); setTranslateError(""); }}
+                aria-label="Search or translate a French word"
+              />
+              <button type="submit" className={styles.translateButton} disabled={translating || !query.trim()}>
+                {translating ? "…" : "Translate"}
+              </button>
+            </form>
+
+            {(translateResult || translateError) && (
+              <div className={styles.translateResult}>
+                {translateResult ? (
+                  <>
+                    <div>
+                      <span className={styles.translateLabel}>TRANSLATION</span>
+                      <strong>{translateResult.word}</strong>
+                      <span className={styles.translateArrow}>→</span>
+                      <span className={styles.translateMeaning}>{translateResult.meaning}</span>
+                    </div>
+                    <button type="button" className={styles.saveTranslation} onClick={handleSaveTranslation} disabled={justSavedId === slugify(translateResult.word)}>
+                      {justSavedId === slugify(translateResult.word) ? "✓ Saved" : "＋ Save to my words"}
+                    </button>
+                  </>
+                ) : (
+                  <p className={styles.translateError}>{translateError}</p>
+                )}
+              </div>
+            )}
+
             <div className={styles.filterRow}>
               {vocabCategories.map((c) => (
                 <button key={c} type="button" className={category === c ? styles.chipActive : styles.chip} onClick={() => setCategory(c)}>{c}</button>
@@ -95,9 +181,9 @@ export function VocabularyPage() {
                     <button type="button" className={favorites.includes(w.id) ? styles.favActive : styles.fav} onClick={() => toggleFavorite(w.id)} aria-label="Toggle favorite">★</button>
                     <span className={styles.category}>{w.category}</span>
                     <strong>{w.word}</strong>
-                    <small className={styles.pron}>/{w.pronunciation}/</small>
+                    {w.pronunciation && <small className={styles.pron}>/{w.pronunciation}/</small>}
                     <p className={styles.meaning}>{w.meaning}</p>
-                    <p className={styles.example}>{w.example}</p>
+                    {w.example && <p className={styles.example}>{w.example}</p>}
                   </div>
                 ))}
               </div>
@@ -113,14 +199,14 @@ export function VocabularyPage() {
                     <button type="button" className={favorites.includes(w.id) ? styles.favActive : styles.fav} onClick={() => toggleFavorite(w.id)} aria-label="Toggle favorite">★</button>
                     <span className={styles.category}>{w.category}</span>
                     <strong>{w.word}</strong>
-                    <small className={styles.pron}>/{w.pronunciation}/</small>
+                    {w.pronunciation && <small className={styles.pron}>/{w.pronunciation}/</small>}
                     <p className={styles.meaning}>{w.meaning}</p>
-                    <p className={styles.example}>{w.example}</p>
+                    {w.example && <p className={styles.example}>{w.example}</p>}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className={styles.empty}><p>{view === "favorites" ? "No favorites yet — star a word to save it here." : "No words match your search."}</p></div>
+              <div className={styles.empty}><p>{view === "favorites" ? "No favorites yet — star a word to save it here." : "No words match — try translating it above."}</p></div>
             )}
           </div>
         </>
@@ -133,13 +219,13 @@ export function VocabularyPage() {
               <>
                 <span className={styles.category}>{activeCard.category}</span>
                 <strong className={styles.flashWord}>{activeCard.word}</strong>
-                <small className={styles.pron}>/{activeCard.pronunciation}/</small>
+                {activeCard.pronunciation && <small className={styles.pron}>/{activeCard.pronunciation}/</small>}
                 <span className={styles.flipHint}>Tap to reveal meaning</span>
               </>
             ) : (
               <>
                 <p className={styles.meaning}>{activeCard.meaning}</p>
-                <p className={styles.example}>{activeCard.example}</p>
+                {activeCard.example && <p className={styles.example}>{activeCard.example}</p>}
                 <span className={styles.flipHint}>Tap to flip back</span>
               </>
             )}

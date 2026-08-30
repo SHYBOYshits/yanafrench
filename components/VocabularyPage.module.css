@@ -18,8 +18,39 @@
 
 .controls { margin-bottom: .5rem; }
 
-.search { width: 100%; max-width: 420px; border: 1px solid var(--hairline-ink); border-radius: 999px; padding: .75rem 1.2rem; font-size: .8rem; background: var(--card-surface); margin-bottom: 1rem; }
+.searchForm { display: flex; gap: .6rem; max-width: 520px; margin-bottom: .9rem; }
+
+.search { flex: 1; border: 1px solid var(--hairline-ink); border-radius: 999px; padding: .75rem 1.2rem; font-size: .8rem; background: var(--card-surface); }
 .search:focus { outline: none; border-color: var(--blue); }
+
+.translateButton { border: 0; background: var(--blue); color: #fff; padding: .75rem 1.3rem; border-radius: 999px; font-size: .74rem; font-weight: 700; flex: 0 0 auto; }
+.translateButton:hover:not(:disabled) { background: var(--blue-2); }
+.translateButton:disabled { opacity: .5; }
+
+.translateResult {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  max-width: 620px;
+  background: var(--porcelain-2);
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-md);
+  padding: .9rem 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.translateLabel { display: block; font-size: .5rem; font-weight: 700; letter-spacing: .1em; color: var(--bordeaux); margin-bottom: .3rem; }
+.translateResult strong { font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--blue); }
+.translateArrow { margin: 0 .5rem; color: var(--text-faint); }
+.translateMeaning { font-size: .9rem; color: var(--text-primary); font-weight: 600; }
+
+.saveTranslation { border: 0; background: var(--blue); color: #fff; padding: .6rem 1.1rem; border-radius: 999px; font-size: .7rem; font-weight: 700; flex: 0 0 auto; }
+.saveTranslation:hover:not(:disabled) { background: var(--blue-2); }
+.saveTranslation:disabled { background: var(--text-faint); }
+
+.translateError { margin: 0; font-size: .78rem; color: var(--bordeaux); }
 
 .filterRow { display: flex; flex-wrap: wrap; gap: .5rem; }
 

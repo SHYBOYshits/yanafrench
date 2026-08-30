@@ -4,7 +4,7 @@ export type VocabWord = {
   pronunciation: string;
   meaning: string;
   example: string;
-  category: "Connectors" | "Opinion" | "Everyday" | "TEF Vocabulary" | "Grammar terms";
+  category: "Connectors" | "Opinion" | "Everyday" | "TEF Vocabulary" | "Grammar terms" | "Saved";
   dateLearned: string;
 };
 
@@ -23,7 +23,27 @@ export const vocabulary: VocabWord[] = [
   { id: "clb", word: "NCLC", pronunciation: "en-say-el-say", meaning: "Canadian Language Benchmark", example: "Mon objectif est NCLC 7 en expression orale.", category: "TEF Vocabulary", dateLearned: "20 Sep" },
 ];
 
-export const vocabCategories = ["All", "Connectors", "Opinion", "Everyday", "TEF Vocabulary", "Grammar terms"] as const;
+export const vocabCategories = ["All", "Saved", "Connectors", "Opinion", "Everyday", "TEF Vocabulary", "Grammar terms"] as const;
+
+const SAVED_WORDS_KEY = "student-hub-vocab-saved";
+
+export function getSavedWords(): VocabWord[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(SAVED_WORDS_KEY);
+    return stored ? (JSON.parse(stored) as VocabWord[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveWord(word: VocabWord) {
+  if (typeof window === "undefined") return;
+  try {
+    const existing = getSavedWords().filter((w) => w.id !== word.id);
+    localStorage.setItem(SAVED_WORDS_KEY, JSON.stringify([word, ...existing]));
+  } catch {}
+}
 
 export function getVocabulary() {
   return vocabulary;
