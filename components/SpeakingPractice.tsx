@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { prompts, evaluateAttempt } from "@/lib/speakingData";
+import { prompts, evaluateAttempt, saveAttempt } from "@/lib/speakingData";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./SpeakingPractice.module.css";
 
@@ -167,8 +167,18 @@ export function SpeakingPractice() {
   async function handleSubmit() {
     if (!audioBlobRef.current) return;
     setState("submitting");
-    await evaluateAttempt(audioBlobRef.current, prompt.text);
-    router.push("/student-hub/speaking/results");
+    const evaluation = await evaluateAttempt(audioBlobRef.current, prompt.text);
+    const id = `attempt-${Date.now()}`;
+    saveAttempt({
+      id,
+      date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" }),
+      topic: prompt.topic,
+      prompt: prompt.text,
+      durationLabel: formatDuration(elapsedMs),
+      status: "Reviewed",
+      evaluation,
+    });
+    router.push(`/student-hub/speaking/results?attempt=${id}`);
   }
 
   return (

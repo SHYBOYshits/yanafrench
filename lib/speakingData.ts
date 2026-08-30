@@ -107,10 +107,32 @@ export const speakingHistory: SpeakingAttempt[] = [
   },
 ];
 
+const LOCAL_ATTEMPTS_KEY = "student-hub-speaking-attempts";
+
+function readLocalAttempts(): SpeakingAttempt[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(LOCAL_ATTEMPTS_KEY);
+    return stored ? (JSON.parse(stored) as SpeakingAttempt[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Persists a freshly-submitted attempt client-side so it shows up in
+// history immediately. Stands in for a real "save to database" call.
+export function saveAttempt(attempt: SpeakingAttempt) {
+  if (typeof window === "undefined") return;
+  try {
+    const next = [attempt, ...readLocalAttempts()];
+    localStorage.setItem(LOCAL_ATTEMPTS_KEY, JSON.stringify(next));
+  } catch {}
+}
+
 export function getSpeakingHistory() {
-  return speakingHistory;
+  return [...readLocalAttempts(), ...speakingHistory];
 }
 
 export function getSpeakingAttempt(id: string) {
-  return speakingHistory.find((a) => a.id === id);
+  return readLocalAttempts().find((a) => a.id === id) ?? speakingHistory.find((a) => a.id === id);
 }

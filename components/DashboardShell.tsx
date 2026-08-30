@@ -12,7 +12,7 @@ const student = { name: "Amelia" };
 const navItems: { type: string; label: string; href?: string }[] = [
   { type: "dashboard", label: "Dashboard", href: "/student-hub" },
   { type: "course", label: "My Course", href: "/student-hub/course" },
-  { type: "lessons", label: "Lessons" },
+  { type: "lessons", label: "Lessons", href: "/student-hub/course" },
   { type: "videos", label: "Videos", href: "/student-hub/videos" },
   { type: "documents", label: "Documents", href: "/student-hub/documents" },
   { type: "speaking", label: "Speaking Practice", href: "/student-hub/speaking" },
@@ -20,7 +20,7 @@ const navItems: { type: string; label: string; href?: string }[] = [
   { type: "vocabulary", label: "Vocabulary", href: "/student-hub/vocabulary" },
   { type: "progress", label: "Progress", href: "/student-hub/progress" },
   { type: "calendar", label: "Calendar", href: "/student-hub/calendar" },
-  { type: "messages", label: "Messages" },
+  { type: "messages", label: "Messages", href: "/student-hub/messages" },
   { type: "settings", label: "Settings", href: "/student-hub/settings" },
 ];
 

@@ -1,0 +1,71 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { conversation, seedMessages, type Message } from "@/lib/messageData";
+import { DashboardShell } from "./DashboardShell";
+import styles from "./MessagesPage.module.css";
+
+export function MessagesPage() {
+  const [messages, setMessages] = useState<Message[]>(seedMessages);
+  const [draft, setDraft] = useState("");
+
+  function handleSend(e: FormEvent) {
+    e.preventDefault();
+    const text = draft.trim();
+    if (!text) return;
+    setMessages((prev) => [...prev, { id: `local-${Date.now()}`, from: "student", text, time: "Just now" }]);
+    setDraft("");
+  }
+
+  const initials = conversation.name.split(" ").map((n) => n[0]).join("");
+
+  return (
+    <DashboardShell>
+      <div className={styles.head}>
+        <small>LE HUB</small>
+        <h1>Messages.</h1>
+      </div>
+
+      <div className={styles.layout}>
+        <div className={styles.conversationList}>
+          <div className={styles.conversationActive}>
+            <span className={styles.avatar}>{initials}</span>
+            <div>
+              <strong>{conversation.name}</strong>
+              <small>{messages[messages.length - 1]?.text.slice(0, 34)}…</small>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.thread}>
+          <div className={styles.threadHead}>
+            <span className={styles.avatar}>{initials}</span>
+            <div>
+              <strong>{conversation.name}</strong>
+              <small>{conversation.role}</small>
+            </div>
+          </div>
+
+          <div className={styles.messages}>
+            {messages.map((m) => (
+              <div key={m.id} className={m.from === "student" ? styles.bubbleStudent : styles.bubbleTeacher}>
+                <p>{m.text}</p>
+                <span>{m.time}</span>
+              </div>
+            ))}
+          </div>
+
+          <form className={styles.composer} onSubmit={handleSend}>
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Write a message…"
+              aria-label="Message"
+            />
+            <button type="submit" disabled={!draft.trim()}>Send →</button>
+          </form>
+        </div>
+      </div>
+    </DashboardShell>
+  );
+}
