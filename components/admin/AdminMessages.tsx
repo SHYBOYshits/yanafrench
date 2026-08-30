@@ -1,21 +1,19 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { addMessage, getMessages } from "@/lib/adminContent";
 import { profile } from "@/lib/profileData";
-import { useAdminValue } from "@/lib/useAdminValue";
+import { formatMessageTime, useMessageThread } from "@/lib/useMessageThread";
 import { AdminShell } from "../AdminShell";
 import styles from "./AdminMessages.module.css";
 
 export function AdminMessages() {
-  const messages = useAdminValue(getMessages);
+  const { messages, send } = useMessageThread();
   const [draft, setDraft] = useState("");
 
   function handleSend(e: FormEvent) {
     e.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
-    addMessage("teacher", text);
+    if (!draft.trim()) return;
+    send("teacher", draft);
     setDraft("");
   }
 
@@ -41,7 +39,7 @@ export function AdminMessages() {
           {messages.map((m) => (
             <div key={m.id} className={m.from === "teacher" ? styles.bubbleTeacher : styles.bubbleStudent}>
               <p>{m.text}</p>
-              <span>{m.time}</span>
+              <span>{formatMessageTime(m.time)}</span>
             </div>
           ))}
         </div>

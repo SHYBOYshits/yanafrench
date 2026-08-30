@@ -1,21 +1,19 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { addMessage, getMessages } from "@/lib/adminContent";
 import { conversation } from "@/lib/messageData";
-import { useAdminValue } from "@/lib/useAdminValue";
+import { formatMessageTime, useMessageThread } from "@/lib/useMessageThread";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./MessagesPage.module.css";
 
 export function MessagesPage() {
-  const messages = useAdminValue(getMessages);
+  const { messages, send } = useMessageThread();
   const [draft, setDraft] = useState("");
 
   function handleSend(e: FormEvent) {
     e.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
-    addMessage("student", text);
+    if (!draft.trim()) return;
+    send("student", draft);
     setDraft("");
   }
 
@@ -52,7 +50,7 @@ export function MessagesPage() {
             {messages.map((m) => (
               <div key={m.id} className={m.from === "student" ? styles.bubbleStudent : styles.bubbleTeacher}>
                 <p>{m.text}</p>
-                <span>{m.time}</span>
+                <span>{formatMessageTime(m.time)}</span>
               </div>
             ))}
           </div>
