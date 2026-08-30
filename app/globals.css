@@ -142,6 +142,8 @@ h1 em,h2 em { font-weight: 400; font-style: italic; }
 .button--light { background: var(--porcelain); color: var(--blue); }
 .button--light:hover { box-shadow: 0 14px 34px rgba(0,0,0,.18); }
 .button--nav { min-height: 44px; padding: .7rem 1.15rem; background: var(--blue); color: white; }
+.button--nav-outline { min-height: 44px; padding: .7rem 1.15rem; background: transparent; border-color: var(--blue); color: var(--blue); }
+.button--nav-outline:hover { background: rgba(31,58,95,.08); }
 
 .text-link {
   display: inline-flex;
@@ -230,7 +232,9 @@ h1 em,h2 em { font-weight: 400; font-style: italic; }
 .mobile-menu__links a span { font-family:var(--sans); font-size: .6rem; color:rgba(247,244,238,.55); letter-spacing:.16em; margin-top:.65rem; }
 .mobile-menu__links a.is-active { color: var(--bordeaux-light); }
 .mobile-menu__links a.is-active span { color: var(--porcelain); }
-.mobile-menu__cta { margin-top: auto; width:100%; background: var(--bordeaux); color: var(--porcelain); }
+.mobile-menu__ctas { margin-top: auto; display: flex; flex-direction: column; gap: .7rem; }
+.mobile-menu__cta { width:100%; background: var(--bordeaux); color: var(--porcelain); }
+.mobile-menu__cta--secondary { width:100%; background: transparent; border-color: rgba(246,244,239,.4); color: var(--porcelain); }
 
 /* hero — console dashboard hero */
 .hero {
@@ -771,6 +775,7 @@ a:focus-visible, button:focus-visible { outline:2px solid var(--bordeaux); outli
   .nav { padding: .8rem .9rem 0; }
   .nav__inner { height:64px; padding: 0 .9rem; }
   .nav .button--nav { display:none; }
+  .nav .button--nav-outline { display:none; }
   .hero { padding-top:5.5rem; min-height:auto; }
   .hero__grid { min-height:auto; grid-template-columns:1fr; gap:2.5rem; }
   .hero__copy { padding:2rem 0 0; order:1; }

@@ -65,6 +65,7 @@ export function Navigation() {
             })}
           </nav>
           <div className="nav__actions">
+            <Link href="/student-hub" className="button button--nav-outline">Student Hub</Link>
             <Link href="/find-your-batch" className="button button--nav">Find your batch</Link>
             <button className="nav__menu" onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open}>
               <span/><span/>
@@ -91,7 +92,10 @@ export function Navigation() {
                   );
                 })}
               </div>
-              <Link href="/find-your-batch" onClick={() => setOpen(false)} className="button button--dark mobile-menu__cta">Find your batch</Link>
+              <div className="mobile-menu__ctas">
+                <Link href="/student-hub" onClick={() => setOpen(false)} className="button mobile-menu__cta--secondary">Student Hub</Link>
+                <Link href="/find-your-batch" onClick={() => setOpen(false)} className="button mobile-menu__cta">Find your batch</Link>
+              </div>
             </motion.div>
           </motion.div>
         )}

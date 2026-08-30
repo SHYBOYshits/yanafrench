@@ -269,7 +269,7 @@ export function LeHubShowcase() {
               <div className={polish.dashboardMicro}><span>FOCUS</span><strong>Natural connectors</strong></div>
             </div>
             <div className={styles.heroActions}>
-              <a href="#lexique" className="button button--dark">Explore Le Hub <span>↓</span></a>
+              <Link href="/student-hub" className="button button--dark">Explore Le Hub <span>→</span></Link>
               <Link href="/find-your-batch" className="button button--ghost">Find your batch</Link>
             </div>
           </motion.div>
