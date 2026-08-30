@@ -13,7 +13,6 @@ const navItems: { type: string; label: string; href?: string }[] = [
   { type: "dashboard", label: "Dashboard", href: "/student-hub" },
   { type: "course", label: "My Course", href: "/student-hub/course" },
   { type: "lessons", label: "Lessons", href: "/student-hub/course" },
-  { type: "videos", label: "Videos", href: "/student-hub/videos" },
   { type: "documents", label: "Documents", href: "/student-hub/documents" },
   { type: "speaking", label: "Speaking Practice", href: "/student-hub/speaking" },
   { type: "tests", label: "Tests & Assignments", href: "/student-hub/tests" },
