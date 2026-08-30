@@ -60,13 +60,18 @@
   border-radius: 999px;
   background: var(--status-available);
   box-shadow: 0 0 0 4px rgba(78,122,92,.1);
+  animation: livePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(63,138,99,.12); }
+  50% { box-shadow: 0 0 0 7px rgba(63,138,99,.05); }
 }
 
 .coursePicker {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border-top: 1px solid var(--stone);
-  border-bottom: 1px solid var(--stone);
+  gap: .85rem;
   margin-bottom: clamp(4rem, 6vw, 6rem);
 }
 
@@ -79,24 +84,26 @@
   justify-content: flex-end;
   gap: .45rem;
   padding: 1.8rem;
-  border: 0;
-  border-right: 1px solid var(--stone);
-  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(16,19,28,.08);
+  border-radius: var(--r-lg);
+  background: var(--card-surface);
+  box-shadow: var(--shadow-soft);
   text-align: left;
   cursor: pointer;
-  transition: background .35s var(--ease), color .35s var(--ease), transform .35s var(--ease);
+  transition: background .3s var(--ease), color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
 }
 
-.courseCard:last-child { border-right: 0; }
-.courseCard:hover { background: rgba(255,255,255,.65); }
+.courseCard:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); border-color: rgba(16,19,28,.14); }
+.courseCard:active { transform: translateY(-1px) scale(.98); }
 
 .courseCardActive {
-  background: var(--blue);
+  background: linear-gradient(165deg, var(--blue-2), var(--blue));
   color: var(--porcelain);
-  box-shadow: var(--shadow-soft);
+  border-color: transparent;
+  box-shadow: var(--shadow-glow);
 }
 
-.courseCardActive:hover { background: var(--blue-2); }
+.courseCardActive:hover { transform: translateY(-4px); }
 
 .courseNumber {
   position: absolute;
@@ -107,7 +114,7 @@
   color: var(--bordeaux);
 }
 
-.courseCardActive .courseNumber { color: rgba(245,242,236,.65); }
+.courseCardActive .courseNumber { color: var(--bordeaux-light); }
 
 .courseCard strong {
   font-family: var(--serif);
@@ -164,9 +171,9 @@
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scrollbar-width: thin;
-  border-top: 1px solid var(--stone);
-  border-bottom: 1px solid var(--stone);
-  background: rgba(255,255,255,.22);
+  border: 1px solid var(--stone);
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,.4);
 }
 
 .calendar {
@@ -220,31 +227,35 @@
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  border: 1px solid rgba(23,23,25,.1);
-  background: rgba(245,242,236,.7);
+  border: 1px solid rgba(16,19,28,.09);
+  border-radius: var(--r-md);
+  background: rgba(255,255,255,.6);
   cursor: pointer;
-  transition: transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease);
+  transition: transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), box-shadow .25s var(--ease);
 }
 
 .slot:hover:not(:disabled) {
   transform: translateY(-2px);
   background: white;
-  border-color: rgba(23,23,25,.26);
+  border-color: rgba(16,19,28,.2);
   box-shadow: var(--shadow-soft);
 }
 
+.slot:active:not(:disabled) { transform: translateY(0) scale(.98); }
+
 .slotSelected {
-  background: var(--blue);
+  background: linear-gradient(165deg, var(--blue-2), var(--blue));
   color: var(--porcelain);
-  border-color: var(--blue);
+  border-color: transparent;
+  box-shadow: var(--shadow-glow);
 }
 
-.slotSelected:hover:not(:disabled) { background: var(--blue-2); }
+.slotSelected:hover:not(:disabled) { transform: translateY(-2px); }
 
 .slotDisabled {
   opacity: .45;
   cursor: not-allowed;
-  background: rgba(235,232,225,.5);
+  background: rgba(235,232,225,.4);
 }
 
 .slotTime {
@@ -254,7 +265,7 @@
   margin-bottom: .65rem;
 }
 
-.slotSelected .slotTime { color: #e7b5bd; }
+.slotSelected .slotTime { color: var(--bordeaux-light); }
 
 .slot strong {
   font-family: var(--serif);
@@ -298,8 +309,9 @@
   display: grid;
   place-items: center;
   padding: 2rem;
-  border-top: 1px solid var(--stone);
-  border-bottom: 1px solid var(--stone);
+  border: 1px solid var(--stone);
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,.4);
   color: var(--text-muted);
   text-align: center;
   line-height: 1.7;
@@ -307,14 +319,16 @@
 
 .state a {
   color: var(--bordeaux);
-  border-bottom: 1px solid rgba(138,41,56,.35);
+  border-bottom: 1px solid rgba(182,58,58,.35);
 }
 
 .selection {
   margin-top: 1.25rem;
-  background: var(--blue);
+  background: linear-gradient(165deg, var(--blue-2), var(--blue));
   color: var(--porcelain);
   padding: clamp(1.5rem, 3vw, 2.8rem);
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(255,255,255,.08);
   box-shadow: var(--shadow-lift);
 }
 
@@ -336,7 +350,7 @@
 .selectionMain > div:first-child > span {
   display: block;
   margin-bottom: .55rem;
-  color: #dcaab2;
+  color: var(--bordeaux-light);
   font-size: .63rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -410,11 +424,7 @@
 
   .courseCard {
     min-height: 145px;
-    border-right: 0;
-    border-bottom: 1px solid var(--stone);
   }
-
-  .courseCard:last-child { border-bottom: 0; }
 
   .selectionMain {
     grid-template-columns: 1fr;
@@ -440,11 +450,40 @@
   }
 
   .calendarScroll {
-    margin-right: calc(var(--pad) * -1);
+    overflow-x: visible;
+    border: 0;
+    background: none;
   }
 
   .calendar {
-    min-width: 930px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+  }
+
+  .day {
+    min-height: 0;
+    border: 1px solid var(--stone);
+    border-radius: var(--r-lg);
+    background: rgba(255,255,255,.5);
+    overflow: hidden;
+  }
+
+  .dayHead {
+    height: auto;
+    padding: 1rem 1.1rem;
+    flex-direction: row;
+    align-items: baseline;
+    gap: .55rem;
+  }
+
+  .dayBody {
+    padding: .8rem;
+  }
+
+  .noClass {
+    padding: 0 .35rem 1rem;
   }
 
   .selectionDetails {

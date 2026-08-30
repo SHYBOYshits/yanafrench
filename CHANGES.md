@@ -77,3 +77,39 @@ Added a floating "C1 · Certified French tutor" badge overlapping the bottom-rig
 The site already used a giant, near-invisible serif "ç" character as a background watermark on 4 sections (`tef-feature`, `page-hero`, `final-cta`, `resources-feature__paper`). Extended the same motif to `.pathways` and `.results-preview` — two prominent homepage sections that were previously flat with no depth layer — using `::after` pseudo-elements with careful `z-index` scoping (`.section-head`, `.pathways__list`, `.results-preview__grid` etc. bumped to `position:relative; z-index:1`) so the giant faint character sits behind all real content rather than on top of it.
 
 Verification: `npm run build` succeeds (TypeScript check included, validates the new `Icons.tsx` prop types and the tuple-destructured icon components in `Approach.tsx`/`ClassFormat.tsx`), all 8 routes prerender cleanly.
+
+## 2026-08-26 — Full-site redesign (design system → structure)
+
+User asked for a whole-site redesign (not just the homepage), using the Anthropic `frontend-design` skill's principles as the quality bar (the "Superpower" and "Anthropic Frontend Design" repos referenced in the brief did not exist on disk / resolved to that skill after clarification — no external repo was cloned or copied from). Hard rule throughout: content, programs, pricing, results, business details, font, animation timing, section order and routes all stay exactly as they were — only visual design, layout composition and interaction states were in scope. Approved plan executed phase by phase with a `npm run build` check after each phase; no regressions found.
+
+### Phase 1 — Design system (`app/globals.css`)
+- Replaced the full color token set with the user-specified palette (Deep Ink `#17191C`, Warm Ivory `#F7F4EE`, Soft Paper `#FCFBF8`, French Blue `#1F3A5F`, Muted Blue `#526B87`, French Red `#B63A3A`, Warm Grey `#DDD8CE`, Primary/Muted text `#202226`/`#6E6B66`), keeping the same CSS variable names so every consumer picked up the new values automatically. Added `--bordeaux-light` (`#E2897A`) for accent-on-dark-background contexts.
+- Retired `--amber` as a decorative color (~60 usages across `globals.css` and all three Le Hub CSS modules): light-background usages now resolve to French Blue, dark-background usages (hero, tef-feature, personality-band, language-journey, final-cta, resource-cta/approach, mobile menu) resolve to `--bordeaux-light` for contrast safety. `--amber`/`--emerald` remain defined but are functional-only now (batch status colors), not brand accents.
+- Consolidated 8 hand-tuned H1/H2 `clamp()` values into shared `--h1`/`--h2`/`--h2-tight` tokens.
+- Normalized card border colors (9 near-duplicate card recipes) onto shared `--hairline-ink`/`--hairline-ink-hover` tokens.
+- Removed the radial-gradient background sheen from 6 "reading" sections (`.pathways`, `.yana-section`, `.max-four`, `.class-format`, `.program-detail`, `.about-page`, `.resource-pathways`) so it's reserved for genuine hero moments only, per the "restrained accents" brief.
+- Realigned every leftover hardcoded old-palette hex/rgba literal in `LeHubInteractive.module.css`, `LeHubShowcase.module.css`, `LeHubPolish.module.css` and `BatchFinder.module.css` to the new tokens.
+
+### Phase 2 — Navigation + footer
+- `components/Navigation.tsx`: added an `IntersectionObserver`-based scroll-spy so the "Programs" nav link highlights when the homepage's `#programs` section is in view (previously only real routes ever got `.is-active`).
+- `components/Footer.tsx` + CSS: rebuilt from a 3-column (brand + links + socials) footer into a 4-column one (brand + Programs + Learn + Contact, including a WhatsApp link) — same real routes/info, better structure.
+
+### Phase 4 — Program pages
+- `components/ProgramDetail.tsx` + CSS: replaced the numbered-card rail (`01`/`02`/`03`/`04` badges on a semi-transparent card background) with a quiet editorial index — hairline dividers between items, no numbering, since the underlying content (how the preparation works) isn't a strict sequence.
+
+### Phase 5 — About page
+- `.about-page__facts` changed from a 2×2 grid of boxed, shadowed "chip" cards to a quiet inline strip with hairline dividers — less SaaS-feature-grid, more editorial fact line.
+
+### Phase 6 — Results page
+- `app/results/page.tsx` + CSS: the two `FullResult` blocks (TEF/TCF) now alternate — added a `reverse` prop and `.full-result--reverse` so the layout is an asymmetric magazine spread instead of two identical stacked blocks. Certificate images now sit with a slight static tilt (`rotate(±1deg)`, straightening on hover) to read as placed physical documents rather than generic cards.
+
+### Phase 7/10 — Batch finder + mobile
+- `components/BatchFinder.module.css`: fixed the highest-friction mobile issue on the site — the 6-day calendar's forced `min-width: 1020px`/`930px` (horizontal scroll) is replaced at ≤720px with a full-width vertical stack of days, no horizontal scroll.
+
+### Phase 8 — Resources
+- `app/resources/[slug]/page.tsx` + CSS: resource detail page rebuilt from a centered, narrow "checkout box" card into an asymmetric two-column layout — large serif price as the visual anchor on the left, facts/CTA/note on the right, no card chrome.
+
+### New: journey breadcrumbs
+- New `components/Breadcrumb.tsx`, wired into `PageHero` via an optional `trail` prop, added to every deep page (about, tef-tcf, delf, results, resources, resource detail) — e.g. "Discover / TEF / TCF" — so deep pages carry a sense of place in the Discover → Program → Batch journey. Purely additive; the existing "← Back" link on the resource detail page was kept alongside it.
+
+Verification: `npm run build` succeeds after every phase (all 15 routes prerender cleanly). Also ran a live smoke test by serving the static `out/` export and curling all 15 routes (all 200) plus spot-checking rendered HTML for the breadcrumb, footer, and de-numbered program-detail markup. Automated browser screenshot verification was not available this session (Claude-in-Chrome extension not connected) — no pixel-level visual QA was performed; verification is build success + rendered-HTML inspection only.

@@ -1,12 +1,16 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
+import { motion, useReducedMotion, useScroll, useTransform, useMotionValueEvent } from "motion/react";
+import { useRef, useState } from "react";
 
 export function LanguageJourney() {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  const [eyebrowVisible, setEyebrowVisible] = useState(true);
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    setEyebrowVisible(v <= 0.005 || v >= 0.86);
+  });
   const y1 = useTransform(scrollYProgress, [0,.24,.3], [0,0,-110]);
   const o1 = useTransform(scrollYProgress, [0,.2,.3], [1,1,0]);
   const y2 = useTransform(scrollYProgress, [.22,.35,.5], [90,0,-110]);
@@ -24,7 +28,7 @@ export function LanguageJourney() {
   return (
     <section className="language-journey" ref={ref}>
       <div className="language-journey__sticky">
-        <p className="eyebrow eyebrow--light">The shift that matters</p>
+        <motion.p className="eyebrow eyebrow--light" animate={{ opacity: reduce ? 1 : eyebrowVisible ? 1 : 0 }} transition={{ duration: .45, ease: "easeOut" }}>The shift that matters</motion.p>
         <div className="language-journey__stage">
           {lines.map((line, i) => <motion.p key={line} style={styles[i]} className={i === 3 ? "is-final" : ""}>{line}</motion.p>)}
         </div>

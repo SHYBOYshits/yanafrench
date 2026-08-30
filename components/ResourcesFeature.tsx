@@ -1,6 +1,5 @@
+import Link from "next/link";
 import { Reveal } from "./Reveal";
-
-const RESOURCES_URL = "https://tfh-resources-admin-k2ii.vercel.app";
 
 export function ResourcesFeature() {
   return (
@@ -26,12 +25,12 @@ export function ResourcesFeature() {
           </Reveal>
 
           <Reveal delay={0.16}>
-            <a
-              href={RESOURCES_URL}
+            <Link
+              href="/resources"
               className="button button--dark resources-feature__button"
             >
               Explore resources
-            </a>
+            </Link>
           </Reveal>
         </div>
 

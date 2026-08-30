@@ -4,19 +4,20 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 import type { MouseEvent } from "react";
-import { tefResult, tcfResult } from "@/lib/data";
+import { tefResult, tcfResult, type ResultRow } from "@/lib/data";
 import { asset } from "@/lib/site";
 import { Arrow, ExternalArrow } from "./Arrow";
 import { Reveal } from "./Reveal";
+import { ScoreRing } from "./ScoreRing";
 
 type ModalState = null | { src: string; alt: string };
 
-function ResultMini({ label, rows, onOpen }: { label: string; rows: string[][]; onOpen: () => void }) {
+function ResultMini({ label, rows, onOpen }: { label: string; rows: ResultRow[]; onOpen: () => void }) {
   return (
     <article className="result-card">
       <div className="result-card__top"><p>{label}</p><span>Recent student result</span></div>
       <div className="result-card__rows">
-        {rows.map(([skill, score, level]) => <div key={skill}><span>{skill}</span><strong>{level}</strong><small>{score}</small></div>)}
+        {rows.map((row) => <ScoreRing key={row.skill} skill={row.skill} score={row.score} level={row.level}/>)}
       </div>
       <button onClick={onOpen} className="result-card__proof">View anonymised result <ExternalArrow/></button>
     </article>

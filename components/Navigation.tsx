@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Wordmark } from "./Wordmark";
@@ -10,12 +11,20 @@ const links = [
   ["Le Hub", "/le-hub"],
   ["About", "/about"],
   ["Results", "/results"],
-  ["Resources", "https://tfh-resources-theprathambatras-projects.vercel.app"],
+  ["Resources", "/resources"],
 ];
+
+function isLinkActive(href: string, pathname: string, onProgramsSection: boolean) {
+  return href === "/#programs"
+    ? pathname === "/" && onProgramsSection
+    : href.startsWith("/") && !href.includes("#") && pathname === href;
+}
 
 export function Navigation() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [onProgramsSection, setOnProgramsSection] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -23,6 +32,21 @@ export function Navigation() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setOnProgramsSection(false);
+      return;
+    }
+    const target = document.getElementById("programs");
+    if (!target) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setOnProgramsSection(entry.isIntersecting),
+      { rootMargin: "-45% 0px -45% 0px" }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [pathname]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -35,7 +59,10 @@ export function Navigation() {
         <div className="container nav__inner">
           <Wordmark />
           <nav className="nav__links" aria-label="Primary navigation">
-            {links.map(([label, href]) => <Link key={label} href={href}>{label}</Link>)}
+            {links.map(([label, href]) => {
+              const active = isLinkActive(href, pathname, onProgramsSection);
+              return <Link key={label} href={href} className={active ? "is-active" : ""} aria-current={active ? "page" : undefined}>{label}</Link>;
+            })}
           </nav>
           <div className="nav__actions">
             <Link href="/find-your-batch" className="button button--nav">Find your batch</Link>
@@ -55,11 +82,14 @@ export function Navigation() {
                 <button onClick={() => setOpen(false)} className="mobile-menu__close" aria-label="Close menu">×</button>
               </div>
               <div className="mobile-menu__links">
-                {links.map(([label, href], i) => (
-                  <Link key={label} href={href} onClick={() => setOpen(false)}>
-                    <span>0{i + 1}</span>{label}
-                  </Link>
-                ))}
+                {links.map(([label, href], i) => {
+                  const active = isLinkActive(href, pathname, onProgramsSection);
+                  return (
+                    <Link key={label} href={href} onClick={() => setOpen(false)} className={active ? "is-active" : ""}>
+                      <span>0{i + 1}</span>{label}
+                    </Link>
+                  );
+                })}
               </div>
               <Link href="/find-your-batch" onClick={() => setOpen(false)} className="button button--dark mobile-menu__cta">Find your batch</Link>
             </motion.div>

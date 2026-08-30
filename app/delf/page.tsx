@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "DELF A1–B2", description: "Online 
 
 export default function DelfPage() {
   return <>
-    <PageHero eyebrow="DELF · A1–B2" title="Build French" italic="level by level." body="A structured path for learners progressing through DELF A1 to B2 — with the flexibility and personal attention of a small online class."/>
+    <PageHero eyebrow="DELF · A1–B2" title="Build French" italic="level by level." body="A structured path for learners progressing through DELF A1 to B2 — with the flexibility and personal attention of a small online class." trail={[{ label: "Discover", href: "/" }, { label: "DELF" }]}/>
     <ProgramDetail label="A clearer path through DELF" intro="Progress you can place." items={[
       { title: "Know your starting point", body: "Begin from your actual level rather than a generic assumption of what you should already know." },
       { title: "Develop all four skills", body: "Reading, listening, speaking and writing are treated as connected parts of one language system." },

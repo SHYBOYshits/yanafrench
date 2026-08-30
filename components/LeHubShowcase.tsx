@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
+import { useEffect, useState, type FormEvent } from "react";
 import { asset } from "@/lib/site";
 import styles from "./LeHubShowcase.module.css";
 import polish from "./LeHubPolish.module.css";
 import { IntelligenceExperience, ProgressExperience } from "./LeHubIntelligenceProgress";
+
+const SAVED_WORDS_KEY = "lexique-saved-words";
+
+type SavedWord = { word: string; meaning: string };
 
 const reveal = {
   initial: { opacity: 0, y: 34 },
@@ -43,7 +48,13 @@ function ProgressRing() {
     <div className={styles.progressRing} aria-label="French progress 68 percent">
       <svg viewBox="0 0 120 120" aria-hidden="true">
         <circle cx="60" cy="60" r="51" className={styles.ringTrack}/>
-        <circle cx="60" cy="60" r="51" className={styles.ringValue}/>
+        <motion.circle
+          cx="60" cy="60" r="51" className={styles.ringValue}
+          initial={{ strokeDashoffset: 320 }}
+          whileInView={{ strokeDashoffset: 102 }}
+          viewport={{ once: true, margin: "-10%" }}
+          transition={{ duration: 1.3, ease: [0.22, 1, 0.36, 1], delay: .2 }}
+        />
       </svg>
       <div><strong>68%</strong><span>French progress</span></div>
     </div>
@@ -153,15 +164,92 @@ function WorkspaceScreen() {
 }
 
 function LexiqueCard() {
+  const [word, setWord] = useState("convaincre");
+  const [meaning, setMeaning] = useState("to convince · to persuade");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState<SavedWord[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SAVED_WORDS_KEY);
+      if (stored) setSaved(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  function persist(next: SavedWord[]) {
+    setSaved(next);
+    try { localStorage.setItem(SAVED_WORDS_KEY, JSON.stringify(next)); } catch {}
+  }
+
+  async function handleTranslate(e: FormEvent) {
+    e.preventDefault();
+    const query = word.trim();
+    if (!query || loading) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(query)}&langpair=fr|en`);
+      const data = await res.json();
+      const translated: string | undefined = data?.responseData?.translatedText;
+      if (translated && !/no translation/i.test(translated)) {
+        setMeaning(translated.toLowerCase());
+      } else {
+        setError("No translation found for that word.");
+      }
+    } catch {
+      setError("Couldn't reach the translator. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleSave() {
+    const w = word.trim();
+    if (!w || !meaning || error) return;
+    const next = [{ word: w, meaning }, ...saved.filter((s) => s.word.toLowerCase() !== w.toLowerCase())].slice(0, 20);
+    persist(next);
+  }
+
+  function handleRemove(w: string) {
+    persist(saved.filter((s) => s.word !== w));
+  }
+
+  const isSaved = saved.some((s) => s.word.toLowerCase() === word.trim().toLowerCase());
+
   return (
     <div className={styles.lexiqueCard}>
       <div className={styles.lexiqueTop}><span>LEXIQUE</span><span>FR → EN</span></div>
-      <div className={styles.lexiqueWordRow}><h3>convaincre</h3><button type="button" tabIndex={-1} aria-label="Hear pronunciation">♪</button></div>
-      <p className={styles.phonetic}>/kɔ̃.vɛ̃kʁ/ · verbe</p>
-      <div className={styles.meaning}><small>MEANING</small><strong>to convince · to persuade</strong></div>
-      <div className={styles.example}><small>IN CONTEXT</small><p>Il faut <em>convaincre</em> l&apos;examinateur avec une idée claire, pas avec des phrases compliquées.</p></div>
-      <div className={styles.conjugation}><span>je convaincs</span><span>tu convaincs</span><span>il convainc</span><span>nous convainquons</span></div>
-      <div className={styles.lexiqueBottom}><button type="button" tabIndex={-1}>＋ Save to my words</button><span>Revision due in 3 days</span></div>
+      <form className={styles.lexiqueWordRow} onSubmit={handleTranslate}>
+        <input
+          className={styles.lexiqueInput}
+          value={word}
+          onChange={(e) => setWord(e.target.value)}
+          placeholder="Type a French word…"
+          aria-label="French word to translate"
+        />
+        <button type="submit" aria-label="Translate" disabled={loading}>{loading ? "…" : "♪"}</button>
+      </form>
+      <div className={styles.meaning}>
+        <small>MEANING</small>
+        <strong>{error || meaning}</strong>
+      </div>
+      <div className={styles.lexiqueBottom}>
+        <button type="button" onClick={handleSave} disabled={!meaning || !!error}>
+          {isSaved ? "✓ Saved" : "＋ Save to my words"}
+        </button>
+        <span>{saved.length} word{saved.length === 1 ? "" : "s"} saved</span>
+      </div>
+      {saved.length > 0 && (
+        <ul className={styles.savedWords}>
+          {saved.map((s) => (
+            <li key={s.word}>
+              <span><strong>{s.word}</strong> — {s.meaning}</span>
+              <button type="button" aria-label={`Remove ${s.word}`} onClick={() => handleRemove(s.word)}>×</button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
