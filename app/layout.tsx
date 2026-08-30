@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
-import { ChatWidget } from "@/components/ChatWidget";
+import { AppChrome } from "@/components/AppChrome";
 import { asset } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -17,10 +15,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en" suppressHydrationWarning>
       <body>
         <a className="skip-link" href="#main">Skip to content</a>
-        <Navigation />
-        <main id="main">{children}</main>
-        <Footer />
-        <ChatWidget />
+        <AppChrome>{children}</AppChrome>
       </body>
     </html>
   );

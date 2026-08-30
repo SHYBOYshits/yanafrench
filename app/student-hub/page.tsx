@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { StudentHub } from "@/components/StudentHub";
+import { StudentDashboard } from "@/components/StudentDashboard";
 
 export const metadata: Metadata = { title: "Student Hub" };
 
 export default function StudentHubPage() {
-  return <StudentHub />;
+  return <StudentDashboard />;
 }
