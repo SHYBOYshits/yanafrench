@@ -1,3 +1,5 @@
+import { notifyAdminChange } from "./adminEvents";
+
 export type VocabWord = {
   id: string;
   word: string;
@@ -42,6 +44,7 @@ export function saveWord(word: VocabWord) {
   try {
     const existing = getSavedWords().filter((w) => w.id !== word.id);
     localStorage.setItem(SAVED_WORDS_KEY, JSON.stringify([word, ...existing]));
+    notifyAdminChange();
   } catch {}
 }
 

@@ -1,29 +1,21 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-import { addMessage, getMessages, type ThreadMessage } from "@/lib/adminContent";
+import { useState, type FormEvent } from "react";
+import { addMessage, getMessages } from "@/lib/adminContent";
 import { conversation } from "@/lib/messageData";
+import { useAdminValue } from "@/lib/useAdminValue";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./MessagesPage.module.css";
 
 export function MessagesPage() {
-  const [messages, setMessages] = useState<ThreadMessage[]>([]);
+  const messages = useAdminValue(getMessages);
   const [draft, setDraft] = useState("");
-
-  useEffect(() => {
-    setMessages(getMessages());
-    function onStorage() {
-      setMessages(getMessages());
-    }
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
 
   function handleSend(e: FormEvent) {
     e.preventDefault();
     const text = draft.trim();
     if (!text) return;
-    setMessages(addMessage("student", text));
+    addMessage("student", text);
     setDraft("");
   }
 

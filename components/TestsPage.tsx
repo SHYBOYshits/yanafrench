@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { assignmentCategories, getAssignments, type AssignmentStatus } from "@/lib/testData";
+import { useAdminValue } from "@/lib/useAdminValue";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./TestsPage.module.css";
 
@@ -22,7 +23,7 @@ const actionLabel: Record<AssignmentStatus, string> = {
 };
 
 export function TestsPage() {
-  const assignments = getAssignments();
+  const assignments = useAdminValue(getAssignments);
   const [category, setCategory] = useState<(typeof assignmentCategories)[number]>("All");
 
   const filtered = category === "All" ? assignments : assignments.filter((a) => a.category === category);

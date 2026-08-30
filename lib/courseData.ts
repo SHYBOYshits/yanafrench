@@ -1,3 +1,5 @@
+import { notifyAdminChange } from "./adminEvents";
+
 export type Lesson = {
   number: number;
   title: string;
@@ -138,6 +140,7 @@ export function setLessonCompleted(number: number, completed: boolean) {
   try {
     const next = { ...readCompletionOverrides(), [number]: completed };
     localStorage.setItem(COMPLETION_OVERRIDES_KEY, JSON.stringify(next));
+    notifyAdminChange();
   } catch {}
 }
 

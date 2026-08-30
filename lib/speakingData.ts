@@ -4,6 +4,8 @@
 // audio directly to Gemini (audio -> AI analysis -> scores -> corrections ->
 // feedback, in one multimodal call) and returns a structured evaluation.
 
+import { notifyAdminChange } from "./adminEvents";
+
 export type SkillScores = {
   pronunciation: number;
   fluency: number;
@@ -130,6 +132,7 @@ export function saveAttempt(attempt: SpeakingAttempt) {
   try {
     const next = [attempt, ...readLocalAttempts()];
     localStorage.setItem(LOCAL_ATTEMPTS_KEY, JSON.stringify(next));
+    notifyAdminChange();
   } catch {}
 }
 

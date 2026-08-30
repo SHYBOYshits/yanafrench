@@ -1,3 +1,5 @@
+import { notifyAdminChange } from "./adminEvents";
+
 export type CefrLevel = {
   code: "A1" | "A2" | "B1" | "B2" | "C1";
   label: string;
@@ -77,6 +79,7 @@ export function setCurrentLevelCode(code: CefrLevel["code"]) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(LEVEL_KEY, code);
+    notifyAdminChange();
   } catch {}
 }
 
@@ -96,6 +99,7 @@ export function setStreak(days: number) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STREAK_KEY, String(days));
+    notifyAdminChange();
   } catch {}
 }
 

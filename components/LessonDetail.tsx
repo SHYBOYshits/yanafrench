@@ -1,13 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { getAdjacentLessons, type Lesson } from "@/lib/courseData";
+import { getAdjacentLessons, getLesson, setLessonCompleted } from "@/lib/courseData";
+import { useAdminValue } from "@/lib/useAdminValue";
 import styles from "./LessonDetail.module.css";
 
-export function LessonDetail({ lesson }: { lesson: Lesson }) {
-  const [completed, setCompleted] = useState(lesson.completed);
+export function LessonDetail({ lessonNumber }: { lessonNumber: number }) {
+  const lesson = useAdminValue(() => getLesson(lessonNumber));
+
+  if (!lesson) {
+    return (
+      <div className={styles.page}>
+        <header className={styles.bar}>
+          <Link href="/student-hub/course" className={styles.back}>← Back to course</Link>
+        </header>
+        <div className={styles.content}>
+          <p>That lesson couldn&apos;t be found.</p>
+        </div>
+      </div>
+    );
+  }
+
   const { previous, next } = getAdjacentLessons(lesson.number);
+
+  function toggleComplete() {
+    setLessonCompleted(lesson!.number, !lesson!.completed);
+  }
 
   return (
     <div className={styles.page}>
@@ -77,10 +95,10 @@ export function LessonDetail({ lesson }: { lesson: Lesson }) {
 
         <button
           type="button"
-          className={completed ? styles.completeDone : styles.complete}
-          onClick={() => setCompleted((v) => !v)}
+          className={lesson.completed ? styles.completeDone : styles.complete}
+          onClick={toggleComplete}
         >
-          {completed ? "✓ Marked as complete" : "Mark as complete"}
+          {lesson.completed ? "✓ Marked as complete" : "Mark as complete"}
         </button>
 
         <nav className={styles.pager}>

@@ -1,3 +1,5 @@
+import { notifyAdminChange } from "./adminEvents";
+
 export type Document = {
   id: string;
   title: string;
@@ -37,6 +39,7 @@ export function addResource(doc: Document) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(ADMIN_RESOURCES_KEY, JSON.stringify([doc, ...readAdminResources()]));
+    notifyAdminChange();
   } catch {}
 }
 
@@ -44,6 +47,7 @@ export function removeResource(id: string) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(ADMIN_RESOURCES_KEY, JSON.stringify(readAdminResources().filter((d) => d.id !== id)));
+    notifyAdminChange();
   } catch {}
 }
 

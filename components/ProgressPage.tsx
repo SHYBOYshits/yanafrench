@@ -10,6 +10,7 @@ import {
   testTarget,
   type CefrLevel,
 } from "@/lib/progressData";
+import { useAdminValue } from "@/lib/useAdminValue";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./ProgressPage.module.css";
 
@@ -26,13 +27,13 @@ function buildPath() {
 }
 
 export function ProgressPage() {
-  const currentLevelCode = getCurrentLevelCode();
+  const currentLevelCode = useAdminValue(getCurrentLevelCode);
   const currentIndex = cefrLevels.findIndex((l) => l.code === currentLevelCode);
   const nextLevel = cefrLevels[currentIndex + 1];
   const currentLevel = cefrLevels[currentIndex];
   const [selected, setSelected] = useState<CefrLevel | null>(null);
-  const skills = getSkillProgress();
-  const overallProgress = getOverallProgress();
+  const skills = useAdminValue(getSkillProgress);
+  const overallProgress = useAdminValue(getOverallProgress);
 
   return (
     <DashboardShell>

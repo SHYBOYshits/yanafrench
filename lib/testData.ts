@@ -1,3 +1,5 @@
+import { notifyAdminChange } from "./adminEvents";
+
 export type AssignmentStatus = "Not started" | "In progress" | "Submitted" | "Reviewed" | "Completed";
 
 export type Assignment = {
@@ -46,6 +48,7 @@ export function updateAssignment(id: string, patch: Partial<Assignment>) {
     const overrides = readAssignmentOverrides();
     const next = { ...overrides, [id]: { ...overrides[id], ...patch } };
     localStorage.setItem(ASSIGNMENT_OVERRIDES_KEY, JSON.stringify(next));
+    notifyAdminChange();
   } catch {}
 }
 

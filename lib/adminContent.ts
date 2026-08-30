@@ -6,6 +6,8 @@
 // functions for real API calls to a database later and nothing that calls
 // them (student pages or the admin dashboard) needs to change.
 
+import { notifyAdminChange } from "./adminEvents";
+
 function readKey<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
@@ -20,6 +22,7 @@ function writeKey<T>(key: string, value: T) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    notifyAdminChange();
   } catch {}
 }
 
