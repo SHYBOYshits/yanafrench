@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { conversation } from "@/lib/messageData";
 import { formatMessageTime, useMessageThread } from "@/lib/useMessageThread";
 import { DashboardShell } from "./DashboardShell";
@@ -9,6 +9,12 @@ import styles from "./MessagesPage.module.css";
 export function MessagesPage() {
   const { messages, send } = useMessageThread();
   const [draft, setDraft] = useState("");
+  const messagesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = messagesRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages.length]);
 
   function handleSend(e: FormEvent) {
     e.preventDefault();
@@ -46,7 +52,7 @@ export function MessagesPage() {
             </div>
           </div>
 
-          <div className={styles.messages}>
+          <div className={styles.messages} ref={messagesRef}>
             {messages.map((m) => (
               <div key={m.id} className={m.from === "student" ? styles.bubbleStudent : styles.bubbleTeacher}>
                 <p>{m.text}</p>

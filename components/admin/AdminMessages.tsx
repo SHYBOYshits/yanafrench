@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { profile } from "@/lib/profileData";
 import { formatMessageTime, useMessageThread } from "@/lib/useMessageThread";
 import { AdminShell } from "../AdminShell";
@@ -9,6 +9,12 @@ import styles from "./AdminMessages.module.css";
 export function AdminMessages() {
   const { messages, send } = useMessageThread();
   const [draft, setDraft] = useState("");
+  const messagesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = messagesRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages.length]);
 
   function handleSend(e: FormEvent) {
     e.preventDefault();
@@ -35,7 +41,7 @@ export function AdminMessages() {
           </div>
         </div>
 
-        <div className={styles.messages}>
+        <div className={styles.messages} ref={messagesRef}>
           {messages.map((m) => (
             <div key={m.id} className={m.from === "teacher" ? styles.bubbleTeacher : styles.bubbleStudent}>
               <p>{m.text}</p>
