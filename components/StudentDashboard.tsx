@@ -240,13 +240,15 @@ export function StudentDashboard() {
           </div>
 
           <div className={styles.featuredRow}>
-            <div className={styles.featured}>
-              <div className={styles.featuredTop}><span>WORD OF THE WEEK</span></div>
-              <strong>{wordOfWeek.word}</strong>
-              <small>{wordOfWeek.meaning}</small>
+            <div className={styles.journalCard}>
+              <span className={styles.journalFlourish} aria-hidden="true">{wordOfWeek.word.charAt(0)}</span>
+              <span className={styles.journalEyebrow}>Word of the week</span>
+              <strong className={styles.journalWord}>{wordOfWeek.word}</strong>
+              <div className={styles.journalRule} />
+              <small className={styles.journalMeaning}>{wordOfWeek.meaning}</small>
             </div>
             <div className={styles.featured}>
-              <div className={styles.featuredTop}><span>YANA&apos;S NOTE</span></div>
+              <div className={styles.featuredTop}><span>TODAY&apos;S NOTE</span></div>
               <strong>{teacherNote.text}</strong>
               <small>{teacherNote.cta} →</small>
             </div>
