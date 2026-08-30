@@ -3,16 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { getNotifications } from "@/lib/notificationData";
 import styles from "./DashboardShell.module.css";
 
 // Mock signed-in student — stands in for a real account once there's auth.
 const student = { name: "Amelia" };
-
-const notifications = [
-  { title: "Yana left feedback", detail: "On your Workspace recording · 2h ago" },
-  { title: "New lesson available", detail: "Lesson 13 · Opinion under pressure · 1d ago" },
-  { title: "Class reminder", detail: "Thursday 9:30 AM with Yana · 2d ago" },
-];
 
 const navItems: { type: string; label: string; href?: string }[] = [
   { type: "dashboard", label: "Dashboard", href: "/student-hub" },
@@ -24,9 +19,9 @@ const navItems: { type: string; label: string; href?: string }[] = [
   { type: "tests", label: "Tests & Assignments", href: "/student-hub/tests" },
   { type: "vocabulary", label: "Vocabulary", href: "/student-hub/vocabulary" },
   { type: "progress", label: "Progress", href: "/student-hub/progress" },
-  { type: "calendar", label: "Calendar" },
+  { type: "calendar", label: "Calendar", href: "/student-hub/calendar" },
   { type: "messages", label: "Messages" },
-  { type: "settings", label: "Settings" },
+  { type: "settings", label: "Settings", href: "/student-hub/settings" },
 ];
 
 function NavIcon({ type }: { type: string }) {
@@ -86,12 +81,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             {notifOpen && (
               <div className={styles.dropdown}>
                 <span className={styles.dropdownHeading}>Notifications</span>
-                {notifications.map((n) => (
-                  <div key={n.title} className={styles.notifItem}>
+                {getNotifications().slice(0, 3).map((n) => (
+                  <div key={n.id} className={styles.notifItem}>
                     <strong>{n.title}</strong>
-                    <small>{n.detail}</small>
+                    <small>{n.detail} · {n.date}</small>
                   </div>
                 ))}
+                <Link href="/student-hub/notifications" className={styles.dropdownLink} onClick={() => setNotifOpen(false)}>View all →</Link>
               </div>
             )}
           </div>
