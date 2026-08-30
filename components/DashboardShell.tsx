@@ -23,7 +23,7 @@ const navItems: { type: string; label: string; href?: string }[] = [
   { type: "speaking", label: "Speaking Practice", href: "/student-hub/speaking" },
   { type: "tests", label: "Tests & Assignments", href: "/student-hub/tests" },
   { type: "vocabulary", label: "Vocabulary", href: "/student-hub/vocabulary" },
-  { type: "progress", label: "Progress" },
+  { type: "progress", label: "Progress", href: "/student-hub/progress" },
   { type: "calendar", label: "Calendar" },
   { type: "messages", label: "Messages" },
   { type: "settings", label: "Settings" },
