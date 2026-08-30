@@ -898,6 +898,9 @@ a:focus-visible, button:focus-visible { outline:2px solid var(--bordeaux); outli
 .chat-widget__close:hover { color: #fff; }
 .chat-widget__body { padding: 1.1rem; display: flex; flex-direction: column; gap: .7rem; max-height: 260px; overflow-y: auto; }
 .chat-widget__bubble { background: var(--porcelain-2); border-radius: var(--r-md); padding: .75rem .9rem; font-size: .78rem; line-height: 1.55; color: var(--text-primary); }
+.chat-widget__bubble--user { background: var(--blue); color: #fff; align-self: flex-end; }
+.chat-widget__bubble--typing { color: var(--text-faint); font-style: italic; }
+.chat-widget__bubble--error { background: #fbe9e7; color: #9c2f2f; }
 .chat-widget__cta { align-self: flex-start; margin-top: .2rem; padding: .65rem 1rem; font-size: .68rem; }
 .chat-widget__composer { display: flex; border-top: 1px solid var(--hairline-ink); }
 .chat-widget__composer input { flex: 1; border: 0; background: none; padding: .85rem 1.1rem; font-size: .8rem; color: var(--text-faint); }

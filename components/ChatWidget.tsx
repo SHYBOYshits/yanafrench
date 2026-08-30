@@ -1,5 +1,7 @@
 "use client";
 
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import type { FormEvent } from "react";
@@ -17,9 +19,24 @@ function ChatIcon() {
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const { messages, sendMessage, status, error, clearError } = useChat({
+    transport: new DefaultChatTransport({ api: "/api/chat" }),
+  });
+
+  const isBusy = status === "submitted" || status === "streaming";
+  const errorMessage =
+    error == null
+      ? null
+      : error.message === "RATE_LIMITED"
+        ? "I'm getting a lot of questions right now — please try again in a minute."
+        : "Something went wrong. Please try again.";
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!draft.trim() || isBusy) return;
+    if (error != null) clearError();
+    sendMessage({ text: draft });
+    setDraft("");
   }
 
   return (
@@ -45,12 +62,27 @@ export function ChatWidget() {
             </div>
 
             <div className="chat-widget__body">
-              <div className="chat-widget__bubble">
-                Bonjour ! I&apos;m a preview of the TFH chat assistant — I can&apos;t answer yet, but this is where I&apos;ll help you explore programs, resources and results.
-              </div>
-              <div className="chat-widget__bubble">
-                For a real answer right now, message Yana directly on WhatsApp.
-              </div>
+              {messages.length === 0 && (
+                <div className="chat-widget__bubble">
+                  Bonjour ! Ask me about programs, resources or results — I&apos;m happy to help.
+                </div>
+              )}
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`chat-widget__bubble ${message.role === "user" ? "chat-widget__bubble--user" : ""}`}
+                >
+                  {message.parts.map((part, i) =>
+                    part.type === "text" ? <span key={`${message.id}-${i}`}>{part.text}</span> : null
+                  )}
+                </div>
+              ))}
+              {status === "submitted" && (
+                <div className="chat-widget__bubble chat-widget__bubble--typing">Typing…</div>
+              )}
+              {errorMessage && (
+                <div className="chat-widget__bubble chat-widget__bubble--error">{errorMessage}</div>
+              )}
               <WhatsAppLink className="button button--accent chat-widget__cta" message="Hi Yana! I found The Français Hub website and had a question.">
                 Chat with Yana instead
               </WhatsAppLink>
@@ -60,13 +92,12 @@ export function ChatWidget() {
               <input
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="Chat coming soon…"
+                placeholder="Ask a question…"
                 aria-label="Message"
-                disabled
+                disabled={isBusy}
               />
-              <button type="submit" disabled aria-label="Send">→</button>
+              <button type="submit" disabled={isBusy || !draft.trim()} aria-label="Send">→</button>
             </form>
-            <span className="chat-widget__note">Preview only — not connected yet.</span>
           </motion.div>
         )}
       </AnimatePresence>
