@@ -1,15 +1,43 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import type { Recording } from "@/lib/recordingData";
+import { uploadFileToR2 } from "@/lib/uploadFile";
 import { useAdminState } from "@/lib/useAdminState";
 import { AdminShell } from "../AdminShell";
 import styles from "./AdminContent.module.css";
 
+function todayLabel() {
+  return new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" });
+}
+
 export function AdminContent() {
-  const { weeklyFocus, wordOfWeek, todaysNote, loaded, setWeeklyFocus, setWordOfWeek, setTodaysNote } = useAdminState();
+  const {
+    weeklyFocus,
+    wordOfWeek,
+    todaysNote,
+    courseName,
+    lessons,
+    recordings,
+    notes,
+    wordArchive,
+    loaded,
+    setWeeklyFocus,
+    setWordOfWeek,
+    setTodaysNote,
+    setCourseName,
+    addRecording,
+    removeRecording,
+    addNote,
+    removeNote,
+    addWordEntry,
+    removeWordEntry,
+  } = useAdminState();
+
   const [focus, setFocus] = useState(weeklyFocus);
   const [word, setWord] = useState(wordOfWeek);
   const [note, setNote] = useState(todaysNote);
+  const [course, setCourse] = useState(courseName);
   const [savedField, setSavedField] = useState<string | null>(null);
   const initialized = useRef(false);
 
@@ -21,9 +49,10 @@ export function AdminContent() {
       setFocus(weeklyFocus);
       setWord(wordOfWeek);
       setNote(todaysNote);
+      setCourse(courseName);
       initialized.current = true;
     }
-  }, [loaded, weeklyFocus, wordOfWeek, todaysNote]);
+  }, [loaded, weeklyFocus, wordOfWeek, todaysNote, courseName]);
 
   function flashSaved(field: string) {
     setSavedField(field);
@@ -42,14 +71,89 @@ export function AdminContent() {
     setTodaysNote(note);
     flashSaved("note");
   }
+  function saveCourse() {
+    setCourseName(course);
+    flashSaved("course");
+  }
+
+  // Recordings
+  const sortedLessons = [...lessons].sort((a, b) => b.number - a.number);
+  const [recTitle, setRecTitle] = useState("");
+  const [recLesson, setRecLesson] = useState<number>(sortedLessons[0]?.number ?? 1);
+  const [recUrl, setRecUrl] = useState("");
+  const [recFile, setRecFile] = useState<File | null>(null);
+  const [recUploading, setRecUploading] = useState(false);
+  const [recError, setRecError] = useState<string | null>(null);
+
+  async function handleAddRecording(e: FormEvent) {
+    e.preventDefault();
+    if (!recTitle.trim()) return;
+    setRecError(null);
+
+    let videoUrl = recUrl.trim();
+    if (recFile) {
+      setRecUploading(true);
+      try {
+        videoUrl = await uploadFileToR2(recFile);
+      } catch (err) {
+        setRecError(err instanceof Error ? err.message : "Upload failed. Check your connection and try again.");
+        setRecUploading(false);
+        return;
+      }
+      setRecUploading(false);
+    }
+
+    const recording: Recording = {
+      id: `recording-${Date.now()}`,
+      title: recTitle.trim(),
+      lessonNumber: recLesson,
+      date: todayLabel(),
+      videoUrl: videoUrl || undefined,
+    };
+    addRecording(recording);
+    setRecTitle("");
+    setRecUrl("");
+    setRecFile(null);
+  }
+
+  // Notes
+  const [noteText, setNoteText] = useState("");
+
+  function handleAddNote(e: FormEvent) {
+    e.preventDefault();
+    if (!noteText.trim()) return;
+    addNote({ id: `note-${Date.now()}`, text: noteText.trim(), date: todayLabel() });
+    setNoteText("");
+  }
+
+  // Words of the week archive
+  const [archiveWord, setArchiveWord] = useState("");
+  const [archiveMeaning, setArchiveMeaning] = useState("");
+
+  function handleAddWordEntry(e: FormEvent) {
+    e.preventDefault();
+    if (!archiveWord.trim() || !archiveMeaning.trim()) return;
+    addWordEntry({ id: `word-${Date.now()}`, word: archiveWord.trim(), meaning: archiveMeaning.trim(), date: todayLabel() });
+    setArchiveWord("");
+    setArchiveMeaning("");
+  }
 
   return (
     <AdminShell>
       <div className={styles.head}>
         <small>ADMIN</small>
         <h1>Content.</h1>
-        <p>These show up on Amelia&apos;s dashboard immediately after saving.</p>
+        <p>These show up on Amelia&apos;s dashboard and My Course page immediately after saving.</p>
       </div>
+
+      <section className={styles.card}>
+        <h2>Course</h2>
+        <label>
+          <span>Course name</span>
+          <input value={course} onChange={(e) => setCourse(e.target.value)} placeholder="e.g. TEF Canada" />
+        </label>
+        <button type="button" className={styles.save} onClick={saveCourse}>{savedField === "course" ? "✓ Saved" : "Save"}</button>
+      </section>
 
       <section className={styles.card}>
         <h2>This week&apos;s focus</h2>
@@ -88,6 +192,113 @@ export function AdminContent() {
           <input value={note.cta} onChange={(e) => setNote({ ...note, cta: e.target.value })} placeholder="e.g. One thing to revisit" />
         </label>
         <button type="button" className={styles.save} onClick={saveNote}>{savedField === "note" ? "✓ Saved" : "Save"}</button>
+      </section>
+
+      <section className={`${styles.card} ${styles.cardWide}`}>
+        <h2>Recordings</h2>
+        <p className={styles.cardHint}>Attach a class recording to a lesson — shows up in the Recordings tab on My Course.</p>
+        <form className={styles.subform} onSubmit={handleAddRecording}>
+          <div className={styles.fieldGrid}>
+            <label>
+              <span>Title</span>
+              <input value={recTitle} onChange={(e) => setRecTitle(e.target.value)} placeholder="e.g. Class recording · 14 Oct" required />
+            </label>
+            <label>
+              <span>Lesson</span>
+              <select value={recLesson} onChange={(e) => setRecLesson(Number(e.target.value))}>
+                {sortedLessons.map((l) => <option key={l.number} value={l.number}>Lesson {l.number} — {l.title}</option>)}
+              </select>
+            </label>
+          </div>
+          <label className={styles.fullWidth}>
+            <span>Upload a video</span>
+            <input type="file" accept="video/*" onChange={(e) => setRecFile(e.target.files?.[0] ?? null)} />
+          </label>
+          <label className={styles.fullWidth}>
+            <span>Or paste a video URL</span>
+            <input value={recUrl} onChange={(e) => setRecUrl(e.target.value)} placeholder="https://…" disabled={!!recFile} />
+          </label>
+          {recError && <p className={styles.error}>{recError}</p>}
+          <button type="submit" className={styles.save} disabled={recUploading}>{recUploading ? "Uploading…" : "Add recording"}</button>
+        </form>
+
+        <div className={styles.list}>
+          {recordings.map((r) => (
+            <div key={r.id} className={styles.row}>
+              <div>
+                <strong>{r.title}</strong>
+                <small>Lesson {r.lessonNumber} · {r.date}</small>
+              </div>
+              {r.id.startsWith("recording-") ? (
+                <button type="button" className={styles.remove} onClick={() => removeRecording(r.id)}>Remove</button>
+              ) : (
+                <span className={styles.seedTag}>Seed content</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={`${styles.card} ${styles.cardWide}`}>
+        <h2>Notes</h2>
+        <p className={styles.cardHint}>Dated class notes — shows up in the Notes tab on My Course.</p>
+        <form className={styles.subform} onSubmit={handleAddNote}>
+          <label className={styles.fullWidth}>
+            <span>Note</span>
+            <textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="What happened in class today…" required />
+          </label>
+          <button type="submit" className={styles.save}>Add note</button>
+        </form>
+
+        <div className={styles.list}>
+          {notes.map((n) => (
+            <div key={n.id} className={styles.row}>
+              <div>
+                <small>{n.date}</small>
+                <p className={styles.noteText}>{n.text}</p>
+              </div>
+              {n.id.startsWith("note-") ? (
+                <button type="button" className={styles.remove} onClick={() => removeNote(n.id)}>Remove</button>
+              ) : (
+                <span className={styles.seedTag}>Seed content</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={`${styles.card} ${styles.cardWide}`}>
+        <h2>Words of the week (archive)</h2>
+        <p className={styles.cardHint}>Past words — shows up in the Words of the Week tab on My Course. Separate from the current word above.</p>
+        <form className={styles.subform} onSubmit={handleAddWordEntry}>
+          <div className={styles.fieldGrid}>
+            <label>
+              <span>Word</span>
+              <input value={archiveWord} onChange={(e) => setArchiveWord(e.target.value)} placeholder="e.g. pourtant" required />
+            </label>
+            <label>
+              <span>Meaning</span>
+              <input value={archiveMeaning} onChange={(e) => setArchiveMeaning(e.target.value)} placeholder="e.g. however · yet" required />
+            </label>
+          </div>
+          <button type="submit" className={styles.save}>Add word</button>
+        </form>
+
+        <div className={styles.list}>
+          {wordArchive.map((w) => (
+            <div key={w.id} className={styles.row}>
+              <div>
+                <strong>{w.word}</strong>
+                <small>{w.meaning} · {w.date}</small>
+              </div>
+              {w.id.startsWith("word-") ? (
+                <button type="button" className={styles.remove} onClick={() => removeWordEntry(w.id)}>Remove</button>
+              ) : (
+                <span className={styles.seedTag}>Seed content</span>
+              )}
+            </div>
+          ))}
+        </div>
       </section>
     </AdminShell>
   );

@@ -88,6 +88,29 @@ a.docChip:hover { color: var(--bordeaux); border-color: var(--bordeaux); }
 .lessonActive .lessonResume { color: #fff; border-color: rgba(255,255,255,.5); }
 .lessonActive .lessonResume:hover { color: var(--bordeaux-light); border-color: var(--bordeaux-light); }
 
+.simpleList { margin-top: .5rem; display: flex; flex-direction: column; gap: .8rem; }
+
+.simpleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem .9rem;
+  border-bottom: 1px solid var(--hairline-ink);
+}
+
+.simpleTag { display: block; font-size: .58rem; font-weight: 700; letter-spacing: .1em; color: var(--bordeaux); margin-bottom: .3rem; }
+.simpleRow strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1.05rem; color: var(--text-primary); }
+.simpleRow small { display: block; font-size: .68rem; color: var(--text-faint); margin-top: .3rem; }
+
+.simpleAction, .simpleActionStatic { font-size: .68rem; font-weight: 700; white-space: nowrap; text-decoration: none; border-bottom: 1px solid var(--ink); padding-bottom: .1rem; color: inherit; }
+.simpleAction:hover { color: var(--bordeaux); border-color: var(--bordeaux); }
+.simpleActionStatic { opacity: .4; }
+
+.noteRow { padding: 1.1rem .9rem; border-bottom: 1px solid var(--hairline-ink); }
+.noteRow small { font-size: .62rem; letter-spacing: .05em; color: var(--text-faint); font-weight: 700; text-transform: uppercase; }
+.noteRow p { font-size: .85rem; color: var(--text-primary); margin: .5rem 0 0; line-height: 1.5; }
+
 .empty {
   margin-top: 1rem;
   border: 1px dashed var(--hairline-ink-hover);

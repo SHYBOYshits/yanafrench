@@ -6,6 +6,9 @@
 import type { CefrLevel } from "./progressData";
 import type { Assignment } from "./testData";
 import type { Document } from "./documentData";
+import type { Recording } from "./recordingData";
+import type { Note } from "./noteData";
+import type { WordEntry } from "./wordArchiveData";
 
 export type AdminState = {
   weeklyFocus: { text: string; tag: string };
@@ -13,9 +16,13 @@ export type AdminState = {
   todaysNote: { text: string; cta: string };
   currentLevelCode: CefrLevel["code"];
   streak: number;
+  courseName: string;
   lessonOverrides: Record<number, boolean>;
   assignmentOverrides: Record<string, Partial<Assignment>>;
   resources: Document[];
+  recordings: Recording[];
+  notes: Note[];
+  wordArchive: WordEntry[];
 };
 
 export const defaultAdminState: AdminState = {
@@ -24,9 +31,13 @@ export const defaultAdminState: AdminState = {
   todaysNote: { text: "Better rhythm today.", cta: "One thing to revisit" },
   currentLevelCode: "B1",
   streak: 12,
+  courseName: "TEF Canada",
   lessonOverrides: {},
   assignmentOverrides: {},
   resources: [],
+  recordings: [],
+  notes: [],
+  wordArchive: [],
 };
 
 export type AdminStateAction =
@@ -35,7 +46,14 @@ export type AdminStateAction =
   | { type: "field"; key: "todaysNote"; value: AdminState["todaysNote"] }
   | { type: "field"; key: "currentLevelCode"; value: AdminState["currentLevelCode"] }
   | { type: "field"; key: "streak"; value: number }
+  | { type: "field"; key: "courseName"; value: string }
   | { type: "lessonOverride"; number: number; completed: boolean }
   | { type: "assignmentOverride"; id: string; patch: Partial<Assignment> }
   | { type: "addResource"; resource: Document }
-  | { type: "removeResource"; id: string };
+  | { type: "removeResource"; id: string }
+  | { type: "addRecording"; recording: Recording }
+  | { type: "removeRecording"; id: string }
+  | { type: "addNote"; note: Note }
+  | { type: "removeNote"; id: string }
+  | { type: "addWordEntry"; entry: WordEntry }
+  | { type: "removeWordEntry"; id: string };

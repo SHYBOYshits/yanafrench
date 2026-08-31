@@ -18,13 +18,13 @@ const emptyStates: Record<Exclude<Tab, "Lessons">, string> = {
 
 export function CoursePage() {
   const [activeTab, setActiveTab] = useState<Tab>("Lessons");
-  const { lessons, documents } = useAdminState();
+  const { lessons, documents, recordings, notes, wordArchive, assignments, courseName } = useAdminState();
   const sorted = [...lessons].sort((a, b) => b.number - a.number);
 
   return (
     <DashboardShell>
       <div className={styles.head}>
-        <small>CURRENT COURSE · TEF CANADA</small>
+        <small>CURRENT COURSE · {courseName.toUpperCase()}</small>
         <h1>Everything from class,<br /><em>in one clear place.</em></h1>
       </div>
 
@@ -43,7 +43,7 @@ export function CoursePage() {
         ))}
       </div>
 
-      {activeTab === "Lessons" ? (
+      {activeTab === "Lessons" && (
         <div className={styles.lessonList}>
           {sorted.map((lesson) => {
             const lessonDocs = documents.filter((d) => d.lessonNumber === lesson.number);
@@ -94,10 +94,80 @@ export function CoursePage() {
             );
           })}
         </div>
-      ) : (
-        <div className={styles.empty}>
-          <p>{emptyStates[activeTab]}</p>
-        </div>
+      )}
+
+      {activeTab === "Recordings" && (
+        recordings.length > 0 ? (
+          <div className={styles.simpleList}>
+            {recordings.map((r) => (
+              <div key={r.id} className={styles.simpleRow}>
+                <div>
+                  <span className={styles.simpleTag}>LESSON {r.lessonNumber}</span>
+                  <strong>{r.title}</strong>
+                  <small>{r.date}</small>
+                </div>
+                {r.videoUrl ? (
+                  <a href={r.videoUrl} target="_blank" rel="noreferrer" className={styles.simpleAction}>Watch →</a>
+                ) : (
+                  <span className={styles.simpleActionStatic}>Watch →</span>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.empty}><p>{emptyStates.Recordings}</p></div>
+        )
+      )}
+
+      {activeTab === "Notes" && (
+        notes.length > 0 ? (
+          <div className={styles.simpleList}>
+            {notes.map((n) => (
+              <div key={n.id} className={styles.noteRow}>
+                <small>{n.date}</small>
+                <p>{n.text}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.empty}><p>{emptyStates.Notes}</p></div>
+        )
+      )}
+
+      {activeTab === "Words of the Week" && (
+        wordArchive.length > 0 ? (
+          <div className={styles.simpleList}>
+            {wordArchive.map((w) => (
+              <div key={w.id} className={styles.simpleRow}>
+                <div>
+                  <strong>{w.word}</strong>
+                  <small>{w.meaning}</small>
+                </div>
+                <small>{w.date}</small>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.empty}><p>{emptyStates["Words of the Week"]}</p></div>
+        )
+      )}
+
+      {activeTab === "Tests" && (
+        assignments.length > 0 ? (
+          <div className={styles.simpleList}>
+            {assignments.map((a) => (
+              <div key={a.id} className={styles.simpleRow}>
+                <div>
+                  <span className={styles.simpleTag}>{a.category.toUpperCase()}</span>
+                  <strong>{a.title}</strong>
+                  <small>{a.status}{a.score ? ` · ${a.score}` : ""} · {a.deadline}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.empty}><p>{emptyStates.Tests}</p></div>
+        )
       )}
     </DashboardShell>
   );

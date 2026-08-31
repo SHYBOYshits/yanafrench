@@ -39,6 +39,24 @@ export async function POST(req: Request) {
     case "removeResource":
       next = { ...existing, resources: existing.resources.filter((r) => r.id !== action.id) };
       break;
+    case "addRecording":
+      next = { ...existing, recordings: [action.recording, ...existing.recordings] };
+      break;
+    case "removeRecording":
+      next = { ...existing, recordings: existing.recordings.filter((r) => r.id !== action.id) };
+      break;
+    case "addNote":
+      next = { ...existing, notes: [action.note, ...existing.notes] };
+      break;
+    case "removeNote":
+      next = { ...existing, notes: existing.notes.filter((n) => n.id !== action.id) };
+      break;
+    case "addWordEntry":
+      next = { ...existing, wordArchive: [action.entry, ...existing.wordArchive] };
+      break;
+    case "removeWordEntry":
+      next = { ...existing, wordArchive: existing.wordArchive.filter((w) => w.id !== action.id) };
+      break;
     default:
       return new Response("Unknown action", { status: 400 });
   }

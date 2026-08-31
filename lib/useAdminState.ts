@@ -5,6 +5,9 @@ import { defaultAdminState, type AdminState, type AdminStateAction } from "./adm
 import { lessons as seedLessons, getLesson as pureGetLesson, getAdjacentLessons as pureGetAdjacentLessons, type Lesson } from "./courseData";
 import { assignments as seedAssignments, type Assignment } from "./testData";
 import { documents as seedDocuments, type Document } from "./documentData";
+import { recordings as seedRecordings, type Recording } from "./recordingData";
+import { notes as seedNotes, type Note } from "./noteData";
+import { wordArchive as seedWordArchive, type WordEntry } from "./wordArchiveData";
 import type { CefrLevel } from "./progressData";
 
 const POLL_MS = 3000;
@@ -21,11 +24,24 @@ function mergeDocuments(resources: Document[]): Document[] {
   return [...resources, ...seedDocuments];
 }
 
+function mergeRecordings(added: Recording[]): Recording[] {
+  return [...added, ...seedRecordings];
+}
+
+function mergeNotes(added: Note[]): Note[] {
+  return [...added, ...seedNotes];
+}
+
+function mergeWordArchive(added: WordEntry[]): WordEntry[] {
+  return [...added, ...seedWordArchive];
+}
+
 // Polls the shared R2-backed admin state so any change made in the admin
 // dashboard (weekly focus, word of the week, today's note, lesson
 // completion, assignment status/score/feedback, CEFR level, streak,
-// resources) reaches the student view across devices/browsers — the same
-// pattern used for Messages, applied to everything admin-editable.
+// resources, recordings, notes, word archive) reaches the student view
+// across devices/browsers — the same pattern used for Messages, applied
+// to everything admin-editable.
 export function useAdminState() {
   const [raw, setRaw] = useState<AdminState>(defaultAdminState);
   const [loaded, setLoaded] = useState(false);
@@ -66,6 +82,9 @@ export function useAdminState() {
   const lessons = mergeLessons(raw.lessonOverrides);
   const assignments = mergeAssignments(raw.assignmentOverrides);
   const documents = mergeDocuments(raw.resources);
+  const recordings = mergeRecordings(raw.recordings);
+  const notes = mergeNotes(raw.notes);
+  const wordArchive = mergeWordArchive(raw.wordArchive);
 
   return {
     loaded,
@@ -74,9 +93,13 @@ export function useAdminState() {
     todaysNote: raw.todaysNote,
     currentLevelCode: raw.currentLevelCode,
     streak: raw.streak,
+    courseName: raw.courseName,
     lessons,
     assignments,
     documents,
+    recordings,
+    notes,
+    wordArchive,
     getLesson: (number: number) => pureGetLesson(lessons, number),
     getAdjacentLessons: (number: number) => pureGetAdjacentLessons(lessons, number),
     setWeeklyFocus: (value: AdminState["weeklyFocus"]) => send({ type: "field", key: "weeklyFocus", value }),
@@ -84,9 +107,16 @@ export function useAdminState() {
     setTodaysNote: (value: AdminState["todaysNote"]) => send({ type: "field", key: "todaysNote", value }),
     setCurrentLevelCode: (value: CefrLevel["code"]) => send({ type: "field", key: "currentLevelCode", value }),
     setStreak: (value: number) => send({ type: "field", key: "streak", value }),
+    setCourseName: (value: string) => send({ type: "field", key: "courseName", value }),
     setLessonCompleted: (number: number, completed: boolean) => send({ type: "lessonOverride", number, completed }),
     updateAssignment: (id: string, patch: Partial<Assignment>) => send({ type: "assignmentOverride", id, patch }),
     addResource: (resource: Document) => send({ type: "addResource", resource }),
     removeResource: (id: string) => send({ type: "removeResource", id }),
+    addRecording: (recording: Recording) => send({ type: "addRecording", recording }),
+    removeRecording: (id: string) => send({ type: "removeRecording", id }),
+    addNote: (note: Note) => send({ type: "addNote", note }),
+    removeNote: (id: string) => send({ type: "removeNote", id }),
+    addWordEntry: (entry: WordEntry) => send({ type: "addWordEntry", entry }),
+    removeWordEntry: (id: string) => send({ type: "removeWordEntry", id }),
   };
 }

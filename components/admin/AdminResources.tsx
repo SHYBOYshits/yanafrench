@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { categories, type Document } from "@/lib/documentData";
 import { useAdminState } from "@/lib/useAdminState";
+import { uploadFileToR2 } from "@/lib/uploadFile";
 import { AdminShell } from "../AdminShell";
 import styles from "./AdminResources.module.css";
 
@@ -31,34 +32,9 @@ export function AdminResources() {
     if (file) {
       setUploading(true);
       try {
-        const presignRes = await fetch("/api/admin/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
-        });
-        if (!presignRes.ok) {
-          setError(await presignRes.text());
-          setUploading(false);
-          return;
-        }
-        const { uploadUrl, fileUrl: presignedFileUrl } = await presignRes.json();
-
-        // Uploads straight to R2 from the browser, bypassing our server
-        // entirely — avoids Vercel's request body size limit for large files.
-        const putRes = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type || "application/octet-stream" },
-          body: file,
-        });
-        if (!putRes.ok) {
-          setError("Upload to storage failed. Please try again.");
-          setUploading(false);
-          return;
-        }
-
-        fileUrl = presignedFileUrl;
-      } catch {
-        setError("Upload failed. Check your connection and try again.");
+        fileUrl = await uploadFileToR2(file);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Upload failed. Check your connection and try again.");
         setUploading(false);
         return;
       }
