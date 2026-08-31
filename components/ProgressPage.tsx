@@ -9,9 +9,10 @@ import {
   testTarget,
   type CefrLevel,
 } from "@/lib/progressData";
+import { lessons } from "@/lib/courseData";
 import { getSpeakingHistory } from "@/lib/speakingData";
+import { assignments } from "@/lib/testData";
 import { getSavedWords, getVocabulary } from "@/lib/vocabData";
-import { useAdminState } from "@/lib/useAdminState";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./ProgressPage.module.css";
 
@@ -27,8 +28,9 @@ function buildPath() {
   return d.trim();
 }
 
+const currentLevelCode = "B1";
+
 export function ProgressPage() {
-  const { lessons, assignments, currentLevelCode } = useAdminState();
   const currentIndex = cefrLevels.findIndex((l) => l.code === currentLevelCode);
   const nextLevel = cefrLevels[currentIndex + 1];
   const currentLevel = cefrLevels[currentIndex];

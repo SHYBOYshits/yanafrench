@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { lessons } from "@/lib/courseData";
 import { profile } from "@/lib/profileData";
 import { computeOverallProgress } from "@/lib/progressData";
 import { getSpeakingHistory } from "@/lib/speakingData";
-import { useAdminState } from "@/lib/useAdminState";
+import { assignments } from "@/lib/testData";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./SettingsPage.module.css";
 
@@ -27,7 +28,6 @@ function Toggle({ label, defaultOn = false }: { label: string; defaultOn?: boole
 export function SettingsPage() {
   const [tab, setTab] = useState<Tab>("Profile");
   const initials = profile.name.slice(0, 2).toUpperCase();
-  const { lessons, assignments } = useAdminState();
   const overallProgress = computeOverallProgress(lessons, assignments, getSpeakingHistory());
 
   return (

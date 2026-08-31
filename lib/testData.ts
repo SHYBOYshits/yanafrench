@@ -11,9 +11,7 @@ export type Assignment = {
   feedback?: string;
 };
 
-// Seed assignments. Admin edits (status/score/feedback) come from the
-// shared R2-backed admin state (see lib/adminState.ts / lib/useAdminState.ts)
-// and are merged onto this list there.
+// Seed assignments.
 export const assignments: Assignment[] = [
   { id: "listening-04", title: "Listening · Task 04", description: "Interview about travel plans — answer the comprehension questions.", category: "Listening", deadline: "Due tomorrow", status: "In progress" },
   { id: "writing-03", title: "Writing · Opinion essay", description: "250-word opinion piece on remote learning, using at least 4 connectors.", category: "Writing", deadline: "Due in 3 days", status: "Not started" },

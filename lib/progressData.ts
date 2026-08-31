@@ -79,14 +79,10 @@ export type SkillMetric = {
 };
 
 // Progress is computed from real activity elsewhere in the app — lessons
-// completed (My Course), assignment scores (Tests & Assignments), and
-// speaking evaluations (Speaking Practice, scored by the AI pipeline) —
-// rather than being a fixed number. Nothing here is fabricated: a skill
-// with no underlying activity yet says so instead of showing a fake stat.
-//
-// These are pure functions that take the already-merged (seed + admin
-// overrides) lessons/assignments as input, so they work the same whether
-// that data came from useAdminState() or anywhere else.
+// completed, assignment scores, and speaking evaluations (scored by the
+// AI pipeline) — rather than being a fixed number. Nothing here is
+// fabricated: a skill with no underlying activity yet says so instead of
+// showing a fake stat.
 
 function parseScoreFraction(score?: string): number | null {
   if (!score) return null;

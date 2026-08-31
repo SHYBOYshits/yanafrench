@@ -11,10 +11,7 @@ const student = { name: "Amelia" };
 
 const navItems: { type: string; label: string; href?: string }[] = [
   { type: "dashboard", label: "Dashboard", href: "/student-hub" },
-  { type: "course", label: "My Course", href: "/student-hub/course" },
-  { type: "lessons", label: "Lessons", href: "/student-hub/course" },
   { type: "speaking", label: "Speaking Practice", href: "/student-hub/speaking" },
-  { type: "tests", label: "Tests & Assignments", href: "/student-hub/tests" },
   { type: "vocabulary", label: "Vocabulary", href: "/student-hub/vocabulary" },
   { type: "progress", label: "Progress", href: "/student-hub/progress" },
   { type: "calendar", label: "Calendar", href: "/student-hub/calendar" },
@@ -26,11 +23,7 @@ function NavIcon({ type }: { type: string }) {
   const props = { viewBox: "0 0 24 24", "aria-hidden": true, fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   switch (type) {
     case "dashboard": return <svg {...props}><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.4"/><rect x="13" y="3.5" width="7.5" height="4.5" rx="1.4"/><rect x="13" y="10.5" width="7.5" height="10" rx="1.4"/><rect x="3.5" y="13.5" width="7.5" height="7" rx="1.4"/></svg>;
-    case "course": return <svg {...props}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>;
-    case "lessons": return <svg {...props}><path d="M4 4.5h11.5L20 9v10.5H4z"/><path d="M15.5 4.5V9H20"/><path d="M7.5 13h9M7.5 16.2h6"/></svg>;
-    case "videos": return <svg {...props}><rect x="3.5" y="5.5" width="13" height="13" rx="1.6"/><path d="m20.5 8.3-4 2.6v2.2l4 2.6z"/></svg>;
     case "speaking": return <svg {...props}><rect x="9" y="3.5" width="6" height="10.5" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3"/></svg>;
-    case "tests": return <svg {...props}><rect x="4.5" y="3.5" width="15" height="17" rx="1.6"/><path d="m8.3 12 2.1 2.1 4.3-4.3M8 17h8"/></svg>;
     case "vocabulary": return <svg {...props}><path d="M5 4.5h14v13H9l-4 3.5z"/><path d="M8.5 9h7M8.5 12h4.5"/></svg>;
     case "progress": return <svg {...props}><path d="M4 20V10M11 20V4M18 20v-6.5"/></svg>;
     case "calendar": return <svg {...props}><rect x="3.5" y="5" width="17" height="15.5" rx="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>;

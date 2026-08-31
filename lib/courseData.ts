@@ -16,10 +16,7 @@ export type Lesson = {
   exercises: { title: string; done: boolean }[];
 };
 
-// Seed course content. Lesson completion overrides (set by the admin, or
-// by a student marking a lesson complete) come from the shared R2-backed
-// admin state (see lib/adminState.ts / lib/useAdminState.ts) and are
-// merged onto this list there.
+// Seed course content.
 export const lessons: Lesson[] = [
   {
     number: 12,
@@ -129,16 +126,3 @@ export const lessons: Lesson[] = [
     exercises: [{ title: "Record 3 hypothetical answers", done: true }],
   },
 ];
-
-export function getLesson(list: Lesson[], number: number) {
-  return list.find((l) => l.number === number);
-}
-
-export function getAdjacentLessons(list: Lesson[], number: number) {
-  const sorted = [...list].sort((a, b) => a.number - b.number);
-  const index = sorted.findIndex((l) => l.number === number);
-  return {
-    previous: index > 0 ? sorted[index - 1] : undefined,
-    next: index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : undefined,
-  };
-}

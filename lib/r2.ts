@@ -1,9 +1,9 @@
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
 // Server-only. Shared R2 (S3-compatible) client for small JSON documents
-// that need to be readable/writable from both the admin dashboard and the
-// student platform — there's no database yet, so this is the persistence
-// layer for things like the shared message thread.
+// that need to persist across devices/browsers — there's no database yet,
+// so this is the persistence layer for things like the shared message
+// thread.
 
 export function getR2Client() {
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;

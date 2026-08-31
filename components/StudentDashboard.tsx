@@ -1,16 +1,17 @@
 "use client";
 
 import { motion } from "motion/react";
+import { lessons } from "@/lib/courseData";
 import { computeLessonProgress, computeOverallProgress } from "@/lib/progressData";
 import { getSpeakingHistory } from "@/lib/speakingData";
-import { useAdminState } from "@/lib/useAdminState";
+import { assignments } from "@/lib/testData";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./StudentDashboard.module.css";
 
 // Mock data — stands in for what will eventually come from the student's
-// account and the admin-editable content once Le Hub has a real backend.
-// Progress/CEFR/completed-lessons come from lib/progressData.ts instead,
-// computed from actual lesson, assignment and speaking-practice activity.
+// account and a real backend. Progress/CEFR/completed-lessons come from
+// lib/progressData.ts instead, computed from actual lesson, assignment
+// and speaking-practice activity.
 const student = {
   name: "Amelia",
   level: "TEF · CLB 7+",
@@ -30,6 +31,12 @@ const nextClass = {
   teacher: "Yana",
   platform: "Google Meet",
 };
+
+const weeklyFocus = { text: "Speak with more natural connectors", tag: "TEF · Expression orale" };
+const wordOfWeek = { word: "pourtant", meaning: "however · yet" };
+const teacherNote = { text: "Better rhythm today.", cta: "One thing to revisit" };
+const currentLevelCode = "B1";
+const streak = 12;
 
 function ProgressRing({ value }: { value: number }) {
   const r = 54;
@@ -55,7 +62,6 @@ function ProgressRing({ value }: { value: number }) {
 }
 
 export function StudentDashboard() {
-  const { lessons, assignments, weeklyFocus, wordOfWeek, todaysNote: teacherNote, currentLevelCode, streak } = useAdminState();
   const speakingHistory = getSpeakingHistory();
   const lessonProgress = computeLessonProgress(lessons);
   const overallProgress = computeOverallProgress(lessons, assignments, speakingHistory);
