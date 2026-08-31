@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getFilesFromDataTransfer, matchesAccept } from "@/lib/dropFiles";
 import { formatFileSize, presignUpload, putFileToR2 } from "@/lib/uploadFile";
 import styles from "./UploadDropzone.module.css";
 
@@ -29,6 +30,14 @@ export function UploadDropzone({
   const [items, setItems] = useState<QueueItem[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // webkitdirectory has no React/JSX prop — set it imperatively so
+    // "browse for a folder" works the same way "drop a folder" does.
+    folderInputRef.current?.setAttribute("webkitdirectory", "");
+    folderInputRef.current?.setAttribute("directory", "");
+  }, []);
 
   const startUpload = useCallback(
     (file: File) => {
@@ -58,9 +67,18 @@ export function UploadDropzone({
     [onUploaded]
   );
 
-  function handleFiles(fileList: FileList | null) {
+  const queueFiles = useCallback(
+    (files: File[]) => {
+      const matching = files.filter((f) => matchesAccept(f, accept));
+      const toUpload = multiple ? matching : matching.slice(0, 1);
+      toUpload.forEach(startUpload);
+    },
+    [accept, multiple, startUpload]
+  );
+
+  function handleFileList(fileList: FileList | null) {
     if (!fileList) return;
-    Array.from(fileList).forEach(startUpload);
+    queueFiles(Array.from(fileList));
   }
 
   function dismiss(id: string) {
@@ -90,7 +108,9 @@ export function UploadDropzone({
         onDrop={(e) => {
           e.preventDefault();
           setDragOver(false);
-          if (!disabled) handleFiles(e.dataTransfer.files);
+          if (disabled) return;
+          const dataTransfer = e.dataTransfer;
+          getFilesFromDataTransfer(dataTransfer).then(queueFiles);
         }}
         onClick={() => !disabled && inputRef.current?.click()}
         onKeyDown={(e) => {
@@ -108,14 +128,36 @@ export function UploadDropzone({
           hidden
           disabled={disabled}
           onChange={(e) => {
-            handleFiles(e.target.files);
+            handleFileList(e.target.files);
+            e.target.value = "";
+          }}
+        />
+        <input
+          ref={folderInputRef}
+          type="file"
+          hidden
+          disabled={disabled}
+          onChange={(e) => {
+            handleFileList(e.target.files);
             e.target.value = "";
           }}
         />
         <span className={styles.zoneIcon} aria-hidden="true">↑</span>
-        <strong>Drop files here or browse</strong>
+        <strong>Drop files or a folder here, or browse</strong>
         <small>{hint}</small>
       </div>
+
+      <button
+        type="button"
+        className={styles.folderLink}
+        disabled={disabled}
+        onClick={(e) => {
+          e.stopPropagation();
+          folderInputRef.current?.click();
+        }}
+      >
+        or select a whole folder
+      </button>
 
       {items.length > 0 && (
         <div className={styles.queue}>

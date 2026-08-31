@@ -30,6 +30,20 @@
 .zone strong { font-family: var(--serif); font-weight: 400; font-size: 1rem; color: var(--text-primary); }
 .zone small { font-size: .68rem; color: var(--text-faint); }
 
+.folderLink {
+  display: block;
+  margin: .5rem auto 0;
+  border: 0;
+  background: none;
+  color: var(--text-faint);
+  font-size: .68rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.folderLink:hover:not(:disabled) { color: var(--blue); }
+.folderLink:disabled { opacity: .5; }
+
 .queue { display: flex; flex-direction: column; gap: .6rem; margin-top: 1rem; }
 
 .queueItem {
