@@ -1,20 +1,19 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { categories, courses, type Document } from "@/lib/documentData";
+import { categories, type Document } from "@/lib/documentData";
 import { useAdminState } from "@/lib/useAdminState";
 import { AdminShell } from "../AdminShell";
 import styles from "./AdminResources.module.css";
 
-const fileTypes: Document["fileType"][] = ["PDF", "Video", "Worksheet"];
-const realCategories = categories.filter((c) => c !== "All");
-const realCourses = courses.filter((c) => c !== "All");
+const fileTypes: Document["fileType"][] = ["PDF", "Image", "PPT"];
 
 export function AdminResources() {
-  const { documents: resources, addResource, removeResource } = useAdminState();
+  const { documents: resources, lessons, addResource, removeResource } = useAdminState();
+  const sortedLessons = [...lessons].sort((a, b) => b.number - a.number);
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<Document["category"]>(realCategories[0]);
-  const [course, setCourse] = useState<Document["course"]>(realCourses[0]);
+  const [category, setCategory] = useState<Document["category"]>(categories[0]);
+  const [lessonNumber, setLessonNumber] = useState<number>(sortedLessons[0]?.number ?? 1);
   const [fileType, setFileType] = useState<Document["fileType"]>("PDF");
   const [pages, setPages] = useState("");
   const [url, setUrl] = useState("");
@@ -70,7 +69,7 @@ export function AdminResources() {
       id: `resource-${Date.now()}`,
       title: title.trim(),
       category,
-      course,
+      lessonNumber,
       fileType,
       pages: pages ? Number(pages) : undefined,
       date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" }),
@@ -92,7 +91,7 @@ export function AdminResources() {
       <div className={styles.head}>
         <small>ADMIN</small>
         <h1>Resources.</h1>
-        <p>Add PDFs, videos and worksheets to Amelia&apos;s Documents library — upload to R2 or paste a link.</p>
+        <p>Add PDFs, images and slide decks to a lesson&apos;s Documents column — upload to R2 or paste a link.</p>
       </div>
 
       <form className={styles.form} onSubmit={handleAdd}>
@@ -104,13 +103,13 @@ export function AdminResources() {
           <label>
             <span>Category</span>
             <select value={category} onChange={(e) => setCategory(e.target.value as Document["category"])}>
-              {realCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </label>
           <label>
-            <span>Course</span>
-            <select value={course} onChange={(e) => setCourse(e.target.value as Document["course"])}>
-              {realCourses.map((c) => <option key={c} value={c}>{c}</option>)}
+            <span>Lesson</span>
+            <select value={lessonNumber} onChange={(e) => setLessonNumber(Number(e.target.value))}>
+              {sortedLessons.map((l) => <option key={l.number} value={l.number}>Lesson {l.number} — {l.title}</option>)}
             </select>
           </label>
           <label>
@@ -127,7 +126,7 @@ export function AdminResources() {
 
         <label className={styles.fullWidth}>
           <span>Upload a file</span>
-          <input type="file" accept=".pdf,video/*,.doc,.docx" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+          <input type="file" accept=".pdf,image/*,.ppt,.pptx" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
         </label>
 
         <label className={styles.fullWidth}>
@@ -148,7 +147,7 @@ export function AdminResources() {
               <div>
                 <span className={styles.category}>{doc.category.toUpperCase()}</span>
                 <strong>{doc.title}</strong>
-                <small>{doc.fileType}{doc.pages ? ` · ${doc.pages} pages` : ""} · {doc.course} · {doc.date}</small>
+                <small>{doc.fileType}{doc.pages ? ` · ${doc.pages} pages` : ""} · Lesson {doc.lessonNumber} · {doc.date}</small>
               </div>
               {doc.id.startsWith("resource-") ? (
                 <button type="button" className={styles.remove} onClick={() => handleRemove(doc.id)}>Remove</button>

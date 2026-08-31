@@ -18,7 +18,7 @@ const emptyStates: Record<Exclude<Tab, "Lessons">, string> = {
 
 export function CoursePage() {
   const [activeTab, setActiveTab] = useState<Tab>("Lessons");
-  const { lessons } = useAdminState();
+  const { lessons, documents } = useAdminState();
   const sorted = [...lessons].sort((a, b) => b.number - a.number);
 
   return (
@@ -45,24 +45,54 @@ export function CoursePage() {
 
       {activeTab === "Lessons" ? (
         <div className={styles.lessonList}>
-          {sorted.map((lesson) => (
-            <Link
-              key={lesson.number}
-              href={`/student-hub/course/${lesson.number}`}
-              className={lesson.completed ? styles.lesson : `${styles.lesson} ${styles.lessonActive}`}
-            >
-              <b>{lesson.number}</b>
-              <div className={styles.lessonBody}>
-                <strong>{lesson.title}</strong>
-                <small>{lesson.date} · {lesson.duration} · {lesson.notesCount} notes</small>
+          {sorted.map((lesson) => {
+            const lessonDocs = documents.filter((d) => d.lessonNumber === lesson.number);
+            return (
+              <div
+                key={lesson.number}
+                className={lesson.completed ? styles.lesson : `${styles.lesson} ${styles.lessonActive}`}
+              >
+                <Link href={`/student-hub/course/${lesson.number}`} className={styles.lessonMain}>
+                  <b>{lesson.number}</b>
+                  <div className={styles.lessonBody}>
+                    <strong>{lesson.title}</strong>
+                    <small>{lesson.date} · {lesson.duration} · {lesson.notesCount} notes</small>
+                  </div>
+                </Link>
+                <div className={styles.lessonDocs}>
+                  {lessonDocs.length > 0 ? (
+                    lessonDocs.map((doc) =>
+                      doc.fileUrl ? (
+                        <a
+                          key={doc.id}
+                          href={doc.fileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={styles.docChip}
+                          title={doc.title}
+                        >
+                          {doc.fileType}
+                        </a>
+                      ) : (
+                        <span key={doc.id} className={styles.docChipStatic} title={doc.title}>
+                          {doc.fileType}
+                        </span>
+                      )
+                    )
+                  ) : (
+                    <span className={styles.docsEmpty}>—</span>
+                  )}
+                </div>
+                <Link href={`/student-hub/course/${lesson.number}`} className={styles.lessonStatus}>
+                  {lesson.completed ? (
+                    <span className={styles.lessonDone}>Completed</span>
+                  ) : (
+                    <span className={styles.lessonResume}>Resume →</span>
+                  )}
+                </Link>
               </div>
-              {lesson.completed ? (
-                <span className={styles.lessonDone}>Completed</span>
-              ) : (
-                <span className={styles.lessonResume}>Resume →</span>
-              )}
-            </Link>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className={styles.empty}>

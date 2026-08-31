@@ -13,7 +13,6 @@ const navItems: { type: string; label: string; href?: string }[] = [
   { type: "dashboard", label: "Dashboard", href: "/student-hub" },
   { type: "course", label: "My Course", href: "/student-hub/course" },
   { type: "lessons", label: "Lessons", href: "/student-hub/course" },
-  { type: "documents", label: "Documents", href: "/student-hub/documents" },
   { type: "speaking", label: "Speaking Practice", href: "/student-hub/speaking" },
   { type: "tests", label: "Tests & Assignments", href: "/student-hub/tests" },
   { type: "vocabulary", label: "Vocabulary", href: "/student-hub/vocabulary" },
@@ -30,7 +29,6 @@ function NavIcon({ type }: { type: string }) {
     case "course": return <svg {...props}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19"/></svg>;
     case "lessons": return <svg {...props}><path d="M4 4.5h11.5L20 9v10.5H4z"/><path d="M15.5 4.5V9H20"/><path d="M7.5 13h9M7.5 16.2h6"/></svg>;
     case "videos": return <svg {...props}><rect x="3.5" y="5.5" width="13" height="13" rx="1.6"/><path d="m20.5 8.3-4 2.6v2.2l4 2.6z"/></svg>;
-    case "documents": return <svg {...props}><path d="M6 3.5h8L19 8.5v12H6z"/><path d="M14 3.5v5h5"/><path d="M9 13h6M9 16.3h6"/></svg>;
     case "speaking": return <svg {...props}><rect x="9" y="3.5" width="6" height="10.5" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3"/></svg>;
     case "tests": return <svg {...props}><rect x="4.5" y="3.5" width="15" height="17" rx="1.6"/><path d="m8.3 12 2.1 2.1 4.3-4.3M8 17h8"/></svg>;
     case "vocabulary": return <svg {...props}><path d="M5 4.5h14v13H9l-4 3.5z"/><path d="M8.5 9h7M8.5 12h4.5"/></svg>;
