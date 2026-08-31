@@ -61,6 +61,7 @@ export function AdminOverview() {
       </div>
 
       <div className={styles.quickLinks}>
+        <Link href="/admin/lessons" className={styles.quickLink}><strong>Lessons</strong><small>Manage each lesson's overview, materials and recordings</small></Link>
         <Link href="/admin/progress" className={styles.quickLink}><strong>Student Progress</strong><small>Mark lessons complete, edit assignments, set CEFR level</small></Link>
         <Link href="/admin/content" className={styles.quickLink}><strong>Content</strong><small>Weekly focus, word of the week, today's note</small></Link>
         <Link href="/admin/resources" className={styles.quickLink}><strong>Resources</strong><small>Upload or link PDFs, videos and worksheets</small></Link>
