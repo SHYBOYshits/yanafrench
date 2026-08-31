@@ -50,6 +50,8 @@ export function AdminResources() {
       pages: pages ? Number(pages) : undefined,
       date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" }),
       fileUrl: fileUrl || undefined,
+      sizeBytes: file?.size,
+      order: Date.now(),
     };
     addResource(doc);
     setTitle("");

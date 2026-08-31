@@ -1,3 +1,5 @@
+export type LessonStatus = "Draft" | "Published" | "Completed";
+
 export type Lesson = {
   number: number;
   title: string;
@@ -5,6 +7,7 @@ export type Lesson = {
   duration: string;
   notesCount: number;
   completed: boolean;
+  status: LessonStatus;
   teacher: string;
   track: string;
   summary: string;
@@ -25,6 +28,7 @@ export const lessons: Lesson[] = [
     duration: "64 min",
     notesCount: 3,
     completed: false,
+    status: "Draft",
     teacher: "Yana Budhiraja",
     track: "TEF Canada · Expression orale",
     summary:
@@ -50,6 +54,7 @@ export const lessons: Lesson[] = [
     duration: "58 min",
     notesCount: 5,
     completed: true,
+    status: "Published",
     teacher: "Yana Budhiraja",
     track: "TEF Canada · Expression orale",
     summary:
@@ -73,6 +78,7 @@ export const lessons: Lesson[] = [
     duration: "62 min",
     notesCount: 2,
     completed: true,
+    status: "Published",
     teacher: "Yana Budhiraja",
     track: "TEF Canada · Compréhension orale",
     summary:
@@ -91,6 +97,7 @@ export const lessons: Lesson[] = [
     duration: "50 min",
     notesCount: 4,
     completed: true,
+    status: "Published",
     teacher: "Yana Budhiraja",
     track: "TEF Canada · Expression orale",
     summary:
@@ -109,6 +116,7 @@ export const lessons: Lesson[] = [
     duration: "55 min",
     notesCount: 3,
     completed: true,
+    status: "Completed",
     teacher: "Yana Budhiraja",
     track: "TEF Canada · Expression orale",
     summary:

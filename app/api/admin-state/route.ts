@@ -24,6 +24,15 @@ export async function POST(req: Request) {
     case "lessonOverride":
       next = { ...existing, lessonOverrides: { ...existing.lessonOverrides, [action.number]: action.completed } };
       break;
+    case "lessonDetailOverride":
+      next = {
+        ...existing,
+        lessonDetailOverrides: {
+          ...existing.lessonDetailOverrides,
+          [action.number]: { ...existing.lessonDetailOverrides[action.number], ...action.patch },
+        },
+      };
+      break;
     case "assignmentOverride":
       next = {
         ...existing,
@@ -37,14 +46,48 @@ export async function POST(req: Request) {
       next = { ...existing, resources: [action.resource, ...existing.resources] };
       break;
     case "removeResource":
-      next = { ...existing, resources: existing.resources.filter((r) => r.id !== action.id) };
+      next = { ...existing, hiddenResourceIds: [...existing.hiddenResourceIds, action.id] };
       break;
+    case "updateResource":
+      next = {
+        ...existing,
+        resourceOverrides: {
+          ...existing.resourceOverrides,
+          [action.id]: { ...existing.resourceOverrides[action.id], ...action.patch },
+        },
+      };
+      break;
+    case "reorderResources": {
+      const overrides = { ...existing.resourceOverrides };
+      action.orderedIds.forEach((id, index) => {
+        overrides[id] = { ...overrides[id], order: index };
+      });
+      next = { ...existing, resourceOverrides: overrides };
+      break;
+    }
     case "addRecording":
       next = { ...existing, recordings: [action.recording, ...existing.recordings] };
       break;
     case "removeRecording":
-      next = { ...existing, recordings: existing.recordings.filter((r) => r.id !== action.id) };
+      next = { ...existing, hiddenRecordingIds: [...existing.hiddenRecordingIds, action.id] };
       break;
+    case "updateRecording":
+      next = {
+        ...existing,
+        recordingOverrides: {
+          ...existing.recordingOverrides,
+          [action.id]: { ...existing.recordingOverrides[action.id], ...action.patch },
+        },
+      };
+      break;
+    case "reorderRecordings": {
+      const overrides = { ...existing.recordingOverrides };
+      action.orderedIds.forEach((id, index) => {
+        overrides[id] = { ...overrides[id], order: index };
+      });
+      next = { ...existing, recordingOverrides: overrides };
+      break;
+    }
     case "addNote":
       next = { ...existing, notes: [action.note, ...existing.notes] };
       break;

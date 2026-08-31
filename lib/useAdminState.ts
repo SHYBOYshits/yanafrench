@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { defaultAdminState, type AdminState, type AdminStateAction } from "./adminState";
+import { defaultAdminState, type AdminState, type AdminStateAction, type LessonDetailPatch } from "./adminState";
 import { lessons as seedLessons, getLesson as pureGetLesson, getAdjacentLessons as pureGetAdjacentLessons, type Lesson } from "./courseData";
 import { assignments as seedAssignments, type Assignment } from "./testData";
 import { documents as seedDocuments, type Document } from "./documentData";
@@ -12,20 +12,28 @@ import type { CefrLevel } from "./progressData";
 
 const POLL_MS = 3000;
 
-function mergeLessons(overrides: AdminState["lessonOverrides"]): Lesson[] {
-  return seedLessons.map((l) => (l.number in overrides ? { ...l, completed: overrides[l.number] } : l));
+function mergeLessons(overrides: AdminState["lessonOverrides"], detailOverrides: AdminState["lessonDetailOverrides"]): Lesson[] {
+  return seedLessons.map((l) => {
+    const patch = detailOverrides[l.number];
+    const completed = l.number in overrides ? overrides[l.number] : l.completed;
+    return patch ? { ...l, ...patch, completed } : { ...l, completed };
+  });
 }
 
 function mergeAssignments(overrides: AdminState["assignmentOverrides"]): Assignment[] {
   return seedAssignments.map((a) => (a.id in overrides ? { ...a, ...overrides[a.id] } : a));
 }
 
-function mergeDocuments(resources: Document[]): Document[] {
-  return [...resources, ...seedDocuments];
+function mergeDocuments(added: Document[], overrides: AdminState["resourceOverrides"], hidden: string[]): Document[] {
+  return [...added, ...seedDocuments]
+    .filter((d) => !hidden.includes(d.id))
+    .map((d) => (d.id in overrides ? { ...d, ...overrides[d.id] } : d));
 }
 
-function mergeRecordings(added: Recording[]): Recording[] {
-  return [...added, ...seedRecordings];
+function mergeRecordings(added: Recording[], overrides: AdminState["recordingOverrides"], hidden: string[]): Recording[] {
+  return [...added, ...seedRecordings]
+    .filter((r) => !hidden.includes(r.id))
+    .map((r) => (r.id in overrides ? { ...r, ...overrides[r.id] } : r));
 }
 
 function mergeNotes(added: Note[]): Note[] {
@@ -38,10 +46,10 @@ function mergeWordArchive(added: WordEntry[]): WordEntry[] {
 
 // Polls the shared R2-backed admin state so any change made in the admin
 // dashboard (weekly focus, word of the week, today's note, lesson
-// completion, assignment status/score/feedback, CEFR level, streak,
-// resources, recordings, notes, word archive) reaches the student view
-// across devices/browsers — the same pattern used for Messages, applied
-// to everything admin-editable.
+// completion/details, assignment status/score/feedback, CEFR level,
+// streak, resources, recordings, notes, word archive) reaches the
+// student view across devices/browsers — the same pattern used for
+// Messages, applied to everything admin-editable.
 export function useAdminState() {
   const [raw, setRaw] = useState<AdminState>(defaultAdminState);
   const [loaded, setLoaded] = useState(false);
@@ -79,10 +87,10 @@ export function useAdminState() {
     }
   }, []);
 
-  const lessons = mergeLessons(raw.lessonOverrides);
+  const lessons = mergeLessons(raw.lessonOverrides, raw.lessonDetailOverrides);
   const assignments = mergeAssignments(raw.assignmentOverrides);
-  const documents = mergeDocuments(raw.resources);
-  const recordings = mergeRecordings(raw.recordings);
+  const documents = mergeDocuments(raw.resources, raw.resourceOverrides, raw.hiddenResourceIds);
+  const recordings = mergeRecordings(raw.recordings, raw.recordingOverrides, raw.hiddenRecordingIds);
   const notes = mergeNotes(raw.notes);
   const wordArchive = mergeWordArchive(raw.wordArchive);
 
@@ -109,11 +117,16 @@ export function useAdminState() {
     setStreak: (value: number) => send({ type: "field", key: "streak", value }),
     setCourseName: (value: string) => send({ type: "field", key: "courseName", value }),
     setLessonCompleted: (number: number, completed: boolean) => send({ type: "lessonOverride", number, completed }),
+    updateLessonDetails: (number: number, patch: LessonDetailPatch) => send({ type: "lessonDetailOverride", number, patch }),
     updateAssignment: (id: string, patch: Partial<Assignment>) => send({ type: "assignmentOverride", id, patch }),
     addResource: (resource: Document) => send({ type: "addResource", resource }),
     removeResource: (id: string) => send({ type: "removeResource", id }),
+    updateResource: (id: string, patch: Partial<Document>) => send({ type: "updateResource", id, patch }),
+    reorderResources: (lessonNumber: number, orderedIds: string[]) => send({ type: "reorderResources", lessonNumber, orderedIds }),
     addRecording: (recording: Recording) => send({ type: "addRecording", recording }),
     removeRecording: (id: string) => send({ type: "removeRecording", id }),
+    updateRecording: (id: string, patch: Partial<Recording>) => send({ type: "updateRecording", id, patch }),
+    reorderRecordings: (lessonNumber: number, orderedIds: string[]) => send({ type: "reorderRecordings", lessonNumber, orderedIds }),
     addNote: (note: Note) => send({ type: "addNote", note }),
     removeNote: (id: string) => send({ type: "removeNote", id }),
     addWordEntry: (entry: WordEntry) => send({ type: "addWordEntry", entry }),

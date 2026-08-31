@@ -20,6 +20,9 @@ export function CoursePage() {
   const [activeTab, setActiveTab] = useState<Tab>("Lessons");
   const { lessons, documents, recordings, notes, wordArchive, assignments, courseName } = useAdminState();
   const sorted = [...lessons].sort((a, b) => b.number - a.number);
+  const visibleRecordings = [...recordings]
+    .filter((r) => r.visibility !== "Hidden")
+    .sort((a, b) => a.order - b.order);
 
   return (
     <DashboardShell>
@@ -46,7 +49,9 @@ export function CoursePage() {
       {activeTab === "Lessons" && (
         <div className={styles.lessonList}>
           {sorted.map((lesson) => {
-            const lessonDocs = documents.filter((d) => d.lessonNumber === lesson.number);
+            const lessonDocs = documents
+              .filter((d) => d.lessonNumber === lesson.number)
+              .sort((a, b) => a.order - b.order);
             return (
               <div
                 key={lesson.number}
@@ -97,9 +102,9 @@ export function CoursePage() {
       )}
 
       {activeTab === "Recordings" && (
-        recordings.length > 0 ? (
+        visibleRecordings.length > 0 ? (
           <div className={styles.simpleList}>
-            {recordings.map((r) => (
+            {visibleRecordings.map((r) => (
               <div key={r.id} className={styles.simpleRow}>
                 <div>
                   <span className={styles.simpleTag}>LESSON {r.lessonNumber}</span>

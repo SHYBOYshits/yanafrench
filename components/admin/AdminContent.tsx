@@ -109,6 +109,8 @@ export function AdminContent() {
       lessonNumber: recLesson,
       date: todayLabel(),
       videoUrl: videoUrl || undefined,
+      visibility: "Visible",
+      order: Date.now(),
     };
     addRecording(recording);
     setRecTitle("");

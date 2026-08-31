@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { cefrLevels } from "@/lib/progressData";
 import { type Assignment, type AssignmentStatus } from "@/lib/testData";
 import { useAdminState } from "@/lib/useAdminState";
@@ -63,6 +64,7 @@ export function AdminProgress() {
                 <input type="checkbox" checked={l.completed} onChange={(e) => setLessonCompleted(l.number, e.target.checked)} />
                 Completed
               </label>
+              <Link href={`/admin/course/${l.number}`} className={styles.manageLink}>Manage →</Link>
             </div>
           ))}
         </div>

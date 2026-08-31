@@ -59,6 +59,9 @@
 .checkLabel { flex-direction: row; align-items: center; gap: .5rem; font-size: .74rem; color: var(--text-primary); white-space: nowrap; }
 .checkLabel input { width: 16px; height: 16px; accent-color: var(--bordeaux); }
 
+.manageLink { font-size: .68rem; font-weight: 700; color: var(--blue); text-decoration: none; white-space: nowrap; border-bottom: 1px solid transparent; }
+.manageLink:hover { border-bottom-color: var(--blue); }
+
 .assignmentRow { border: 1px solid var(--hairline-ink); border-radius: var(--r-md); background: var(--card-surface); padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: .8rem; }
 
 .assignmentHead strong { display: block; font-size: .82rem; font-weight: 700; color: var(--text-primary); }
