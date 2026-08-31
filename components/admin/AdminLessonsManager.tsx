@@ -32,6 +32,14 @@ function inferResourceType(file: File): Resource["fileType"] {
   return "PDF";
 }
 
+function PublishToggle({ published, onToggle }: { published: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" className={published ? styles.publishedBadge : styles.draftBadge} onClick={onToggle}>
+      {published ? "Published — click to unpublish" : "Draft — click to publish"}
+    </button>
+  );
+}
+
 export function AdminLessonsManager() {
   const [activeTab, setActiveTab] = useState<Tab>("Course");
   const {
@@ -67,6 +75,7 @@ export function AdminLessonsManager() {
       title: courseTitle.trim(),
       description: courseDescription.trim(),
       date: todayLabel(),
+      published: true,
       videos: [],
       pdfs: [],
     };
@@ -113,6 +122,7 @@ export function AdminLessonsManager() {
       id: `recording-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       title: stripExtension(file.name),
       date: todayLabel(),
+      published: true,
       videoUrl: fileUrl,
       sizeBytes: file.size,
     };
@@ -126,6 +136,7 @@ export function AdminLessonsManager() {
       id: `recording-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       title: recLinkTitle.trim(),
       date: todayLabel(),
+      published: true,
       videoUrl: recLinkUrl.trim(),
     });
     setRecLinkTitle("");
@@ -155,6 +166,7 @@ export function AdminLessonsManager() {
       title: stripExtension(file.name),
       fileType: inferResourceType(file),
       date: todayLabel(),
+      published: true,
       fileUrl,
       sizeBytes: file.size,
     };
@@ -169,6 +181,7 @@ export function AdminLessonsManager() {
       title: resLinkTitle.trim(),
       fileType: resLinkType,
       date: todayLabel(),
+      published: true,
       fileUrl: resLinkUrl.trim(),
     });
     setResLinkTitle("");
@@ -202,6 +215,7 @@ export function AdminLessonsManager() {
       category: aCategory,
       deadline: aDeadline.trim() || "No deadline set",
       status: "Not started",
+      published: true,
     });
     setATitle("");
     setADescription("");
@@ -250,7 +264,8 @@ export function AdminLessonsManager() {
 
           <div className={styles.courseList}>
             {courses.map((course) => (
-              <div key={course.id} className={styles.courseCard}>
+              <div key={course.id} className={course.published ? styles.courseCard : `${styles.courseCard} ${styles.draftCard}`}>
+                <PublishToggle published={course.published} onToggle={() => updateCourse(course.id, { published: !course.published })} />
                 <input
                   className={styles.courseTitleInput}
                   defaultValue={course.title}
@@ -347,7 +362,7 @@ export function AdminLessonsManager() {
 
           <div className={styles.list}>
             {recordings.map((r) => (
-              <div key={r.id} className={styles.row}>
+              <div key={r.id} className={r.published ? styles.row : `${styles.row} ${styles.draftRow}`}>
                 <div>
                   <input
                     className={styles.rowTitleInput}
@@ -357,6 +372,7 @@ export function AdminLessonsManager() {
                   <small>{r.sizeBytes ? `${formatFileSize(r.sizeBytes)} · ` : ""}{r.date}</small>
                 </div>
                 <div className={styles.rowActions}>
+                  <PublishToggle published={r.published} onToggle={() => updateRecording(r.id, { published: !r.published })} />
                   <label className={styles.rowLink}>
                     {replacingId === r.id ? "Replacing…" : "Replace"}
                     <input
@@ -400,7 +416,7 @@ export function AdminLessonsManager() {
 
           <div className={styles.list}>
             {resources.map((r) => (
-              <div key={r.id} className={styles.row}>
+              <div key={r.id} className={r.published ? styles.row : `${styles.row} ${styles.draftRow}`}>
                 <div>
                   <span className={styles.typeTag}>{r.fileType}</span>
                   <input
@@ -411,6 +427,7 @@ export function AdminLessonsManager() {
                   <small>{r.sizeBytes ? `${formatFileSize(r.sizeBytes)} · ` : ""}{r.date}</small>
                 </div>
                 <div className={styles.rowActions}>
+                  <PublishToggle published={r.published} onToggle={() => updateResource(r.id, { published: !r.published })} />
                   <label className={styles.rowLink}>
                     {replacingId === r.id ? "Replacing…" : "Replace"}
                     <input
@@ -463,10 +480,11 @@ export function AdminLessonsManager() {
 
           <div className={styles.assignmentList}>
             {assignments.map((a) => (
-              <div key={a.id} className={styles.assignmentRow}>
+              <div key={a.id} className={a.published ? styles.assignmentRow : `${styles.assignmentRow} ${styles.draftRow}`}>
                 <div className={styles.assignmentHead}>
                   <strong>{a.title}</strong>
                   <small>{a.category}</small>
+                  <PublishToggle published={a.published} onToggle={() => updateAssignment(a.id, { published: !a.published })} />
                 </div>
                 <div className={styles.fieldGrid}>
                   <label>

@@ -28,7 +28,8 @@ function Toggle({ label, defaultOn = false }: { label: string; defaultOn?: boole
 export function SettingsPage() {
   const [tab, setTab] = useState<Tab>("Profile");
   const initials = profile.name.slice(0, 2).toUpperCase();
-  const { assignments } = usePortalState();
+  const { assignments: allAssignments } = usePortalState();
+  const assignments = allAssignments.filter((a) => a.published);
   const overallProgress = computeOverallProgress(lessons, assignments, getSpeakingHistory());
 
   return (

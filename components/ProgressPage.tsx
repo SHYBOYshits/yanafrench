@@ -31,7 +31,8 @@ function buildPath() {
 const currentLevelCode = "B1";
 
 export function ProgressPage() {
-  const { assignments } = usePortalState();
+  const { assignments: allAssignments } = usePortalState();
+  const assignments = allAssignments.filter((a) => a.published);
   const currentIndex = cefrLevels.findIndex((l) => l.code === currentLevelCode);
   const nextLevel = cefrLevels[currentIndex + 1];
   const currentLevel = cefrLevels[currentIndex];

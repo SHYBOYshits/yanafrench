@@ -28,9 +28,13 @@ const actionLabel: Record<AssignmentStatus, string> = {
 export function LessonsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Course");
   const [category, setCategory] = useState<(typeof assignmentCategories)[number]>("All");
-  const { courses, recordings, resources, assignments } = usePortalState();
+  const { courses: allCourses, recordings: allRecordings, resources: allResources, assignments: allAssignments } = usePortalState();
 
-  const filteredAssignments = category === "All" ? assignments : assignments.filter((a) => a.category === category);
+  const courses = allCourses.filter((c) => c.published);
+  const recordings = allRecordings.filter((r) => r.published);
+  const resources = allResources.filter((r) => r.published);
+  const publishedAssignments = allAssignments.filter((a) => a.published);
+  const filteredAssignments = category === "All" ? publishedAssignments : publishedAssignments.filter((a) => a.category === category);
 
   return (
     <DashboardShell>

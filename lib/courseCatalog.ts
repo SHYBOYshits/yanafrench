@@ -6,6 +6,7 @@ export type CourseItem = {
   title: string;
   description: string;
   date: string;
+  published: boolean;
   videos: CourseVideo[];
   pdfs: CoursePdf[];
 };
@@ -19,6 +20,7 @@ export const courses: CourseItem[] = [
     title: "TEF Canada — Expression orale",
     description: "Structuring spontaneous answers under time pressure, building a working set of connectors, and sounding natural under exam conditions.",
     date: "14 Oct",
+    published: true,
     videos: [
       { id: "seed-video-1", title: "Building stronger oral answers" },
       { id: "seed-video-2", title: "Opinion structures that sound natural" },
