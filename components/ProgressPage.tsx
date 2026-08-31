@@ -11,7 +11,7 @@ import {
 } from "@/lib/progressData";
 import { lessons } from "@/lib/courseData";
 import { getSpeakingHistory } from "@/lib/speakingData";
-import { assignments } from "@/lib/testData";
+import { usePortalState } from "@/lib/usePortalState";
 import { getSavedWords, getVocabulary } from "@/lib/vocabData";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./ProgressPage.module.css";
@@ -31,6 +31,7 @@ function buildPath() {
 const currentLevelCode = "B1";
 
 export function ProgressPage() {
+  const { assignments } = usePortalState();
   const currentIndex = cefrLevels.findIndex((l) => l.code === currentLevelCode);
   const nextLevel = cefrLevels[currentIndex + 1];
   const currentLevel = cefrLevels[currentIndex];

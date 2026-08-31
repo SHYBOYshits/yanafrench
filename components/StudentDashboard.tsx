@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { lessons } from "@/lib/courseData";
 import { computeLessonProgress, computeOverallProgress } from "@/lib/progressData";
 import { getSpeakingHistory } from "@/lib/speakingData";
-import { assignments } from "@/lib/testData";
+import { usePortalState } from "@/lib/usePortalState";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./StudentDashboard.module.css";
 
@@ -62,6 +62,7 @@ function ProgressRing({ value }: { value: number }) {
 }
 
 export function StudentDashboard() {
+  const { assignments } = usePortalState();
   const speakingHistory = getSpeakingHistory();
   const lessonProgress = computeLessonProgress(lessons);
   const overallProgress = computeOverallProgress(lessons, assignments, speakingHistory);

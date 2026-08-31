@@ -6,17 +6,18 @@ import { Navigation } from "./Navigation";
 import { Footer } from "./Footer";
 import { ChatWidget } from "./ChatWidget";
 
-const STANDALONE_PREFIXES = ["/student-hub"];
+const STANDALONE_PREFIXES = ["/student-hub", "/admin"];
 
 export function AppChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const standalone = STANDALONE_PREFIXES.some((p) => pathname?.startsWith(p));
+  const isAdmin = pathname?.startsWith("/admin");
 
   if (standalone) {
     return (
       <>
         <main id="main">{children}</main>
-        <ChatWidget />
+        {!isAdmin && <ChatWidget />}
       </>
     );
   }

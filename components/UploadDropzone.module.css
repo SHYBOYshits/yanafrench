@@ -1,0 +1,56 @@
+.zone {
+  border: 1.5px dashed var(--hairline-ink-hover, rgba(23,25,28,.18));
+  border-radius: var(--r-lg);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  background: var(--porcelain);
+  transition: border-color .2s ease, background .2s ease;
+}
+
+.zone:hover, .zone:focus-visible { border-color: var(--blue); outline: none; }
+.zoneActive { border-color: var(--bordeaux); background: rgba(182,58,58,.04); }
+
+.zoneIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline-ink);
+  display: grid;
+  place-items: center;
+  color: var(--blue);
+  font-size: .9rem;
+  margin-bottom: .3rem;
+}
+
+.zone strong { font-family: var(--serif); font-weight: 400; font-size: 1rem; color: var(--text-primary); }
+.zone small { font-size: .68rem; color: var(--text-faint); }
+
+.queue { display: flex; flex-direction: column; gap: .6rem; margin-top: 1rem; }
+
+.queueItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-md);
+  padding: .8rem 1rem;
+  background: var(--card-surface);
+}
+
+.queueInfo { flex: 1; min-width: 0; }
+.queueInfo strong { display: block; font-size: .78rem; font-weight: 700; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.queueInfo small { display: block; font-size: .66rem; color: var(--text-faint); margin-top: .15rem; }
+
+.progressTrack { height: 4px; border-radius: 999px; background: var(--stone); margin-top: .5rem; overflow: hidden; }
+.progressTrack span { display: block; height: 100%; background: var(--blue); transition: width .15s ease; }
+
+.statusDone { font-size: .68rem; font-weight: 700; color: var(--blue); white-space: nowrap; }
+
+.dismissBtn { border: 1px solid rgba(182,58,58,.35); background: none; color: var(--bordeaux); padding: .4rem .9rem; border-radius: 999px; font-size: .64rem; font-weight: 700; white-space: nowrap; }
+.dismissBtn:hover { background: rgba(182,58,58,.06); }
