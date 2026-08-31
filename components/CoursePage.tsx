@@ -129,8 +129,12 @@ export function CoursePage() {
           <div className={styles.simpleList}>
             {notes.map((n) => (
               <div key={n.id} className={styles.noteRow}>
-                <small>{n.date}</small>
-                <p>{n.text}</p>
+                <div className={styles.noteRowHead}>
+                  <span className={styles.simpleTag}>LESSON {n.lessonNumber}</span>
+                  <small>{n.date}</small>
+                </div>
+                <strong>{n.title}</strong>
+                <div className={styles.noteBody} dangerouslySetInnerHTML={{ __html: n.bodyHtml }} />
               </div>
             ))}
           </div>

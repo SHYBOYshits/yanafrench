@@ -92,8 +92,25 @@ export async function POST(req: Request) {
       next = { ...existing, notes: [action.note, ...existing.notes] };
       break;
     case "removeNote":
-      next = { ...existing, notes: existing.notes.filter((n) => n.id !== action.id) };
+      next = { ...existing, hiddenNoteIds: [...existing.hiddenNoteIds, action.id] };
       break;
+    case "updateNote":
+      next = {
+        ...existing,
+        noteOverrides: {
+          ...existing.noteOverrides,
+          [action.id]: { ...existing.noteOverrides[action.id], ...action.patch },
+        },
+      };
+      break;
+    case "reorderNotes": {
+      const overrides = { ...existing.noteOverrides };
+      action.orderedIds.forEach((id, index) => {
+        overrides[id] = { ...overrides[id], order: index };
+      });
+      next = { ...existing, noteOverrides: overrides };
+      break;
+    }
     case "addWordEntry":
       next = { ...existing, wordArchive: [action.entry, ...existing.wordArchive] };
       break;

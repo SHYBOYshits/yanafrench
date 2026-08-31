@@ -30,6 +30,8 @@ export type AdminState = {
   recordingOverrides: Record<string, Partial<Recording>>;
   hiddenRecordingIds: string[];
   notes: Note[];
+  noteOverrides: Record<string, Partial<Note>>;
+  hiddenNoteIds: string[];
   wordArchive: WordEntry[];
 };
 
@@ -50,6 +52,8 @@ export const defaultAdminState: AdminState = {
   recordingOverrides: {},
   hiddenRecordingIds: [],
   notes: [],
+  noteOverrides: {},
+  hiddenNoteIds: [],
   wordArchive: [],
 };
 
@@ -73,5 +77,7 @@ export type AdminStateAction =
   | { type: "reorderRecordings"; lessonNumber: number; orderedIds: string[] }
   | { type: "addNote"; note: Note }
   | { type: "removeNote"; id: string }
+  | { type: "updateNote"; id: string; patch: Partial<Note> }
+  | { type: "reorderNotes"; lessonNumber: number; orderedIds: string[] }
   | { type: "addWordEntry"; entry: WordEntry }
   | { type: "removeWordEntry"; id: string };

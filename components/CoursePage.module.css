@@ -108,8 +108,17 @@ a.docChip:hover { color: var(--bordeaux); border-color: var(--bordeaux); }
 .simpleActionStatic { opacity: .4; }
 
 .noteRow { padding: 1.1rem .9rem; border-bottom: 1px solid var(--hairline-ink); }
-.noteRow small { font-size: .62rem; letter-spacing: .05em; color: var(--text-faint); font-weight: 700; text-transform: uppercase; }
-.noteRow p { font-size: .85rem; color: var(--text-primary); margin: .5rem 0 0; line-height: 1.5; }
+.noteRowHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: .3rem; }
+.noteRowHead small { font-size: .62rem; color: var(--text-faint); font-weight: 700; }
+.noteRow strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1.1rem; color: var(--text-primary); margin-bottom: .4rem; }
+
+.noteBody { font-size: .85rem; color: var(--text-primary); line-height: 1.6; }
+.noteBody :global(p) { margin: 0 0 .5rem; }
+.noteBody :global(h2) { font-family: var(--serif); font-weight: 400; font-size: 1.25rem; color: var(--blue); margin: .5rem 0 .35rem; }
+.noteBody :global(h3) { font-family: var(--serif); font-weight: 400; font-size: 1.05rem; color: var(--blue); margin: .45rem 0 .3rem; }
+.noteBody :global(ul), .noteBody :global(ol) { margin: 0 0 .5rem 1.2rem; padding: 0; }
+.noteBody :global(mark) { background: rgba(182,58,58,.18); border-radius: 3px; padding: 0 .15rem; }
+.noteBody :global(a) { color: var(--bordeaux); text-decoration: underline; }
 
 .empty {
   margin-top: 1rem;

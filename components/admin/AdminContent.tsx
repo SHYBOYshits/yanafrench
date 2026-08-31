@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { Recording } from "@/lib/recordingData";
+import type { Note } from "@/lib/noteData";
 import { uploadFileToR2 } from "@/lib/uploadFile";
 import { useAdminState } from "@/lib/useAdminState";
 import { AdminShell } from "../AdminShell";
+import { RichTextEditor } from "./RichTextEditor";
 import styles from "./AdminContent.module.css";
 
 function todayLabel() {
@@ -119,13 +121,26 @@ export function AdminContent() {
   }
 
   // Notes
-  const [noteText, setNoteText] = useState("");
+  const [noteTitle, setNoteTitle] = useState("");
+  const [noteLesson, setNoteLesson] = useState<number>(sortedLessons[0]?.number ?? 1);
+  const [noteBodyHtml, setNoteBodyHtml] = useState("");
+  const [noteEditorKey, setNoteEditorKey] = useState(0);
 
   function handleAddNote(e: FormEvent) {
     e.preventDefault();
-    if (!noteText.trim()) return;
-    addNote({ id: `note-${Date.now()}`, text: noteText.trim(), date: todayLabel() });
-    setNoteText("");
+    if (!noteTitle.trim()) return;
+    const note: Note = {
+      id: `note-${Date.now()}`,
+      title: noteTitle.trim(),
+      bodyHtml: noteBodyHtml,
+      lessonNumber: noteLesson,
+      date: todayLabel(),
+      order: Date.now(),
+    };
+    addNote(note);
+    setNoteTitle("");
+    setNoteBodyHtml("");
+    setNoteEditorKey((k) => k + 1);
   }
 
   // Words of the week archive
@@ -243,12 +258,21 @@ export function AdminContent() {
 
       <section className={`${styles.card} ${styles.cardWide}`}>
         <h2>Notes</h2>
-        <p className={styles.cardHint}>Dated class notes — shows up in the Notes tab on My Course.</p>
+        <p className={styles.cardHint}>Attach a class note to a lesson — shows up in the Notes tab on My Course.</p>
         <form className={styles.subform} onSubmit={handleAddNote}>
-          <label className={styles.fullWidth}>
-            <span>Note</span>
-            <textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="What happened in class today…" required />
-          </label>
+          <div className={styles.fieldGrid}>
+            <label>
+              <span>Title</span>
+              <input value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} placeholder="e.g. Great progress today" required />
+            </label>
+            <label>
+              <span>Lesson</span>
+              <select value={noteLesson} onChange={(e) => setNoteLesson(Number(e.target.value))}>
+                {sortedLessons.map((l) => <option key={l.number} value={l.number}>Lesson {l.number} — {l.title}</option>)}
+              </select>
+            </label>
+          </div>
+          <RichTextEditor key={noteEditorKey} content={noteBodyHtml} onChange={setNoteBodyHtml} />
           <button type="submit" className={styles.save}>Add note</button>
         </form>
 
@@ -256,8 +280,8 @@ export function AdminContent() {
           {notes.map((n) => (
             <div key={n.id} className={styles.row}>
               <div>
-                <small>{n.date}</small>
-                <p className={styles.noteText}>{n.text}</p>
+                <strong>{n.title}</strong>
+                <small>Lesson {n.lessonNumber} · {n.date}</small>
               </div>
               {n.id.startsWith("note-") ? (
                 <button type="button" className={styles.remove} onClick={() => removeNote(n.id)}>Remove</button>

@@ -7,8 +7,10 @@ import type { LessonStatus } from "@/lib/courseData";
 import type { Recording } from "@/lib/recordingData";
 import { useAdminState } from "@/lib/useAdminState";
 import { formatFileSize, readMediaDuration, uploadFileToR2 } from "@/lib/uploadFile";
+import type { Note } from "@/lib/noteData";
 import { AdminShell } from "../AdminShell";
 import { UploadDropzone } from "./UploadDropzone";
+import { RichTextEditor } from "./RichTextEditor";
 import styles from "./AdminLessonBoard.module.css";
 
 const tabs = ["Lessons", "Recordings", "Notes", "Words of the Week", "Tests"] as const;
@@ -18,10 +20,11 @@ const statuses: LessonStatus[] = ["Draft", "Published", "Completed"];
 const fileTypes: Document["fileType"][] = ["PDF", "Image", "PPT"];
 
 const comingSoon: Partial<Record<Tab, string>> = {
-  Notes: "A rich-text notes editor for this lesson is coming in a follow-up pass.",
   "Words of the Week": "Per-lesson vocabulary management (word, meaning, pronunciation, example) is coming in a follow-up pass.",
   Tests: "The test/quiz builder for this lesson is coming in a follow-up pass.",
 };
+
+const NEW_NOTE = "__new__";
 
 function todayLabel() {
   return new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" });
@@ -60,6 +63,11 @@ export function AdminLessonBoard({ lessonNumber }: { lessonNumber: number }) {
     removeRecording,
     updateRecording,
     reorderRecordings,
+    notes,
+    addNote,
+    removeNote,
+    updateNote,
+    reorderNotes,
     loaded,
   } = useAdminState();
 
@@ -98,6 +106,10 @@ export function AdminLessonBoard({ lessonNumber }: { lessonNumber: number }) {
   const [recLinkTitle, setRecLinkTitle] = useState("");
   const [recLinkUrl, setRecLinkUrl] = useState("");
 
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [noteDraftTitle, setNoteDraftTitle] = useState("");
+  const [noteDraftBody, setNoteDraftBody] = useState("");
+
   if (!lesson) {
     return (
       <AdminShell>
@@ -111,6 +123,7 @@ export function AdminLessonBoard({ lessonNumber }: { lessonNumber: number }) {
 
   const lessonDocs = documents.filter((d) => d.lessonNumber === lessonNumber).sort((a, b) => a.order - b.order);
   const lessonRecordings = recordings.filter((r) => r.lessonNumber === lessonNumber).sort((a, b) => a.order - b.order);
+  const lessonNotes = notes.filter((n) => n.lessonNumber === lessonNumber).sort((a, b) => a.order - b.order);
 
   function saveOverview() {
     updateLessonDetails(lessonNumber, { title, summary, date, duration, status, notesCount });
@@ -223,6 +236,48 @@ export function AdminLessonBoard({ lessonNumber }: { lessonNumber: number }) {
     setRecLinkTitle("");
     setRecLinkUrl("");
     setAddingRecordingLink(false);
+  }
+
+  function moveNote(id: string, dir: -1 | 1) {
+    const ids = lessonNotes.map((n) => n.id);
+    const idx = ids.indexOf(id);
+    const swap = idx + dir;
+    if (swap < 0 || swap >= ids.length) return;
+    [ids[idx], ids[swap]] = [ids[swap], ids[idx]];
+    reorderNotes(lessonNumber, ids);
+  }
+
+  function startNewNote() {
+    setEditingNoteId(NEW_NOTE);
+    setNoteDraftTitle("");
+    setNoteDraftBody("");
+  }
+
+  function startEditNote(note: Note) {
+    setEditingNoteId(note.id);
+    setNoteDraftTitle(note.title);
+    setNoteDraftBody(note.bodyHtml);
+  }
+
+  function cancelNoteEdit() {
+    setEditingNoteId(null);
+  }
+
+  function saveNote() {
+    if (!noteDraftTitle.trim()) return;
+    if (editingNoteId === NEW_NOTE) {
+      addNote({
+        id: `note-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        title: noteDraftTitle.trim(),
+        bodyHtml: noteDraftBody,
+        lessonNumber,
+        date: todayLabel(),
+        order: Date.now(),
+      });
+    } else if (editingNoteId) {
+      updateNote(editingNoteId, { title: noteDraftTitle.trim(), bodyHtml: noteDraftBody });
+    }
+    setEditingNoteId(null);
   }
 
   return (
@@ -474,7 +529,76 @@ export function AdminLessonBoard({ lessonNumber }: { lessonNumber: number }) {
         </div>
       )}
 
-      {(activeTab === "Notes" || activeTab === "Words of the Week" || activeTab === "Tests") && (
+      {activeTab === "Notes" && (
+        <div className={styles.tabPanel}>
+          <p className={styles.tabHint}>Class notes students see for this lesson — write directly with headings, lists, links and highlights.</p>
+
+          {editingNoteId === NEW_NOTE ? (
+            <div className={styles.noteEditor}>
+              <input
+                className={styles.noteTitleInput}
+                value={noteDraftTitle}
+                onChange={(e) => setNoteDraftTitle(e.target.value)}
+                placeholder="Note title"
+              />
+              <RichTextEditor content={noteDraftBody} onChange={setNoteDraftBody} />
+              <div className={styles.noteEditorActions}>
+                <button type="button" className={styles.saveBtn} onClick={saveNote}>Save Note</button>
+                <button type="button" className={styles.linkToggle} onClick={cancelNoteEdit}>Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" className={styles.linkToggle} onClick={startNewNote}>+ New Note</button>
+          )}
+
+          <div className={styles.noteList}>
+            {lessonNotes.length === 0 && editingNoteId !== NEW_NOTE && <p className={styles.emptyHint}>No notes yet for this lesson.</p>}
+            {lessonNotes.map((note, i) =>
+              editingNoteId === note.id ? (
+                <div key={note.id} className={styles.noteEditor}>
+                  <input
+                    className={styles.noteTitleInput}
+                    value={noteDraftTitle}
+                    onChange={(e) => setNoteDraftTitle(e.target.value)}
+                    placeholder="Note title"
+                  />
+                  <RichTextEditor content={noteDraftBody} onChange={setNoteDraftBody} />
+                  <div className={styles.noteEditorActions}>
+                    <button type="button" className={styles.saveBtn} onClick={saveNote}>Save Note</button>
+                    <button type="button" className={styles.linkToggle} onClick={cancelNoteEdit}>Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <div key={note.id} className={styles.noteCard}>
+                  <div className={styles.noteCardHead}>
+                    <strong>{note.title}</strong>
+                    <small>{note.date}</small>
+                  </div>
+                  <div className={styles.noteBody} dangerouslySetInnerHTML={{ __html: note.bodyHtml }} />
+                  <div className={styles.cardActions}>
+                    <div className={styles.reorderBtns}>
+                      <button type="button" disabled={i === 0} onClick={() => moveNote(note.id, -1)} aria-label="Move up">↑</button>
+                      <button type="button" disabled={i === lessonNotes.length - 1} onClick={() => moveNote(note.id, 1)} aria-label="Move down">↓</button>
+                    </div>
+                    <button type="button" className={styles.cardLink} onClick={() => startEditNote(note)}>Edit</button>
+                    <button
+                      type="button"
+                      className={styles.deleteBtn}
+                      onClick={() => {
+                        if (confirm(`Delete "${note.title}"?`)) removeNote(note.id);
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      )}
+
+      {(activeTab === "Words of the Week" || activeTab === "Tests") && (
         <div className={styles.comingSoon}>
           <p>{comingSoon[activeTab]}</p>
         </div>

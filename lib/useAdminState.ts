@@ -36,8 +36,10 @@ function mergeRecordings(added: Recording[], overrides: AdminState["recordingOve
     .map((r) => (r.id in overrides ? { ...r, ...overrides[r.id] } : r));
 }
 
-function mergeNotes(added: Note[]): Note[] {
-  return [...added, ...seedNotes];
+function mergeNotes(added: Note[], overrides: AdminState["noteOverrides"], hidden: string[]): Note[] {
+  return [...added, ...seedNotes]
+    .filter((n) => !hidden.includes(n.id))
+    .map((n) => (n.id in overrides ? { ...n, ...overrides[n.id] } : n));
 }
 
 function mergeWordArchive(added: WordEntry[]): WordEntry[] {
@@ -91,7 +93,7 @@ export function useAdminState() {
   const assignments = mergeAssignments(raw.assignmentOverrides);
   const documents = mergeDocuments(raw.resources, raw.resourceOverrides, raw.hiddenResourceIds);
   const recordings = mergeRecordings(raw.recordings, raw.recordingOverrides, raw.hiddenRecordingIds);
-  const notes = mergeNotes(raw.notes);
+  const notes = mergeNotes(raw.notes, raw.noteOverrides, raw.hiddenNoteIds);
   const wordArchive = mergeWordArchive(raw.wordArchive);
 
   return {
@@ -129,6 +131,8 @@ export function useAdminState() {
     reorderRecordings: (lessonNumber: number, orderedIds: string[]) => send({ type: "reorderRecordings", lessonNumber, orderedIds }),
     addNote: (note: Note) => send({ type: "addNote", note }),
     removeNote: (id: string) => send({ type: "removeNote", id }),
+    updateNote: (id: string, patch: Partial<Note>) => send({ type: "updateNote", id, patch }),
+    reorderNotes: (lessonNumber: number, orderedIds: string[]) => send({ type: "reorderNotes", lessonNumber, orderedIds }),
     addWordEntry: (entry: WordEntry) => send({ type: "addWordEntry", entry }),
     removeWordEntry: (id: string) => send({ type: "removeWordEntry", id }),
   };
