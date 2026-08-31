@@ -1,0 +1,37 @@
+.wrap { display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; }
+
+.trigger {
+  border: 1px solid var(--hairline-ink);
+  background: var(--porcelain);
+  color: var(--blue);
+  padding: .4rem .8rem;
+  border-radius: 999px;
+  font-size: .64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.trigger:hover:not(:disabled) { border-color: var(--blue); background: rgba(31,58,95,.06); }
+.trigger:disabled { opacity: .6; }
+
+.panel {
+  width: 100%;
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-md);
+  background: var(--card-surface);
+  padding: .9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.panelLabel { font-size: .56rem; font-weight: 700; letter-spacing: .1em; color: var(--bordeaux); }
+.suggestion { font-size: .82rem; line-height: 1.55; color: var(--text-primary); margin: 0; white-space: pre-wrap; }
+.error { font-size: .78rem; color: var(--bordeaux); margin: 0; }
+
+.panelActions { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+.use { border: 0; background: var(--blue); color: #fff; padding: .45rem .9rem; border-radius: 999px; font-size: .66rem; font-weight: 700; }
+.use:hover { background: var(--blue-2); }
+
+.retry, .dismiss { border: 1px solid var(--hairline-ink); background: none; color: var(--text-primary); padding: .45rem .9rem; border-radius: 999px; font-size: .66rem; font-weight: 700; }
+.retry:hover, .dismiss:hover { border-color: var(--blue); color: var(--blue); }

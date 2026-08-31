@@ -9,6 +9,7 @@ import { usePortalState } from "@/lib/usePortalState";
 import { formatFileSize, uploadFileToR2 } from "@/lib/uploadFile";
 import { UploadDropzone } from "../UploadDropzone";
 import { AdminShell } from "../AdminShell";
+import { AiEnhanceButton } from "./AiEnhanceButton";
 import styles from "./AdminLessonsManager.module.css";
 
 const tabs = ["Course", "Recordings", "Resources", "Test and Assignments"] as const;
@@ -238,10 +239,12 @@ export function AdminLessonsManager() {
               <span>Title</span>
               <input value={courseTitle} onChange={(e) => setCourseTitle(e.target.value)} placeholder="e.g. TEF Canada — Expression orale" required />
             </label>
+            <AiEnhanceButton kind="title" value={courseTitle} context="a course title for a French class" onApply={setCourseTitle} />
             <label>
               <span>Description</span>
               <textarea value={courseDescription} onChange={(e) => setCourseDescription(e.target.value)} placeholder="What this course covers…" />
             </label>
+            <AiEnhanceButton kind="description" value={courseDescription} context="a course description for a French class" onApply={setCourseDescription} />
             <button type="submit" className={styles.save}>Add course</button>
           </form>
 
@@ -437,6 +440,7 @@ export function AdminLessonsManager() {
               <label>
                 <span>Title</span>
                 <input value={aTitle} onChange={(e) => setATitle(e.target.value)} placeholder="e.g. Writing · Opinion essay" required />
+                <AiEnhanceButton kind="title" value={aTitle} context="a homework/test title for a French class" onApply={setATitle} />
               </label>
               <label>
                 <span>Category</span>
@@ -453,6 +457,7 @@ export function AdminLessonsManager() {
               <span>Description</span>
               <textarea value={aDescription} onChange={(e) => setADescription(e.target.value)} placeholder="What the student needs to do…" />
             </label>
+            <AiEnhanceButton kind="description" value={aDescription} context="a homework/test description for a French class" onApply={setADescription} />
             <button type="submit" className={styles.save}>Add</button>
           </form>
 
