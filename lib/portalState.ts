@@ -58,3 +58,49 @@ export type PortalStateAction =
   | { type: "addAssignment"; assignment: Assignment }
   | { type: "removeAssignment"; id: string }
   | { type: "updateAssignment"; id: string; patch: Partial<Assignment> };
+
+// Pure reducer shared by the API route (authoritative, persisted write) and
+// the client hook (optimistic local update, applied instantly so the UI
+// doesn't wait on a round trip to R2 before a delete/edit is reflected).
+export function applyPortalAction(state: PortalState, action: PortalStateAction): PortalState {
+  switch (action.type) {
+    case "addCourse":
+      return { ...state, courses: [action.course, ...state.courses] };
+    case "removeCourse":
+      return { ...state, hiddenCourseIds: [...state.hiddenCourseIds, action.id] };
+    case "updateCourse":
+      return {
+        ...state,
+        courseOverrides: { ...state.courseOverrides, [action.id]: { ...state.courseOverrides[action.id], ...action.patch } },
+      };
+    case "addRecording":
+      return { ...state, recordings: [action.recording, ...state.recordings] };
+    case "removeRecording":
+      return { ...state, hiddenRecordingIds: [...state.hiddenRecordingIds, action.id] };
+    case "updateRecording":
+      return {
+        ...state,
+        recordingOverrides: { ...state.recordingOverrides, [action.id]: { ...state.recordingOverrides[action.id], ...action.patch } },
+      };
+    case "addResource":
+      return { ...state, resources: [action.resource, ...state.resources] };
+    case "removeResource":
+      return { ...state, hiddenResourceIds: [...state.hiddenResourceIds, action.id] };
+    case "updateResource":
+      return {
+        ...state,
+        resourceOverrides: { ...state.resourceOverrides, [action.id]: { ...state.resourceOverrides[action.id], ...action.patch } },
+      };
+    case "addAssignment":
+      return { ...state, assignments: [action.assignment, ...state.assignments] };
+    case "removeAssignment":
+      return { ...state, hiddenAssignmentIds: [...state.hiddenAssignmentIds, action.id] };
+    case "updateAssignment":
+      return {
+        ...state,
+        assignmentOverrides: { ...state.assignmentOverrides, [action.id]: { ...state.assignmentOverrides[action.id], ...action.patch } },
+      };
+    default:
+      return state;
+  }
+}

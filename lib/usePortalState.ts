@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { defaultPortalState, type PortalState, type PortalStateAction } from "./portalState";
+import { applyPortalAction, defaultPortalState, type PortalState, type PortalStateAction } from "./portalState";
 import { courses as seedCourses, type CourseItem } from "./courseCatalog";
 import { recordings as seedRecordings, type Recording } from "./recordingData";
 import { resources as seedResources, type Resource } from "./resourceData";
@@ -43,7 +43,12 @@ export function usePortalState() {
     };
   }, [refresh]);
 
+  // Applies the edit to local state immediately (so a delete/edit feels
+  // instant instead of waiting on a round trip to R2) and persists it in
+  // the background; the response — or the next poll — reconciles with the
+  // authoritative server state.
   const send = useCallback(async (action: PortalStateAction) => {
+    setRaw((prev) => applyPortalAction(prev, action));
     try {
       const res = await fetch("/api/portal-state", {
         method: "POST",
