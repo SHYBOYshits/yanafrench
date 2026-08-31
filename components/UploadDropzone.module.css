@@ -54,3 +54,8 @@
 
 .dismissBtn { border: 1px solid rgba(182,58,58,.35); background: none; color: var(--bordeaux); padding: .4rem .9rem; border-radius: 999px; font-size: .64rem; font-weight: 700; white-space: nowrap; }
 .dismissBtn:hover { background: rgba(182,58,58,.06); }
+
+.errorActions { display: flex; gap: .5rem; }
+
+.retryBtn { border: 1px solid var(--hairline-ink); background: none; color: var(--blue); padding: .4rem .9rem; border-radius: 999px; font-size: .64rem; font-weight: 700; white-space: nowrap; }
+.retryBtn:hover { border-color: var(--blue); background: rgba(31,58,95,.06); }

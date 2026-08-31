@@ -71,6 +71,13 @@ export function UploadDropzone({
     });
   }
 
+  function retry(id: string) {
+    const item = items.find((it) => it.id === id);
+    if (!item) return;
+    setItems((prev) => prev.filter((it) => it.id !== id));
+    startUpload(item.file);
+  }
+
   return (
     <div>
       <div
@@ -127,10 +134,14 @@ export function UploadDropzone({
                 )}
               </div>
               {it.status === "done" && <span className={styles.statusDone}>✓ Uploaded</span>}
-              {(it.status === "uploading" || it.status === "error") && (
-                <button type="button" className={styles.dismissBtn} onClick={() => dismiss(it.id)}>
-                  {it.status === "uploading" ? "Cancel" : "Remove"}
-                </button>
+              {it.status === "uploading" && (
+                <button type="button" className={styles.dismissBtn} onClick={() => dismiss(it.id)}>Cancel</button>
+              )}
+              {it.status === "error" && (
+                <div className={styles.errorActions}>
+                  <button type="button" className={styles.retryBtn} onClick={() => retry(it.id)}>Retry</button>
+                  <button type="button" className={styles.dismissBtn} onClick={() => dismiss(it.id)}>Remove</button>
+                </div>
               )}
             </div>
           ))}

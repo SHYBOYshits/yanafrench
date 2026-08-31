@@ -22,10 +22,13 @@ export async function POST(req: Request) {
   const key = `resources/${Date.now()}-${filename.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
 
   try {
+    // A large video on a slow connection can take a while to finish
+    // uploading — give the presigned URL a generous window so it doesn't
+    // expire mid-transfer.
     const uploadUrl = await getSignedUrl(
       r2.client,
       new PutObjectCommand({ Bucket: r2.bucket, Key: key, ContentType: contentType }),
-      { expiresIn: 600 }
+      { expiresIn: 3600 }
     );
 
     const publicBase = process.env.R2_PUBLIC_URL;
