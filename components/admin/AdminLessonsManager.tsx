@@ -9,6 +9,7 @@ import { usePortalState } from "@/lib/usePortalState";
 import { formatFileSize, uploadFileToR2 } from "@/lib/uploadFile";
 import { UploadDropzone } from "../UploadDropzone";
 import { AdminShell } from "../AdminShell";
+import { IconPlay, IconVideoFrame } from "../Icons";
 import { AiEnhanceButton } from "./AiEnhanceButton";
 import styles from "./AdminLessonsManager.module.css";
 
@@ -37,6 +38,52 @@ function PublishToggle({ published, onToggle }: { published: boolean; onToggle: 
     <button type="button" className={published ? styles.publishedBadge : styles.draftBadge} onClick={onToggle}>
       {published ? "Published — click to unpublish" : "Draft — click to publish"}
     </button>
+  );
+}
+
+function LessonRow({
+  video,
+  index,
+  onRename,
+  onDelete,
+}: {
+  video: CourseVideo;
+  index: number;
+  onRename: (title: string) => void;
+  onDelete: () => void;
+}) {
+  const [previewing, setPreviewing] = useState(false);
+
+  return (
+    <div className={styles.lessonRow}>
+      <div className={styles.lessonRowMain}>
+        <IconVideoFrame size={18} />
+        <div className={styles.lessonRowText}>
+          <small>Lesson {index + 1}</small>
+          <input
+            className={styles.itemTitleInput}
+            defaultValue={video.title}
+            onBlur={(e) => e.target.value !== video.title && onRename(e.target.value)}
+          />
+          {video.sizeBytes ? <span className={styles.lessonRowMeta}>{formatFileSize(video.sizeBytes)}</span> : null}
+        </div>
+      </div>
+      <div className={styles.lessonRowActions}>
+        <button
+          type="button"
+          className={styles.previewToggle}
+          onClick={() => setPreviewing((v) => !v)}
+          disabled={!video.videoUrl}
+        >
+          <IconPlay size={13} />
+          {previewing ? "Hide" : "Preview"}
+        </button>
+        <button type="button" className={styles.remove} onClick={onDelete}>Delete</button>
+      </div>
+      {previewing && video.videoUrl ? (
+        <video src={video.videoUrl} controls preload="metadata" className={styles.lessonPreviewPlayer} />
+      ) : null}
+    </div>
   );
 }
 
@@ -278,27 +325,21 @@ export function AdminLessonsManager() {
                 />
 
                 <div className={styles.courseSection}>
-                  <span className={styles.sectionLabel}>VIDEOS</span>
+                  <span className={styles.sectionLabel}>LESSONS</span>
                   <UploadDropzone
                     accept="video/*"
                     hint="Upload one or more lecture videos"
                     onUploaded={(fileUrl, file) => handleAddVideosToCourse(course, fileUrl, file)}
                   />
-                  <div className={styles.itemGrid}>
-                    {course.videos.map((v) => (
-                      <div key={v.id} className={styles.item}>
-                        <input
-                          className={styles.itemTitleInput}
-                          defaultValue={v.title}
-                          onBlur={(e) => {
-                            if (e.target.value !== v.title) {
-                              updateCourse(course.id, { videos: course.videos.map((x) => (x.id === v.id ? { ...x, title: e.target.value } : x)) });
-                            }
-                          }}
-                        />
-                        <small>{v.sizeBytes ? formatFileSize(v.sizeBytes) : ""}</small>
-                        <button type="button" className={styles.remove} onClick={() => removeVideoFromCourse(course, v.id)}>Delete</button>
-                      </div>
+                  <div className={styles.lessonRowList}>
+                    {course.videos.map((v, i) => (
+                      <LessonRow
+                        key={v.id}
+                        video={v}
+                        index={i}
+                        onRename={(title) => updateCourse(course.id, { videos: course.videos.map((x) => (x.id === v.id ? { ...x, title } : x)) })}
+                        onDelete={() => removeVideoFromCourse(course, v.id)}
+                      />
                     ))}
                   </div>
                 </div>

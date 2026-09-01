@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import type { CourseItem } from "@/lib/courseCatalog";
 import { assignmentCategories, type AssignmentStatus } from "@/lib/testData";
 import { usePortalState } from "@/lib/usePortalState";
 import { DashboardShell } from "./DashboardShell";
+import { IconPlay, IconVideoFrame } from "./Icons";
 import styles from "./LessonsPage.module.css";
 
 const tabs = ["Course", "Recordings", "Resources", "Test and Assignments"] as const;
@@ -24,6 +26,47 @@ const actionLabel: Record<AssignmentStatus, string> = {
   Reviewed: "View →",
   Completed: "View →",
 };
+
+function CourseLessons({ course }: { course: CourseItem }) {
+  const [activeVideoId, setActiveVideoId] = useState(course.videos[0]?.id ?? null);
+  const activeVideo = course.videos.find((v) => v.id === activeVideoId) ?? course.videos[0] ?? null;
+
+  return (
+    <div className={styles.courseSection}>
+      <span className={styles.courseSectionLabel}>LESSONS</span>
+      <div className={styles.lessonLayout}>
+        <nav className={styles.lessonList}>
+          {course.videos.map((v, i) => (
+            <button
+              key={v.id}
+              type="button"
+              className={v.id === activeVideo?.id ? styles.lessonRowActive : styles.lessonRow}
+              onClick={() => setActiveVideoId(v.id)}
+            >
+              <IconPlay size={15} />
+              <span className={styles.lessonRowText}>
+                <small>Lesson {i + 1}</small>
+                {v.title}
+              </span>
+            </button>
+          ))}
+        </nav>
+
+        <div className={styles.playerPane}>
+          {activeVideo?.videoUrl ? (
+            <video key={activeVideo.id} src={activeVideo.videoUrl} controls preload="metadata" className={styles.videoPlayer} />
+          ) : (
+            <div className={styles.videoPlaceholder}>
+              <IconVideoFrame size={26} />
+              <span>Video coming soon</span>
+            </div>
+          )}
+          {activeVideo && <p className={styles.playerCaption}>{activeVideo.title}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function LessonsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Course");
@@ -68,26 +111,7 @@ export function LessonsPage() {
                 <small className={styles.courseDate}>{c.date}</small>
                 <p className={styles.courseDescription}>{c.description}</p>
 
-                {c.videos.length > 0 && (
-                  <div className={styles.courseSection}>
-                    <span className={styles.courseSectionLabel}>VIDEOS</span>
-                    <div className={styles.mediaGrid}>
-                      {c.videos.map((v) =>
-                        v.videoUrl ? (
-                          <div key={v.id} className={styles.mediaItem}>
-                            <video src={v.videoUrl} controls preload="metadata" className={styles.mediaPlayer} />
-                            <small>{v.title}</small>
-                          </div>
-                        ) : (
-                          <div key={v.id} className={styles.mediaItem}>
-                            <div className={styles.mediaPlaceholder}>Coming soon</div>
-                            <small>{v.title}</small>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
+                {c.videos.length > 0 && <CourseLessons course={c} />}
 
                 {c.pdfs.length > 0 && (
                   <div className={styles.courseSection}>

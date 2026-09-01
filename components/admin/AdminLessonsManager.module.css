@@ -152,19 +152,47 @@
 .courseSection { padding-top: .9rem; border-top: 1px solid var(--hairline-ink); display: flex; flex-direction: column; gap: .8rem; }
 .sectionLabel { display: block; font-size: .58rem; font-weight: 700; letter-spacing: .1em; color: var(--bordeaux); }
 
-.itemGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .8rem; }
-.item {
+.lessonRowList { display: flex; flex-direction: column; gap: .6rem; }
+
+.lessonRow {
   border: 1px solid var(--hairline-ink);
   border-radius: var(--r-md);
   background: var(--porcelain);
-  padding: .8rem .9rem;
+  padding: .75rem .9rem;
   display: flex;
-  flex-direction: column;
-  gap: .4rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
 }
-.itemTitleInput { border: 0; background: none; font-size: .8rem; color: var(--text-primary); padding: 0; }
+
+.lessonRowMain { display: flex; align-items: flex-start; gap: .6rem; min-width: 200px; flex: 1 1 240px; color: var(--text-faint); }
+.lessonRowText { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.lessonRowText small { font-size: .58rem; font-weight: 700; letter-spacing: .08em; color: var(--bordeaux); text-transform: uppercase; }
+.lessonRowMeta { font-size: .64rem; color: var(--text-faint); }
+
+.itemTitleInput { border: 0; background: none; font-size: .82rem; color: var(--text-primary); padding: 0; font-family: var(--sans); width: 100%; }
 .itemTitleInput:focus { outline: none; }
-.item small { font-size: .64rem; color: var(--text-faint); }
+
+.lessonRowActions { display: flex; align-items: center; gap: .6rem; }
+
+.previewToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border: 1px solid var(--hairline-ink);
+  background: var(--card-surface);
+  color: var(--text-primary);
+  padding: .4rem .8rem;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.previewToggle:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+.previewToggle:disabled { opacity: .4; cursor: not-allowed; }
+
+.lessonPreviewPlayer { width: 100%; margin-top: .2rem; border-radius: var(--r-md); background: #000; max-height: 260px; }
 
 .deleteCourse { align-self: flex-start; border: 1px solid rgba(182,58,58,.35); background: none; color: var(--bordeaux); padding: .5rem 1rem; border-radius: 999px; font-size: .68rem; font-weight: 700; }
 .deleteCourse:hover { background: rgba(182,58,58,.06); }

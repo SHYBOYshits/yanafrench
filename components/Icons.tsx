@@ -73,3 +73,21 @@ export function IconGuidance({ size = 20 }: { size?: number }) {
     </svg>
   );
 }
+
+export function IconPlay({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9.2" stroke="currentColor" strokeWidth="1.4"/>
+      <path d="M10.2 8.6 15.6 12l-5.4 3.4V8.6Z" fill="currentColor" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function IconVideoFrame({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3.5" y="6" width="13" height="12" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+      <path d="M16.5 10.4 20.5 8v8l-4-2.4" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+    </svg>
+  );
+}
