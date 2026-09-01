@@ -310,6 +310,7 @@ function LessonRow({
 export function AdminLessonsManager() {
   const [activeTab, setActiveTab] = useState<Tab>("Course");
   const {
+    loaded,
     courses,
     addCourse,
     removeCourse,
@@ -524,6 +525,12 @@ export function AdminLessonsManager() {
         ))}
       </div>
 
+      {!loaded ? (
+        <div className={styles.tabPanel}>
+          <p className={styles.tabHint}>Loading…</p>
+        </div>
+      ) : (
+      <>
       {activeTab === "Course" && (
         <div className={styles.tabPanel}>
           <form className={styles.form} onSubmit={handleAddCourse}>
@@ -808,6 +815,8 @@ export function AdminLessonsManager() {
             ))}
           </div>
         </div>
+      )}
+      </>
       )}
     </AdminShell>
   );

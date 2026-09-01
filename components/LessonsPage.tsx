@@ -124,7 +124,7 @@ function CourseLessons({ course }: { course: CourseItem }) {
 export function LessonsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Course");
   const [category, setCategory] = useState<(typeof assignmentCategories)[number]>("All");
-  const { courses: allCourses, recordings: allRecordings, resources: allResources, assignments: allAssignments } = usePortalState();
+  const { loaded, courses: allCourses, recordings: allRecordings, resources: allResources, assignments: allAssignments } = usePortalState();
 
   const courses = allCourses.filter((c) => c.published);
   const recordings = allRecordings.filter((r) => r.published);
@@ -155,6 +155,10 @@ export function LessonsPage() {
         ))}
       </div>
 
+      {!loaded ? (
+        <div className={styles.empty}><p>Loading…</p></div>
+      ) : (
+      <>
       {activeTab === "Course" && (
         courses.length > 0 ? (
           <div className={styles.courseList}>
@@ -274,6 +278,8 @@ export function LessonsPage() {
             <div className={styles.empty}><p>Homework and tests will appear here.</p></div>
           )}
         </>
+      )}
+      </>
       )}
     </DashboardShell>
   );
