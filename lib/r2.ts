@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 // Server-only. Shared R2 (S3-compatible) client for small JSON documents
@@ -57,6 +57,30 @@ export async function resolveFileUrl(key: string): Promise<string> {
 // other uploaded object.
 export function buildUploadKey(filename: string): string {
   return `resources/${Date.now()}-${filename.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+}
+
+// Recovers the object key from a URL this app handed out for an uploaded
+// file — either the permanent public URL or a signed one, both of which
+// end in the key itself (see buildUploadKey). Returns null for anything
+// else (an admin-pasted external link, e.g. a YouTube URL), so callers can
+// tell "nothing to delete from R2" apart from "this is our object."
+export function extractUploadKey(url: string): string | null {
+  const match = url.match(/resources\/[^?]+/);
+  return match ? decodeURIComponent(match[0]) : null;
+}
+
+// Best-effort delete of an uploaded object — used when an admin deletes or
+// replaces a video/PDF, so the file doesn't keep sitting in the bucket
+// forever with nothing left pointing at it. Never throws: a cleanup
+// failure shouldn't block the admin's edit from going through.
+export async function deleteUploadedObject(key: string): Promise<void> {
+  const r2 = getR2Client();
+  if (!r2) return;
+  try {
+    await r2.client.send(new DeleteObjectCommand({ Bucket: r2.bucket, Key: key }));
+  } catch (error) {
+    console.error("Failed to delete R2 object", key, error);
+  }
 }
 
 export async function writeJson<T>(key: string, value: T): Promise<boolean> {

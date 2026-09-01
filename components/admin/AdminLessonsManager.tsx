@@ -6,6 +6,7 @@ import type { Recording } from "@/lib/recordingData";
 import type { Resource } from "@/lib/resourceData";
 import { assignmentCategories, type Assignment, type AssignmentStatus } from "@/lib/testData";
 import { usePortalState } from "@/lib/usePortalState";
+import { deleteFileFromR2 } from "@/lib/deleteFile";
 import { getFilesFromDataTransfer, matchesAccept } from "@/lib/dropFiles";
 import { formatFileSize, uploadFileToR2 } from "@/lib/uploadFile";
 import { UploadCancelledError, uploadVideoToR2, type VideoUploadHandle } from "@/lib/uploadVideoR2";
@@ -371,11 +372,21 @@ export function AdminLessonsManager() {
   }
 
   function removeVideoFromCourse(course: CourseItem, videoId: string) {
+    const video = course.videos.find((v) => v.id === videoId);
     updateCourse(course.id, { videos: course.videos.filter((v) => v.id !== videoId) });
+    deleteFileFromR2(video?.videoUrl);
   }
 
   function removePdfFromCourse(course: CourseItem, pdfId: string) {
+    const pdf = course.pdfs.find((p) => p.id === pdfId);
     updateCourse(course.id, { pdfs: course.pdfs.filter((p) => p.id !== pdfId) });
+    deleteFileFromR2(pdf?.fileUrl);
+  }
+
+  function deleteCourseAndFiles(course: CourseItem) {
+    removeCourse(course.id);
+    course.videos.forEach((v) => deleteFileFromR2(v.videoUrl));
+    course.pdfs.forEach((p) => deleteFileFromR2(p.fileUrl));
   }
 
   // Recordings
@@ -415,6 +426,7 @@ export function AdminLessonsManager() {
     try {
       const fileUrl = await uploadVideoToR2(file, () => {}).promise;
       updateRecording(recording.id, { videoUrl: fileUrl, sizeBytes: file.size, date: todayLabel() });
+      deleteFileFromR2(recording.videoUrl);
     } finally {
       setReplacingId(null);
     }
@@ -460,6 +472,7 @@ export function AdminLessonsManager() {
     try {
       const fileUrl = await uploadFileToR2(file);
       updateResource(resource.id, { fileUrl, fileType: inferResourceType(file), sizeBytes: file.size, date: todayLabel() });
+      deleteFileFromR2(resource.fileUrl);
     } finally {
       setReplacingId(null);
     }
@@ -589,7 +602,7 @@ export function AdminLessonsManager() {
                   type="button"
                   className={styles.deleteCourse}
                   onClick={() => {
-                    if (confirm(`Delete course "${course.title}"?`)) removeCourse(course.id);
+                    if (confirm(`Delete course "${course.title}"?`)) deleteCourseAndFiles(course);
                   }}
                 >
                   Delete course
@@ -642,7 +655,16 @@ export function AdminLessonsManager() {
                       }}
                     />
                   </label>
-                  <button type="button" className={styles.remove} onClick={() => removeRecording(r.id)}>Delete</button>
+                  <button
+                    type="button"
+                    className={styles.remove}
+                    onClick={() => {
+                      removeRecording(r.id);
+                      deleteFileFromR2(r.videoUrl);
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
@@ -697,7 +719,16 @@ export function AdminLessonsManager() {
                       }}
                     />
                   </label>
-                  <button type="button" className={styles.remove} onClick={() => removeResource(r.id)}>Delete</button>
+                  <button
+                    type="button"
+                    className={styles.remove}
+                    onClick={() => {
+                      removeResource(r.id);
+                      deleteFileFromR2(r.fileUrl);
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
