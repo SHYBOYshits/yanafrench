@@ -6,7 +6,7 @@ import type { Recording } from "@/lib/recordingData";
 import { assignmentCategories, type AssignmentStatus } from "@/lib/testData";
 import { usePortalState } from "@/lib/usePortalState";
 import { DashboardShell } from "./DashboardShell";
-import { IconPlay, IconVideoFrame } from "./Icons";
+import { IconAttachment, IconPlay, IconVideoFrame } from "./Icons";
 import styles from "./LessonsPage.module.css";
 
 const tabs = ["Course", "Recordings", "Resources", "Test and Assignments"] as const;
@@ -302,6 +302,12 @@ export function LessonsPage() {
                   </div>
                   <strong>{a.title}</strong>
                   <p>{a.description}</p>
+                  {a.attachmentUrl && (
+                    <a href={a.attachmentUrl} target="_blank" rel="noreferrer" className={styles.assignmentAttachment}>
+                      <IconAttachment size={14} />
+                      {a.attachmentName ?? "View attachment"}
+                    </a>
+                  )}
                   <div className={styles.assignmentFooter}>
                     <div>
                       <small className={styles.deadline}>{a.deadline}</small>

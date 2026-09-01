@@ -486,6 +486,7 @@ export function AdminLessonsManager() {
   const [aDescription, setADescription] = useState("");
   const [aCategory, setACategory] = useState<Assignment["category"]>(realCategories[0]);
   const [aDeadline, setADeadline] = useState("");
+  const [aAttachment, setAAttachment] = useState<{ url: string; name: string } | null>(null);
 
   function handleAddAssignment(e: FormEvent) {
     e.preventDefault();
@@ -498,10 +499,23 @@ export function AdminLessonsManager() {
       deadline: aDeadline.trim() || "No deadline set",
       status: "Not started",
       published: true,
+      attachmentUrl: aAttachment?.url,
+      attachmentName: aAttachment?.name,
     });
     setATitle("");
     setADescription("");
     setADeadline("");
+    setAAttachment(null);
+  }
+
+  function handleReplaceAssignmentAttachment(assignment: Assignment, fileUrl: string, file: File) {
+    updateAssignment(assignment.id, { attachmentUrl: fileUrl, attachmentName: file.name });
+    deleteFileFromR2(assignment.attachmentUrl);
+  }
+
+  function removeAssignmentAttachment(assignment: Assignment) {
+    updateAssignment(assignment.id, { attachmentUrl: undefined, attachmentName: undefined });
+    deleteFileFromR2(assignment.attachmentUrl);
   }
 
   return (
@@ -793,6 +807,32 @@ export function AdminLessonsManager() {
               <textarea value={aDescription} onChange={(e) => setADescription(e.target.value)} placeholder="What the student needs to do…" />
             </label>
             <AiEnhanceButton kind="description" value={aDescription} context="a homework/test description for a French class" onApply={setADescription} />
+
+            <label className={styles.fullWidth}>
+              <span>Attachment (optional)</span>
+              {aAttachment ? (
+                <div className={styles.attachmentChip}>
+                  <span>{aAttachment.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      deleteFileFromR2(aAttachment.url);
+                      setAAttachment(null);
+                    }}
+                  >
+                    <IconClose size={12} />
+                  </button>
+                </div>
+              ) : (
+                <UploadDropzone
+                  accept=".mp3,.pdf,.ppt,.pptx,.jpg,.jpeg,.png"
+                  hint="MP3, PDF, PPT, JPG or PNG"
+                  multiple={false}
+                  onUploaded={(fileUrl, file) => setAAttachment({ url: fileUrl, name: file.name })}
+                />
+              )}
+            </label>
+
             <button type="submit" className={styles.save}>Add</button>
           </form>
 
@@ -834,7 +874,50 @@ export function AdminLessonsManager() {
                     onBlur={(e) => updateAssignment(a.id, { feedback: e.target.value || undefined })}
                   />
                 </label>
-                <button type="button" className={styles.remove} onClick={() => removeAssignment(a.id)}>Delete</button>
+
+                <div className={styles.assignmentAttachmentRow}>
+                  {a.attachmentUrl ? (
+                    <>
+                      <a href={a.attachmentUrl} target="_blank" rel="noreferrer" className={styles.rowLink}>
+                        {a.attachmentName ?? "View attachment"}
+                      </a>
+                      <label className={styles.rowLink}>
+                        Replace
+                        <input
+                          type="file"
+                          hidden
+                          accept=".mp3,.pdf,.ppt,.pptx,.jpg,.jpeg,.png"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (!file) return;
+                            const fileUrl = await uploadFileToR2(file);
+                            handleReplaceAssignmentAttachment(a, fileUrl, file);
+                          }}
+                        />
+                      </label>
+                      <button type="button" className={styles.remove} onClick={() => removeAssignmentAttachment(a)}>Remove attachment</button>
+                    </>
+                  ) : (
+                    <label className={styles.rowLink}>
+                      + Add attachment
+                      <input
+                        type="file"
+                        hidden
+                        accept=".mp3,.pdf,.ppt,.pptx,.jpg,.jpeg,.png"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          e.target.value = "";
+                          if (!file) return;
+                          const fileUrl = await uploadFileToR2(file);
+                          updateAssignment(a.id, { attachmentUrl: fileUrl, attachmentName: file.name });
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+
+                <button type="button" className={styles.remove} onClick={() => { removeAssignment(a.id); deleteFileFromR2(a.attachmentUrl); }}>Delete</button>
               </div>
             ))}
           </div>

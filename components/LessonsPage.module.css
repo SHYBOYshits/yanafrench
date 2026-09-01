@@ -199,6 +199,19 @@ a.fileChip:hover { border-color: var(--bordeaux); color: var(--bordeaux); }
 .assignmentCard strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1.15rem; color: var(--text-primary); margin-bottom: .4rem; }
 .assignmentCard p { font-size: .78rem; line-height: 1.6; color: var(--text-faint); margin: 0; }
 
+.assignmentAttachment {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .8rem;
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--blue);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.assignmentAttachment:hover { border-color: var(--blue); }
+
 .assignmentFooter { display: flex; align-items: center; justify-content: space-between; margin-top: 1.1rem; padding-top: .9rem; border-top: 1px solid var(--hairline-ink); }
 
 .deadline { display: block; font-size: .68rem; color: var(--text-faint); }

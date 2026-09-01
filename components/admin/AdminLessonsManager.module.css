@@ -354,6 +354,23 @@
 .assignmentHead strong { display: block; font-size: .9rem; font-weight: 700; color: var(--text-primary); }
 .assignmentHead small { font-size: .66rem; color: var(--bordeaux); font-weight: 700; letter-spacing: .06em; }
 
+.attachmentChip {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  align-self: flex-start;
+  border: 1px solid var(--hairline-ink);
+  border-radius: 999px;
+  background: var(--porcelain);
+  padding: .45rem .5rem .45rem .9rem;
+  font-size: .72rem;
+  color: var(--text-primary);
+}
+.attachmentChip button { display: inline-flex; border: 0; background: none; color: var(--text-faint); padding: .15rem; border-radius: 999px; }
+.attachmentChip button:hover { color: var(--bordeaux); }
+
+.assignmentAttachmentRow { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+
 @media (max-width: 620px) {
   .fieldGrid { grid-template-columns: 1fr; }
   .row { flex-direction: column; align-items: flex-start; }

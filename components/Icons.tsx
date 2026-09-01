@@ -109,6 +109,20 @@ export function IconCheck({ size = 14 }: { size?: number }) {
   );
 }
 
+export function IconAttachment({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M16.5 6.5 9 14a3 3 0 1 0 4.24 4.24l6.5-6.5a5 5 0 1 0-7.07-7.07L5.5 11.83"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function IconClose({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">

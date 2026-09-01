@@ -10,6 +10,8 @@ export type Assignment = {
   published: boolean;
   score?: string;
   feedback?: string;
+  attachmentUrl?: string;
+  attachmentName?: string;
 };
 
 // Seed assignments.
