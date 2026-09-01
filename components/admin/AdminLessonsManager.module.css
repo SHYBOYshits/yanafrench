@@ -176,23 +176,64 @@
 
 .lessonRowActions { display: flex; align-items: center; gap: .6rem; }
 
-.previewToggle {
+.lessonPreviewPlayer { width: 100%; display: block; margin-top: .2rem; border-radius: var(--r-md); background: #000; max-height: 260px; }
+
+/* Video upload widget (Course tab) */
+.uploadWidget { display: flex; flex-direction: column; gap: .6rem; align-items: flex-start; }
+
+.uploadButton {
   display: inline-flex;
   align-items: center;
-  gap: .35rem;
-  border: 1px solid var(--hairline-ink);
-  background: var(--card-surface);
-  color: var(--text-primary);
-  padding: .4rem .8rem;
+  gap: .4rem;
+  border: 1px dashed var(--hairline-ink-hover, rgba(23,25,28,.2));
+  background: none;
+  color: var(--text-faint);
+  padding: .55rem 1rem;
   border-radius: 999px;
   font-size: .68rem;
   font-weight: 700;
-  white-space: nowrap;
 }
-.previewToggle:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
-.previewToggle:disabled { opacity: .4; cursor: not-allowed; }
+.uploadButton:hover { border-color: var(--bordeaux); color: var(--bordeaux); }
 
-.lessonPreviewPlayer { width: 100%; margin-top: .2rem; border-radius: var(--r-md); background: #000; max-height: 260px; }
+.uploadProgressRow { display: flex; align-items: center; gap: .6rem; }
+.uploadProgressTrack { height: 6px; width: 9rem; border-radius: 999px; background: var(--porcelain); overflow: hidden; }
+.uploadProgressFill { height: 100%; border-radius: 999px; background: var(--bordeaux); transition: width .2s ease; }
+.uploadProgressPct { width: 2.4rem; font-size: .64rem; font-weight: 700; color: var(--text-faint); }
+.uploadCancel { display: inline-flex; border: 0; background: none; color: var(--text-faint); padding: .2rem; border-radius: 999px; }
+.uploadCancel:hover { color: var(--bordeaux); }
+
+.uploadError { font-size: .68rem; color: var(--bordeaux); margin: 0; }
+
+.uploadDone { display: flex; align-items: center; gap: .35rem; font-size: .68rem; font-weight: 700; color: #2f6b47; margin: 0 0 .4rem; }
+.uploadDoneName { font-weight: 400; color: rgba(47,107,71,.75); }
+
+/* Click-to-play video preview (upload widget + lesson rows) */
+.videoPreviewBox { position: relative; margin-top: .3rem; border-radius: var(--r-md); overflow: hidden; background: #000; }
+.videoPreviewBox .lessonPreviewPlayer { margin-top: 0; }
+
+.playOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: rgba(0,0,0,.25);
+  cursor: pointer;
+}
+.playOverlay:hover { background: rgba(0,0,0,.35); }
+
+.playCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.92);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lift);
+}
 
 .deleteCourse { align-self: flex-start; border: 1px solid rgba(182,58,58,.35); background: none; color: var(--bordeaux); padding: .5rem 1rem; border-radius: 999px; font-size: .68rem; font-weight: 700; }
 .deleteCourse:hover { background: rgba(182,58,58,.06); }

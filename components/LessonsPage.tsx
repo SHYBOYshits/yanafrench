@@ -11,6 +11,54 @@ import styles from "./LessonsPage.module.css";
 const tabs = ["Course", "Recordings", "Resources", "Test and Assignments"] as const;
 type Tab = (typeof tabs)[number];
 
+function getYouTubeEmbedUrl(url: string): string | null {
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{6,})/
+  );
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
+function getVimeoEmbedUrl(url: string): string | null {
+  const match = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  return match ? `https://player.vimeo.com/video/${match[1]}` : null;
+}
+
+function isDirectFileUrl(url: string): boolean {
+  return /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+}
+
+/**
+ * Renders whatever's actually at a lesson video's URL — YouTube/Vimeo
+ * embed, a direct video file, or a plain external link — without assuming
+ * every lesson video is a direct file upload.
+ */
+function VideoEmbed({ url, title, className }: { url: string; title: string; className: string }) {
+  const embedUrl = getYouTubeEmbedUrl(url) ?? getVimeoEmbedUrl(url);
+
+  if (embedUrl) {
+    return (
+      <iframe
+        src={embedUrl}
+        title={title}
+        className={className}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    );
+  }
+
+  if (isDirectFileUrl(url)) {
+    return <video src={url} controls preload="metadata" className={className} />;
+  }
+
+  return (
+    <a href={url} target="_blank" rel="noreferrer" className={`${className} ${styles.videoLinkFallback}`}>
+      <IconVideoFrame size={22} />
+      <span>Open Video</span>
+    </a>
+  );
+}
+
 const statusStyles: Record<AssignmentStatus, string> = {
   "Not started": "statusNeutral",
   "In progress": "statusActive",
@@ -54,7 +102,12 @@ function CourseLessons({ course }: { course: CourseItem }) {
 
         <div className={styles.playerPane}>
           {activeVideo?.videoUrl ? (
-            <video key={activeVideo.id} src={activeVideo.videoUrl} controls preload="metadata" className={styles.videoPlayer} />
+            <VideoEmbed
+              key={activeVideo.id}
+              url={activeVideo.videoUrl}
+              title={activeVideo.title}
+              className={styles.videoPlayer}
+            />
           ) : (
             <div className={styles.videoPlaceholder}>
               <IconVideoFrame size={26} />

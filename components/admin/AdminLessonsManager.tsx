@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { CourseItem, CoursePdf, CourseVideo } from "@/lib/courseCatalog";
 import type { Recording } from "@/lib/recordingData";
 import type { Resource } from "@/lib/resourceData";
 import { assignmentCategories, type Assignment, type AssignmentStatus } from "@/lib/testData";
 import { usePortalState } from "@/lib/usePortalState";
-import { formatFileSize, uploadFileToR2 } from "@/lib/uploadFile";
+import { formatFileSize, presignUpload, putFileToR2, uploadFileToR2 } from "@/lib/uploadFile";
 import { UploadDropzone } from "../UploadDropzone";
 import { AdminShell } from "../AdminShell";
-import { IconPlay, IconVideoFrame } from "../Icons";
+import { IconCheck, IconClose, IconPlay, IconUpload, IconVideoFrame } from "../Icons";
 import { AiEnhanceButton } from "./AiEnhanceButton";
 import styles from "./AdminLessonsManager.module.css";
 
@@ -41,6 +41,129 @@ function PublishToggle({ published, onToggle }: { published: boolean; onToggle: 
   );
 }
 
+/**
+ * Adds one lesson video at a time: a dashed pill button that turns into a
+ * progress bar while uploading, then a confirmation + click-to-play preview
+ * before resetting so the next lesson video can be added — the course's
+ * video list (below) is the actual source of truth once a video lands
+ * there, so this widget doesn't need to "hold onto" what it just uploaded.
+ */
+function VideoUploadWidget({ onUploaded }: { onUploaded: (fileUrl: string, file: File) => void }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
+  const [progress, setProgress] = useState<number | null>(null);
+  const [done, setDone] = useState<{ fileName: string; previewUrl: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (done?.previewUrl) URL.revokeObjectURL(done.previewUrl);
+    };
+  }, [done]);
+
+  async function handleFile(file: File) {
+    setError(null);
+    setDone(null);
+    setIsPlaying(false);
+    setProgress(0);
+    try {
+      const { uploadUrl, fileUrl } = await presignUpload(file);
+      const { promise, xhr } = putFileToR2(uploadUrl, file, (percent) => setProgress(percent));
+      xhrRef.current = xhr;
+      await promise;
+      xhrRef.current = null;
+      setProgress(null);
+      setDone({ fileName: file.name, previewUrl: URL.createObjectURL(file) });
+      onUploaded(fileUrl, file);
+    } catch (err) {
+      xhrRef.current = null;
+      setProgress(null);
+      setError(err instanceof Error ? err.message : "Upload failed.");
+    }
+  }
+
+  function cancelUpload() {
+    xhrRef.current?.abort();
+    xhrRef.current = null;
+    setProgress(null);
+  }
+
+  return (
+    <div className={styles.uploadWidget}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/*"
+        hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void handleFile(file);
+          e.target.value = "";
+        }}
+      />
+
+      {progress === null ? (
+        <button type="button" className={styles.uploadButton} onClick={() => fileInputRef.current?.click()}>
+          <IconUpload size={14} />
+          {done ? "Upload Another Video" : "Upload Video File"}
+        </button>
+      ) : (
+        <div className={styles.uploadProgressRow}>
+          <div className={styles.uploadProgressTrack}>
+            <div className={styles.uploadProgressFill} style={{ width: `${progress}%` }} />
+          </div>
+          <span className={styles.uploadProgressPct}>{progress}%</span>
+          <button type="button" className={styles.uploadCancel} onClick={cancelUpload} aria-label="Cancel upload">
+            <IconClose size={13} />
+          </button>
+        </div>
+      )}
+
+      {error && <p className={styles.uploadError}>{error}</p>}
+
+      {done && (
+        <div>
+          <p className={styles.uploadDone}>
+            <IconCheck size={13} />
+            Video has been uploaded
+            <span className={styles.uploadDoneName}>— {done.fileName}</span>
+          </p>
+          <div className={styles.videoPreviewBox}>
+            <video
+              ref={previewVideoRef}
+              src={done.previewUrl}
+              controls={isPlaying}
+              preload="metadata"
+              playsInline
+              className={styles.lessonPreviewPlayer}
+              onClick={() => {
+                if (isPlaying) return;
+                setIsPlaying(true);
+                previewVideoRef.current?.play();
+              }}
+            />
+            {!isPlaying && (
+              <button
+                type="button"
+                className={styles.playOverlay}
+                aria-label="Play video"
+                onClick={() => {
+                  setIsPlaying(true);
+                  previewVideoRef.current?.play();
+                }}
+              >
+                <span className={styles.playCircle}><IconPlay size={20} /></span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LessonRow({
   video,
   index,
@@ -52,7 +175,8 @@ function LessonRow({
   onRename: (title: string) => void;
   onDelete: () => void;
 }) {
-  const [previewing, setPreviewing] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   return (
     <div className={styles.lessonRow}>
@@ -69,20 +193,38 @@ function LessonRow({
         </div>
       </div>
       <div className={styles.lessonRowActions}>
-        <button
-          type="button"
-          className={styles.previewToggle}
-          onClick={() => setPreviewing((v) => !v)}
-          disabled={!video.videoUrl}
-        >
-          <IconPlay size={13} />
-          {previewing ? "Hide" : "Preview"}
-        </button>
         <button type="button" className={styles.remove} onClick={onDelete}>Delete</button>
       </div>
-      {previewing && video.videoUrl ? (
-        <video src={video.videoUrl} controls preload="metadata" className={styles.lessonPreviewPlayer} />
-      ) : null}
+      {video.videoUrl && (
+        <div className={styles.videoPreviewBox}>
+          <video
+            ref={videoRef}
+            src={video.videoUrl}
+            controls={isPlaying}
+            preload="metadata"
+            playsInline
+            className={styles.lessonPreviewPlayer}
+            onClick={() => {
+              if (isPlaying) return;
+              setIsPlaying(true);
+              videoRef.current?.play();
+            }}
+          />
+          {!isPlaying && (
+            <button
+              type="button"
+              className={styles.playOverlay}
+              aria-label="Play video"
+              onClick={() => {
+                setIsPlaying(true);
+                videoRef.current?.play();
+              }}
+            >
+              <span className={styles.playCircle}><IconPlay size={20} /></span>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -326,11 +468,7 @@ export function AdminLessonsManager() {
 
                 <div className={styles.courseSection}>
                   <span className={styles.sectionLabel}>LESSONS</span>
-                  <UploadDropzone
-                    accept="video/*"
-                    hint="Upload one or more lecture videos"
-                    onUploaded={(fileUrl, file) => handleAddVideosToCourse(course, fileUrl, file)}
-                  />
+                  <VideoUploadWidget onUploaded={(fileUrl, file) => handleAddVideosToCourse(course, fileUrl, file)} />
                   <div className={styles.lessonRowList}>
                     {course.videos.map((v, i) => (
                       <LessonRow
