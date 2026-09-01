@@ -1,11 +1,62 @@
 "use client";
 
+import { useState } from "react";
 import { usePortalState } from "@/lib/usePortalState";
 import { AdminShell } from "../AdminShell";
+import { WordOfWeekAiButton } from "./WordOfWeekAiButton";
 import styles from "./AdminLessonsManager.module.css";
 
 function todayLabel() {
   return new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" });
+}
+
+/** Controlled word/meaning fields, remounted (via the `key` its parent
+ * passes) whenever the saved value changes from elsewhere — so typing
+ * doesn't fight a concurrent admin edit or the AI suggestion, but a fresh
+ * external value still shows up. */
+function WordOfWeekFields({
+  word,
+  meaning,
+  onSave,
+}: {
+  word: string;
+  meaning: string;
+  onSave: (next: { word: string; meaning: string }) => void;
+}) {
+  const [wordDraft, setWordDraft] = useState(word);
+  const [meaningDraft, setMeaningDraft] = useState(meaning);
+
+  function commit(next: { word: string; meaning: string }) {
+    setWordDraft(next.word);
+    setMeaningDraft(next.meaning);
+    if (next.word.trim() && (next.word !== word || next.meaning !== meaning)) onSave(next);
+  }
+
+  return (
+    <>
+      <div className={styles.fieldGrid}>
+        <label>
+          <span>Word</span>
+          <input
+            value={wordDraft}
+            onChange={(e) => setWordDraft(e.target.value)}
+            onBlur={() => commit({ word: wordDraft, meaning: meaningDraft })}
+            placeholder="e.g. pourtant"
+          />
+        </label>
+        <label>
+          <span>Meaning</span>
+          <input
+            value={meaningDraft}
+            onChange={(e) => setMeaningDraft(e.target.value)}
+            onBlur={() => commit({ word: wordDraft, meaning: meaningDraft })}
+            placeholder="e.g. however · yet"
+          />
+        </label>
+      </div>
+      <WordOfWeekAiButton word={wordDraft} onApply={commit} />
+    </>
+  );
 }
 
 // Word of the Week and Today's Note — small admin-authored highlights
@@ -30,26 +81,7 @@ export function AdminHighlightsPage() {
         <div className={styles.tabPanel}>
           <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
             <h2>Word of the week</h2>
-            <div className={styles.fieldGrid}>
-              <label>
-                <span>Word</span>
-                <input
-                  key={wordOfWeek.word}
-                  defaultValue={wordOfWeek.word}
-                  placeholder="e.g. pourtant"
-                  onBlur={(e) => e.target.value.trim() && e.target.value !== wordOfWeek.word && setWordOfWeek({ word: e.target.value.trim(), meaning: wordOfWeek.meaning })}
-                />
-              </label>
-              <label>
-                <span>Meaning</span>
-                <input
-                  key={wordOfWeek.meaning}
-                  defaultValue={wordOfWeek.meaning}
-                  placeholder="e.g. however · yet"
-                  onBlur={(e) => e.target.value !== wordOfWeek.meaning && setWordOfWeek({ word: wordOfWeek.word, meaning: e.target.value.trim() })}
-                />
-              </label>
-            </div>
+            <WordOfWeekFields key={`${wordOfWeek.word}-${wordOfWeek.meaning}`} word={wordOfWeek.word} meaning={wordOfWeek.meaning} onSave={setWordOfWeek} />
           </form>
 
           <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
