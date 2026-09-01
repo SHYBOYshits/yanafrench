@@ -4,8 +4,18 @@
 // same live document that already backs Available Batches on the public
 // site and, via generateClassEvents below, the student's calendar.
 
-import type { CalendarEvent } from "./calendarData";
 import { site } from "./site";
+
+export type ClassEvent = {
+  id: string;
+  batchId: string;
+  title: string;
+  date: Date;
+  time: string;
+  course: BatchCourse;
+  teacher: string;
+  meetingLink?: string;
+};
 
 export type BatchCourse = "TEF" | "TCF" | "DELF";
 export type BatchStatus = "available" | "few_seats" | "full" | "waitlist";
@@ -65,7 +75,7 @@ export function statusText(batch: Batch) {
 // is derived fresh from the batch's days/times every time the calendar
 // renders, so an admin edit to the batch instantly reshapes every future
 // occurrence instead of leaving stale copies behind.
-export function generateClassEvents(batch: Batch, meetingLink: string, horizonDays = 90): CalendarEvent[] {
+export function generateClassEvents(batch: Batch, meetingLink: string, horizonDays = 90): ClassEvent[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -80,13 +90,13 @@ export function generateClassEvents(batch: Batch, meetingLink: string, horizonDa
   const dayIndexes = new Set(batch.days.map((d) => DAY_INDEX[d]).filter((i) => i !== undefined));
   const timeLabel = `${formatTime(batch.start_time)}–${formatTime(batch.end_time)}`;
 
-  const events: CalendarEvent[] = [];
+  const events: ClassEvent[] = [];
   const cursor = new Date(rangeStart);
   while (cursor <= rangeEnd) {
     if (dayIndexes.has(cursor.getDay())) {
       events.push({
         id: `class-${batch.id}-${cursor.toISOString().slice(0, 10)}`,
-        type: "class",
+        batchId: batch.id,
         title: `${batch.name} · Live class`,
         date: new Date(cursor),
         time: timeLabel,

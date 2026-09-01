@@ -29,9 +29,6 @@
 .calendarHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
 .calendarHead strong { font-family: var(--serif); font-weight: 400; font-size: 1.2rem; color: var(--blue); }
 
-.clear { border: 0; background: none; font-size: .68rem; font-weight: 700; color: var(--text-faint); }
-.clear:hover { color: var(--bordeaux); }
-
 .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: .4rem; }
 .weekdays span { text-align: center; font-size: .6rem; font-weight: 700; color: var(--text-faint); }
 
@@ -53,19 +50,10 @@
   color: var(--text-primary);
 }
 
-.cell:hover { background: var(--porcelain-2); }
-
 .cellToday { font-weight: 700; color: var(--blue); border-color: var(--hairline-ink); }
-.cellSelected { background: var(--blue); color: #fff; }
 
 .dots { display: flex; gap: 2px; }
-.dots i { width: 4px; height: 4px; border-radius: 50%; }
-
-.dotClass { background: var(--blue); }
-.dotAssignment { background: var(--bordeaux); }
-.dotTest { background: #b8862f; }
-.dotSpeaking { background: #6a4fa0; }
-.dotDeadline { background: #b63a3a; }
+.dots i { width: 4px; height: 4px; border-radius: 50%; background: var(--blue); }
 
 .agenda h2 {
   font-family: var(--serif);
@@ -79,17 +67,15 @@
 
 .list { display: flex; flex-direction: column; gap: .8rem; }
 
-.eventCard { border: 1px solid var(--hairline-ink); border-radius: var(--r-md); background: var(--card-surface); padding: 1rem 1.1rem; }
+.batchCard { border: 1px solid var(--hairline-ink); border-radius: var(--r-md); background: var(--card-surface); padding: 1rem 1.1rem; }
 
-.eventTop { display: flex; align-items: center; gap: .45rem; margin-bottom: .5rem; }
-.eventTop span.eventType { font-size: .55rem; font-weight: 700; letter-spacing: .08em; color: var(--text-faint); }
-.eventDate { margin-left: auto; font-size: .64rem; color: var(--text-faint); }
+.batchTop { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+.batchCourse { font-size: .55rem; font-weight: 700; letter-spacing: .08em; color: var(--blue); }
+.batchLevel { font-size: .6rem; color: var(--text-faint); }
 
-.eventTop i, .eventTop span:first-child { width: 6px; height: 6px; border-radius: 50%; }
-
-.eventCard strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1rem; color: var(--text-primary); }
-.eventCard small { display: block; font-size: .68rem; color: var(--text-faint); margin-top: .3rem; }
-.teacher { color: var(--text-faint); }
+.batchCard strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1rem; color: var(--text-primary); }
+.batchCard small { display: block; font-size: .68rem; color: var(--text-faint); margin-top: .3rem; }
+.nextClass { color: var(--bordeaux) !important; font-weight: 700; }
 
 .joinLink { display: inline-block; margin-top: .6rem; font-size: .68rem; font-weight: 700; color: var(--blue); }
 .joinLink:hover { color: var(--bordeaux); }
