@@ -72,6 +72,17 @@
 .batchTop { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
 .batchCourse { font-size: .55rem; font-weight: 700; letter-spacing: .08em; color: var(--blue); }
 .batchLevel { font-size: .6rem; color: var(--text-faint); }
+.mainBadge {
+  margin-left: auto;
+  font-size: .55rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--bordeaux);
+  border: 1px solid rgba(182,58,58,.35);
+  background: rgba(182,58,58,.08);
+  padding: .2rem .55rem;
+  border-radius: 999px;
+}
 
 .batchCard strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1rem; color: var(--text-primary); }
 .batchCard small { display: block; font-size: .68rem; color: var(--text-faint); margin-top: .3rem; }

@@ -21,6 +21,7 @@ function BatchCard({ batch, zoomLink }: { batch: Batch; zoomLink: string }) {
       <div className={styles.batchTop}>
         <span className={styles.batchCourse}>{batch.course.toUpperCase()}</span>
         {batch.level && <span className={styles.batchLevel}>{batch.level}</span>}
+        {batch.isCurrent && <span className={styles.mainBadge}>Her main batch</span>}
       </div>
       <strong>{batch.name}</strong>
       <small>{batch.days.map((d) => DAY_LABELS[d] ?? d).join(" · ")}</small>
@@ -39,16 +40,23 @@ export function CalendarPage() {
   const { batches, zoomLink } = usePortalState();
   const [category, setCategory] = useState<CategoryFilter>("All");
 
-  const currentBatches = useMemo(
-    () => batches.filter((b) => b.isCurrent && (category === "All" || b.course === category)),
+  // Every published batch for the selected course — not just the one
+  // admin marked "current" — so a batch shows up here the moment it's
+  // published, with no separate step required. The current one (if any)
+  // just sorts first.
+  const visibleBatches = useMemo(
+    () =>
+      batches
+        .filter((b) => b.published && (category === "All" || b.course === category))
+        .sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent)),
     [batches, category]
   );
 
   // Only drives the dots on the grid — the batches themselves (not
   // per-occurrence entries) are what the agenda now lists.
   const classDates = useMemo(
-    () => currentBatches.flatMap((b) => generateClassEvents(b, zoomLink, 45).map((e) => e.date)),
-    [currentBatches, zoomLink]
+    () => visibleBatches.flatMap((b) => generateClassEvents(b, zoomLink, 45).map((e) => e.date)),
+    [visibleBatches, zoomLink]
   );
 
   const today = useMemo(() => new Date(), []);
@@ -116,13 +124,13 @@ export function CalendarPage() {
 
         <div className={styles.agenda}>
           <h2>Her batches</h2>
-          {currentBatches.length > 0 ? (
+          {visibleBatches.length > 0 ? (
             <div className={styles.list}>
-              {currentBatches.map((b) => <BatchCard key={b.id} batch={b} zoomLink={zoomLink} />)}
+              {visibleBatches.map((b) => <BatchCard key={b.id} batch={b} zoomLink={zoomLink} />)}
             </div>
           ) : (
             <div className={styles.empty}>
-              <p>{category === "All" ? "No batch set yet — ask your teacher." : `No ${category} batch set yet.`}</p>
+              <p>{category === "All" ? "No batches published yet — ask your teacher." : `No ${category} batch published yet.`}</p>
             </div>
           )}
         </div>

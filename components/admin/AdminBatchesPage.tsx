@@ -16,7 +16,7 @@ export function AdminBatchesPage() {
       <div className={styles.head}>
         <small>ADMIN</small>
         <h1>Batches.</h1>
-        <p>Manage class batches — shown live on the website&rsquo;s Available Batches section, and the one marked current drives the student&rsquo;s calendar.</p>
+        <p>Manage class batches — every published batch shows live on the website&rsquo;s Available Batches section and the student&rsquo;s calendar. Marking one as her main batch just highlights it there.</p>
       </div>
 
       {!loaded ? (

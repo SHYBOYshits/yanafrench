@@ -150,10 +150,10 @@ function BatchRow({
         <div className={styles.rowBadges}>
           {batch.isCurrent ? (
             <button type="button" className={styles.currentBadge} onClick={() => onUpdate({ isCurrent: false })}>
-              Current {batch.course} batch — click to unset
+              Her main {batch.course} batch — click to unset
             </button>
           ) : (
-            <button type="button" className={styles.setCurrent} onClick={onSetCurrent}>Set as her current {batch.course} batch</button>
+            <button type="button" className={styles.setCurrent} onClick={onSetCurrent}>Mark as her main {batch.course} batch</button>
           )}
           <button type="button" className={batch.published ? styles.publishedBadge : styles.draftBadge} onClick={() => onUpdate({ published: !batch.published })}>
             {batch.published ? "Published" : "Draft"}
