@@ -6,6 +6,7 @@ import { courses as seedCourses, type CourseItem } from "./courseCatalog";
 import { recordings as seedRecordings, type Recording } from "./recordingData";
 import { resources as seedResources, type Resource } from "./resourceData";
 import type { QuizLevel } from "./quizData";
+import type { Batch } from "./batchData";
 
 const POLL_MS = 3000;
 
@@ -113,5 +114,10 @@ export function usePortalState() {
     teacherNote: raw.teacherNote,
     setWordOfWeek: (wordOfWeek: { word: string; meaning: string }) => send({ type: "setWordOfWeek", wordOfWeek }),
     setTeacherNote: (teacherNote: { text: string; date: string }) => send({ type: "setTeacherNote", teacherNote }),
+    batches: raw.batches,
+    addBatch: (batch: Batch) => send({ type: "addBatch", batch }),
+    removeBatch: (id: string) => send({ type: "removeBatch", id }),
+    updateBatch: (id: string, patch: Partial<Batch>) => send({ type: "updateBatch", id, patch }),
+    setCurrentBatch: (id: string) => send({ type: "setCurrentBatch", id }),
   };
 }

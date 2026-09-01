@@ -1,9 +1,9 @@
-import { readJson, writeJson } from "@/lib/r2";
-import { applyPortalAction, defaultPortalState, PORTAL_STATE_KEY, type PortalState, type PortalStateAction } from "@/lib/portalState";
+import { writeJson } from "@/lib/r2";
+import { applyPortalAction, PORTAL_STATE_KEY, type PortalStateAction } from "@/lib/portalState";
+import { readPortalState } from "@/lib/portalStateServer";
 
 export async function GET() {
-  const state = await readJson<PortalState>(PORTAL_STATE_KEY, defaultPortalState);
-  return Response.json({ ...defaultPortalState, ...state });
+  return Response.json(await readPortalState());
 }
 
 export async function POST(req: Request) {
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     return new Response("Invalid action", { status: 400 });
   }
 
-  const existing = await readJson<PortalState>(PORTAL_STATE_KEY, defaultPortalState);
+  const existing = await readPortalState();
   const next = applyPortalAction(existing, action);
   if (next === existing) {
     return new Response("Unknown action", { status: 400 });

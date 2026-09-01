@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { eventTypeLabels, getCalendarEvents, type CalendarEventType } from "@/lib/calendarData";
+import { eventTypeLabels, getStaticEvents, type CalendarEventType } from "@/lib/calendarData";
+import { generateClassEvents } from "@/lib/batchData";
+import { usePortalState } from "@/lib/usePortalState";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./CalendarPage.module.css";
 
@@ -18,7 +20,12 @@ function isSameDay(a: Date, b: Date) {
 }
 
 export function CalendarPage() {
-  const events = getCalendarEvents();
+  const { batches, zoomLink } = usePortalState();
+  const currentBatch = batches.find((b) => b.isCurrent);
+  const events = useMemo(() => {
+    const classEvents = currentBatch ? generateClassEvents(currentBatch, zoomLink) : [];
+    return [...classEvents, ...getStaticEvents()].sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [currentBatch, zoomLink]);
   const today = useMemo(() => new Date(), []);
   const [selected, setSelected] = useState<Date | null>(null);
 

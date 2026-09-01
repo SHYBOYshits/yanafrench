@@ -1,8 +1,9 @@
 import { google } from "@ai-sdk/google";
 import { APICallError, RetryError, generateText, Output } from "ai";
 import { z } from "zod";
-import { readJson, writeJson } from "@/lib/r2";
-import { defaultPortalState, PORTAL_STATE_KEY, type PortalState } from "@/lib/portalState";
+import { writeJson } from "@/lib/r2";
+import { PORTAL_STATE_KEY, type PortalState } from "@/lib/portalState";
+import { readPortalState } from "@/lib/portalStateServer";
 import { evaluateSpeakingAudio, SpeakingEvalRateLimitError } from "@/lib/speakingEval";
 import {
   countSessionsToday,
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
     const answers = JSON.parse(answersRaw) as SubmittedAnswer[];
     const answerByQuestionId = new Map(answers.map((a) => [a.questionId, a.response]));
 
-    const state = { ...defaultPortalState, ...(await readJson<PortalState>(PORTAL_STATE_KEY, defaultPortalState)) };
+    const state = await readPortalState();
     if (countSessionsToday(state.quizSessions) >= DAILY_QUIZ_LIMIT) {
       return new Response("Daily quiz limit reached", { status: 403 });
     }

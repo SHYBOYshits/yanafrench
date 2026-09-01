@@ -8,6 +8,7 @@ import type { CourseItem } from "./courseCatalog";
 import type { Recording } from "./recordingData";
 import type { Resource } from "./resourceData";
 import { defaultQuizLevel, type QuizLevel, type QuizSession } from "./quizData";
+import type { Batch } from "./batchData";
 
 export const PORTAL_STATE_KEY = "data/portal-state.json";
 
@@ -38,6 +39,13 @@ export type PortalState = {
   // Admin-authored highlights shown on the student's dashboard.
   wordOfWeek: { word: string; meaning: string };
   teacherNote: { text: string; date: string };
+
+  // Class batches — no static seed/overrides layer like courses etc.,
+  // since there's nothing pre-existing to merge against: admin owns this
+  // list outright. Shown live on the public site's Available Batches
+  // section, and the one with isCurrent true drives the student's
+  // recurring class events on her calendar (see lib/batchData.ts).
+  batches: Batch[];
 };
 
 export const defaultPortalState: PortalState = {
@@ -60,6 +68,8 @@ export const defaultPortalState: PortalState = {
 
   wordOfWeek: { word: "pourtant", meaning: "however · yet" },
   teacherNote: { text: "Better rhythm today.", date: "" },
+
+  batches: [],
 };
 
 export type PortalStateAction =
@@ -75,7 +85,11 @@ export type PortalStateAction =
   | { type: "updateResource"; id: string; patch: Partial<Resource> }
   | { type: "setQuizLevel"; level: QuizLevel }
   | { type: "setWordOfWeek"; wordOfWeek: { word: string; meaning: string } }
-  | { type: "setTeacherNote"; teacherNote: { text: string; date: string } };
+  | { type: "setTeacherNote"; teacherNote: { text: string; date: string } }
+  | { type: "addBatch"; batch: Batch }
+  | { type: "removeBatch"; id: string }
+  | { type: "updateBatch"; id: string; patch: Partial<Batch> }
+  | { type: "setCurrentBatch"; id: string };
 
 // Pure reducer shared by the API route (authoritative, persisted write) and
 // the client hook (optimistic local update, applied instantly so the UI
@@ -117,6 +131,14 @@ export function applyPortalAction(state: PortalState, action: PortalStateAction)
       return { ...state, wordOfWeek: action.wordOfWeek };
     case "setTeacherNote":
       return { ...state, teacherNote: action.teacherNote };
+    case "addBatch":
+      return { ...state, batches: [action.batch, ...state.batches] };
+    case "removeBatch":
+      return { ...state, batches: state.batches.filter((b) => b.id !== action.id) };
+    case "updateBatch":
+      return { ...state, batches: state.batches.map((b) => (b.id === action.id ? { ...b, ...action.patch } : b)) };
+    case "setCurrentBatch":
+      return { ...state, batches: state.batches.map((b) => ({ ...b, isCurrent: b.id === action.id })) };
     default:
       return state;
   }

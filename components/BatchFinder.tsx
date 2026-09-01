@@ -1,102 +1,17 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { whatsappUrl } from "@/lib/site";
+import { usePortalState } from "@/lib/usePortalState";
+import { DAYS, DAY_LABELS, formatTime, statusText, type Batch, type BatchCourse } from "@/lib/batchData";
 import styles from "./BatchFinder.module.css";
 
-type Course = "TEF" | "TCF" | "DELF";
-type BatchStatus = "available" | "few_seats" | "full" | "waitlist";
-
-type Batch = {
-  id: string;
-  course: Course;
-  level?: string | null;
-  name: string;
-  days: string[];
-  start_time: string;
-  end_time: string;
-  start_date?: string | null;
-  end_date?: string | null;
-  total_seats: number;
-  seats_remaining: number;
-  status: BatchStatus;
-  timezone?: string;
-};
-
-type BatchPayload = {
-  batches?: Batch[];
-  timezone?: string;
-  error?: string;
-};
-
-declare global {
-  interface Window {
-    __TFH_BATCH_PAYLOAD__?: BatchPayload;
-  }
-}
-
-const COURSES: { code: Course; title: string; note: string }[] = [
+const COURSES: { code: BatchCourse; title: string; note: string }[] = [
   { code: "TEF", title: "TEF", note: "Canada & score-focused preparation" },
   { code: "TCF", title: "TCF", note: "Structured exam preparation" },
   { code: "DELF", title: "DELF", note: "A1–B2 language certification" },
 ];
-
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const DAY_LABELS: Record<string, string> = {
-  Mon: "Monday",
-  Tue: "Tuesday",
-  Wed: "Wednesday",
-  Thu: "Thursday",
-  Fri: "Friday",
-  Sat: "Saturday",
-};
-
-const API_URL =
-  process.env.NEXT_PUBLIC_BATCH_API_URL ||
-  "https://tfh-resources-theprathambatras-projects.vercel.app/api/batches";
-
-const SCRIPT_URL = API_URL.replace(/\/api\/batches\/?$/, "/api/batches-script");
-
-function loadBatchScript(): Promise<BatchPayload> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") {
-      reject(new Error("Browser unavailable"));
-      return;
-    }
-
-    delete window.__TFH_BATCH_PAYLOAD__;
-    const script = document.createElement("script");
-    script.src = `${SCRIPT_URL}?t=${Date.now()}`;
-    script.async = true;
-
-    const cleanup = () => {
-      script.remove();
-    };
-
-    script.onload = () => {
-      const payload = window.__TFH_BATCH_PAYLOAD__;
-      cleanup();
-      if (payload && Array.isArray(payload.batches)) resolve(payload);
-      else reject(new Error("Batch fallback did not return data"));
-    };
-
-    script.onerror = () => {
-      cleanup();
-      reject(new Error("Batch fallback failed"));
-    };
-
-    document.head.appendChild(script);
-  });
-}
-
-function formatTime(value: string) {
-  const [h = "0", m = "00"] = String(value || "").split(":");
-  const hour = Number(h);
-  const suffix = hour >= 12 ? "PM" : "AM";
-  const displayHour = hour % 12 || 12;
-  return `${displayHour}:${m} ${suffix}`;
-}
 
 function formatDate(value?: string | null) {
   if (!value) return null;
@@ -105,21 +20,12 @@ function formatDate(value?: string | null) {
   return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(date);
 }
 
-function statusText(batch: Batch) {
-  if (batch.status === "waitlist") return "Waitlist";
-  if (batch.status === "full" || batch.seats_remaining <= 0) return "Full";
-  if (batch.status === "few_seats") {
-    return batch.seats_remaining === 1 ? "1 seat left" : `${batch.seats_remaining} seats left`;
-  }
-  return "Available";
-}
-
 function canSelect(batch: Batch) {
   return batch.status !== "full" && batch.seats_remaining > 0;
 }
 
 function whatsappMessage(batch: Batch) {
-  const dayNames = batch.days.map(day => DAY_LABELS[day] || day).join(", ");
+  const dayNames = batch.days.map((day) => DAY_LABELS[day] || day).join(", ");
   const time = `${formatTime(batch.start_time)}–${formatTime(batch.end_time)} IST`;
   const start = formatDate(batch.start_date);
 
@@ -131,54 +37,23 @@ function whatsappMessage(batch: Batch) {
 }
 
 export function BatchFinder({ standalone = false }: { standalone?: boolean }) {
-  const [course, setCourse] = useState<Course>("TEF");
-  const [batches, setBatches] = useState<Batch[]>([]);
+  const { loaded, batches: allBatches } = usePortalState();
+  const [course, setCourse] = useState<BatchCourse>("TEF");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    let active = true;
-
-    async function load() {
-      try {
-        const response = await fetch(API_URL, { cache: "no-store" });
-        if (!response.ok) throw new Error("Availability request failed");
-        const body: BatchPayload = await response.json();
-        if (active) {
-          setBatches(Array.isArray(body.batches) ? body.batches : []);
-          setError(false);
-        }
-      } catch {
-        try {
-          const body = await loadBatchScript();
-          if (active) {
-            setBatches(Array.isArray(body.batches) ? body.batches : []);
-            setError(false);
-          }
-        } catch {
-          if (active) setError(true);
-        }
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-
-    load();
-    return () => { active = false; };
-  }, []);
+  const batches = useMemo(() => allBatches.filter((b) => b.published), [allBatches]);
 
   const courseBatches = useMemo(
-    () => batches.filter(batch => batch.course === course),
+    () => batches.filter((batch) => batch.course === course),
     [batches, course]
   );
 
   const selected = useMemo(
-    () => batches.find(batch => batch.id === selectedId) || null,
+    () => batches.find((batch) => batch.id === selectedId) || null,
     [batches, selectedId]
   );
 
-  function chooseCourse(next: Course) {
+  function chooseCourse(next: BatchCourse) {
     setCourse(next);
     setSelectedId(null);
   }
@@ -224,12 +99,8 @@ export function BatchFinder({ standalone = false }: { standalone?: boolean }) {
           <p>Monday–Saturday · 8:00 AM–6:00 PM IST</p>
         </div>
 
-        {loading ? (
+        {!loaded ? (
           <div className={styles.state}>Checking Yana&apos;s latest availability…</div>
-        ) : error ? (
-          <div className={styles.state}>
-            Live availability is temporarily unavailable. You can still <a href={whatsappUrl()} target="_blank" rel="noreferrer">talk to Yana on WhatsApp →</a>
-          </div>
         ) : courseBatches.length === 0 ? (
           <div className={styles.state}>
             No {course} batches are published right now. <a href={whatsappUrl(`Hi Yana! I found The Français Hub website and I'm interested in ${course}. Could you let me know when the next batch opens?`)} target="_blank" rel="noreferrer">Ask about the next batch →</a>

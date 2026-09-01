@@ -1,8 +1,7 @@
 import { google } from "@ai-sdk/google";
 import { APICallError, RetryError, generateText, Output } from "ai";
 import { z } from "zod";
-import { readJson } from "@/lib/r2";
-import { defaultPortalState, PORTAL_STATE_KEY, type PortalState } from "@/lib/portalState";
+import { readPortalState } from "@/lib/portalStateServer";
 import {
   countSessionsToday,
   encodeQuizToken,
@@ -48,7 +47,7 @@ const sessionSchema = z.object({
 
 export async function POST() {
   try {
-    const state = { ...defaultPortalState, ...(await readJson<PortalState>(PORTAL_STATE_KEY, defaultPortalState)) };
+    const state = await readPortalState();
     if (countSessionsToday(state.quizSessions) >= DAILY_QUIZ_LIMIT) {
       return new Response("Daily quiz limit reached", { status: 403 });
     }
