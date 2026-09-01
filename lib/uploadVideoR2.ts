@@ -9,6 +9,13 @@
 const CHUNK_SIZE = 10 * 1024 * 1024; // R2/S3 multipart parts must be >=5MB except the last.
 const PART_RETRY_DELAYS = [0, 2000, 5000, 10000];
 
+// A connection that's merely slow keeps firing upload.onprogress and is
+// left alone — only a genuinely stalled one (no bytes moving at all) trips
+// this and fails the chunk so the existing per-part retry loop picks it
+// back up, instead of the upload hanging forever with no error and no way
+// to recover short of reloading the page.
+const CHUNK_STALL_MS = 45_000;
+
 type CompletedPart = { partNumber: number; etag: string };
 
 export class UploadCancelledError extends Error {}
@@ -35,12 +42,29 @@ function uploadPart(
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     registerXhr(xhr);
+    let stallTimer: ReturnType<typeof setTimeout> | undefined;
+    let settled = false;
+
+    function resetStallTimer() {
+      if (stallTimer) clearTimeout(stallTimer);
+      stallTimer = setTimeout(() => {
+        settled = true;
+        xhr.abort();
+        reject(new Error("This chunk stalled — retrying."));
+      }, CHUNK_STALL_MS);
+    }
+
     xhr.open("PUT", url);
+    resetStallTimer();
     xhr.upload.onprogress = (e) => {
+      resetStallTimer();
       if (e.lengthComputable) onProgress(e.loaded);
     };
     xhr.onload = () => {
+      if (stallTimer) clearTimeout(stallTimer);
       registerXhr(null);
+      if (settled) return;
+      settled = true;
       if (xhr.status >= 200 && xhr.status < 300) {
         const etag = xhr.getResponseHeader("ETag");
         if (!etag) {
@@ -53,11 +77,17 @@ function uploadPart(
       }
     };
     xhr.onerror = () => {
+      if (stallTimer) clearTimeout(stallTimer);
       registerXhr(null);
+      if (settled) return;
+      settled = true;
       reject(new Error("Network error while uploading a chunk."));
     };
     xhr.onabort = () => {
+      if (stallTimer) clearTimeout(stallTimer);
       registerXhr(null);
+      if (settled) return;
+      settled = true;
       reject(new UploadCancelledError());
     };
     xhr.send(blob);

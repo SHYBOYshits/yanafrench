@@ -110,6 +110,19 @@ function VideoUploadWidget({ onUploaded }: { onUploaded: (fileUrl: string, file:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // A multi-GB upload can run for a long time — warn before an accidental
+  // tab close/refresh loses it, rather than failing silently.
+  const hasActiveUpload = items.some((it) => it.status === "uploading");
+  useEffect(() => {
+    if (!hasActiveUpload) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasActiveUpload]);
+
   function startUpload(file: File) {
     const id = `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     setItems((prev) => [...prev, { id, file, progress: 0, status: "uploading" }]);
