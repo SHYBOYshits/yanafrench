@@ -6,6 +6,7 @@ import type { Recording } from "@/lib/recordingData";
 import type { Resource } from "@/lib/resourceData";
 import { assignmentCategories, type Assignment, type AssignmentStatus } from "@/lib/testData";
 import { usePortalState } from "@/lib/usePortalState";
+import { getFilesFromDataTransfer, matchesAccept } from "@/lib/dropFiles";
 import { formatFileSize, uploadFileToR2 } from "@/lib/uploadFile";
 import { UploadCancelledError, uploadVideoToR2, type VideoUploadHandle } from "@/lib/uploadVideoR2";
 import { UploadDropzone } from "../UploadDropzone";
@@ -42,124 +43,217 @@ function PublishToggle({ published, onToggle }: { published: boolean; onToggle: 
   );
 }
 
+/** Click-to-play preview used both while a queued upload is still showing
+ * its local blob and for an already-uploaded lesson video. */
+function VideoClickToPlay({ src, className }: { src: string; className?: string }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  function play() {
+    if (isPlaying) return;
+    setIsPlaying(true);
+    videoRef.current?.play();
+  }
+
+  return (
+    <div className={`${styles.videoPreviewBox} ${className ?? ""}`}>
+      <video
+        ref={videoRef}
+        src={src}
+        controls={isPlaying}
+        preload="metadata"
+        playsInline
+        className={styles.lessonPreviewPlayer}
+        onClick={play}
+      />
+      {!isPlaying && (
+        <button type="button" className={styles.playOverlay} aria-label="Play video" onClick={play}>
+          <span className={styles.playCircle}><IconPlay size={20} /></span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+type VideoQueueItem = {
+  id: string;
+  file: File;
+  progress: number;
+  status: "uploading" | "done" | "error";
+  error?: string;
+  previewUrl?: string;
+  handle?: VideoUploadHandle;
+};
+
 /**
- * Adds one lesson video at a time: a dashed pill button that turns into a
- * progress bar while uploading, then a confirmation + click-to-play preview
- * before resetting so the next lesson video can be added — the course's
- * video list (below) is the actual source of truth once a video lands
- * there, so this widget doesn't need to "hold onto" what it just uploaded.
+ * A video-specific dropzone: drop (or browse for) one or more files, or a
+ * whole folder, same as the generic UploadDropzone — but each file uploads
+ * as a resumable R2 multipart upload instead of a single PUT, with its own
+ * progress bar, cancel, and retry, and a click-to-play preview once done.
  */
 function VideoUploadWidget({ onUploaded }: { onUploaded: (fileUrl: string, file: File) => void }) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadRef = useRef<VideoUploadHandle | null>(null);
-  const previewVideoRef = useRef<HTMLVideoElement>(null);
-  const [progress, setProgress] = useState<number | null>(null);
-  const [done, setDone] = useState<{ fileName: string; previewUrl: string } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [items, setItems] = useState<VideoQueueItem[]>([]);
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    folderInputRef.current?.setAttribute("webkitdirectory", "");
+    folderInputRef.current?.setAttribute("directory", "");
+  }, []);
 
   useEffect(() => {
     return () => {
-      if (done?.previewUrl) URL.revokeObjectURL(done.previewUrl);
+      items.forEach((it) => it.previewUrl && URL.revokeObjectURL(it.previewUrl));
     };
-  }, [done]);
+    // Revoke only on unmount — see the cleanup pattern below for per-item revokes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  async function handleFile(file: File) {
-    setError(null);
-    setDone(null);
-    setIsPlaying(false);
-    setProgress(0);
-    const handle = uploadVideoToR2(file, (percent) => setProgress(percent));
-    uploadRef.current = handle;
-    try {
-      const fileUrl = await handle.promise;
-      uploadRef.current = null;
-      setProgress(null);
-      setDone({ fileName: file.name, previewUrl: URL.createObjectURL(file) });
-      onUploaded(fileUrl, file);
-    } catch (err) {
-      uploadRef.current = null;
-      setProgress(null);
-      if (!(err instanceof UploadCancelledError)) {
-        setError(err instanceof Error ? err.message : "Upload failed.");
-      }
-    }
+  function startUpload(file: File) {
+    const id = `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setItems((prev) => [...prev, { id, file, progress: 0, status: "uploading" }]);
+
+    const handle = uploadVideoToR2(file, (percent) => {
+      setItems((prev) => prev.map((it) => (it.id === id ? { ...it, progress: percent } : it)));
+    });
+    setItems((prev) => prev.map((it) => (it.id === id ? { ...it, handle } : it)));
+
+    handle.promise
+      .then((fileUrl) => {
+        setItems((prev) =>
+          prev.map((it) => (it.id === id ? { ...it, status: "done", progress: 100, previewUrl: URL.createObjectURL(file) } : it))
+        );
+        onUploaded(fileUrl, file);
+      })
+      .catch((err) => {
+        if (err instanceof UploadCancelledError) {
+          setItems((prev) => prev.filter((it) => it.id !== id));
+          return;
+        }
+        setItems((prev) =>
+          prev.map((it) => (it.id === id ? { ...it, status: "error", error: err instanceof Error ? err.message : "Upload failed." } : it))
+        );
+      });
   }
 
-  function cancelUpload() {
-    uploadRef.current?.cancel();
-    uploadRef.current = null;
-    setProgress(null);
+  function queueFiles(files: File[]) {
+    files.filter((f) => matchesAccept(f, "video/*")).forEach(startUpload);
+  }
+
+  function handleFileList(fileList: FileList | null) {
+    if (!fileList) return;
+    queueFiles(Array.from(fileList));
+  }
+
+  function dismiss(id: string) {
+    setItems((prev) => {
+      const item = prev.find((it) => it.id === id);
+      item?.handle?.cancel();
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((it) => it.id !== id);
+    });
+  }
+
+  function retry(id: string) {
+    const item = items.find((it) => it.id === id);
+    if (!item) return;
+    setItems((prev) => prev.filter((it) => it.id !== id));
+    startUpload(item.file);
   }
 
   return (
     <div className={styles.uploadWidget}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="video/*"
-        hidden
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) void handleFile(file);
-          e.target.value = "";
+      <div
+        className={dragOver ? `${styles.videoZone} ${styles.videoZoneActive}` : styles.videoZone}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
         }}
-      />
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          getFilesFromDataTransfer(e.dataTransfer).then(queueFiles);
+        }}
+        onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept="video/*"
+          multiple
+          hidden
+          onChange={(e) => {
+            handleFileList(e.target.files);
+            e.target.value = "";
+          }}
+        />
+        <input
+          ref={folderInputRef}
+          type="file"
+          hidden
+          onChange={(e) => {
+            handleFileList(e.target.files);
+            e.target.value = "";
+          }}
+        />
+        <IconUpload size={16} />
+        <span>Drop video files or a folder here, or browse</span>
+      </div>
 
-      {progress === null ? (
-        <button type="button" className={styles.uploadButton} onClick={() => fileInputRef.current?.click()}>
-          <IconUpload size={14} />
-          {done ? "Upload Another Video" : "Upload Video File"}
-        </button>
-      ) : (
-        <div className={styles.uploadProgressRow}>
-          <div className={styles.uploadProgressTrack}>
-            <div className={styles.uploadProgressFill} style={{ width: `${progress}%` }} />
-          </div>
-          <span className={styles.uploadProgressPct}>{progress}%</span>
-          <button type="button" className={styles.uploadCancel} onClick={cancelUpload} aria-label="Cancel upload">
-            <IconClose size={13} />
-          </button>
-        </div>
-      )}
+      <button
+        type="button"
+        className={styles.uploadButton}
+        onClick={(e) => {
+          e.stopPropagation();
+          folderInputRef.current?.click();
+        }}
+      >
+        or select a whole folder
+      </button>
 
-      {error && <p className={styles.uploadError}>{error}</p>}
-
-      {done && (
-        <div>
-          <p className={styles.uploadDone}>
-            <IconCheck size={13} />
-            Video has been uploaded
-            <span className={styles.uploadDoneName}>— {done.fileName}</span>
-          </p>
-          <div className={styles.videoPreviewBox}>
-            <video
-              ref={previewVideoRef}
-              src={done.previewUrl}
-              controls={isPlaying}
-              preload="metadata"
-              playsInline
-              className={styles.lessonPreviewPlayer}
-              onClick={() => {
-                if (isPlaying) return;
-                setIsPlaying(true);
-                previewVideoRef.current?.play();
-              }}
-            />
-            {!isPlaying && (
-              <button
-                type="button"
-                className={styles.playOverlay}
-                aria-label="Play video"
-                onClick={() => {
-                  setIsPlaying(true);
-                  previewVideoRef.current?.play();
-                }}
-              >
-                <span className={styles.playCircle}><IconPlay size={20} /></span>
-              </button>
-            )}
-          </div>
+      {items.length > 0 && (
+        <div className={styles.videoQueue}>
+          {items.map((it) => (
+            <div key={it.id} className={styles.videoQueueItem}>
+              <div className={styles.videoQueueInfo}>
+                <strong>{it.file.name}</strong>
+                <small>
+                  {formatFileSize(it.file.size)}
+                  {it.status === "error" ? ` · ${it.error}` : ""}
+                </small>
+                {it.status === "uploading" && (
+                  <div className={styles.uploadProgressRow}>
+                    <div className={styles.uploadProgressTrack}>
+                      <div className={styles.uploadProgressFill} style={{ width: `${it.progress}%` }} />
+                    </div>
+                    <span className={styles.uploadProgressPct}>{it.progress}%</span>
+                    <button type="button" className={styles.uploadCancel} onClick={() => dismiss(it.id)} aria-label="Cancel upload">
+                      <IconClose size={13} />
+                    </button>
+                  </div>
+                )}
+                {it.status === "error" && (
+                  <div className={styles.videoQueueActions}>
+                    <button type="button" className={styles.uploadButton} onClick={() => retry(it.id)}>Retry</button>
+                    <button type="button" className={styles.remove} onClick={() => dismiss(it.id)}>Remove</button>
+                  </div>
+                )}
+              </div>
+              {it.status === "done" && it.previewUrl && (
+                <div>
+                  <p className={styles.uploadDone}><IconCheck size={13} />Uploaded</p>
+                  <VideoClickToPlay src={it.previewUrl} />
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -177,9 +271,6 @@ function LessonRow({
   onRename: (title: string) => void;
   onDelete: () => void;
 }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
   return (
     <div className={styles.lessonRow}>
       <div className={styles.lessonRowMain}>
@@ -197,36 +288,7 @@ function LessonRow({
       <div className={styles.lessonRowActions}>
         <button type="button" className={styles.remove} onClick={onDelete}>Delete</button>
       </div>
-      {video.videoUrl && (
-        <div className={styles.videoPreviewBox}>
-          <video
-            ref={videoRef}
-            src={video.videoUrl}
-            controls={isPlaying}
-            preload="metadata"
-            playsInline
-            className={styles.lessonPreviewPlayer}
-            onClick={() => {
-              if (isPlaying) return;
-              setIsPlaying(true);
-              videoRef.current?.play();
-            }}
-          />
-          {!isPlaying && (
-            <button
-              type="button"
-              className={styles.playOverlay}
-              aria-label="Play video"
-              onClick={() => {
-                setIsPlaying(true);
-                videoRef.current?.play();
-              }}
-            >
-              <span className={styles.playCircle}><IconPlay size={20} /></span>
-            </button>
-          )}
-        </div>
-      )}
+      {video.videoUrl && <VideoClickToPlay src={video.videoUrl} />}
     </div>
   );
 }

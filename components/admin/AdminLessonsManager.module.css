@@ -178,8 +178,28 @@
 
 .lessonPreviewPlayer { width: 100%; display: block; margin-top: .2rem; border-radius: var(--r-md); background: #000; max-height: 260px; }
 
-/* Video upload widget (Course tab) */
-.uploadWidget { display: flex; flex-direction: column; gap: .6rem; align-items: flex-start; }
+/* Video upload widget (Course tab + Recordings tab) */
+.uploadWidget { display: flex; flex-direction: column; gap: .6rem; align-items: flex-start; width: 100%; }
+
+.videoZone {
+  width: 100%;
+  border: 1.5px dashed var(--hairline-ink-hover, rgba(23,25,28,.18));
+  border-radius: var(--r-lg);
+  padding: 1.6rem 1.2rem;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  background: var(--porcelain);
+  color: var(--text-faint);
+  font-size: .78rem;
+  font-weight: 600;
+  transition: border-color .2s ease, background .2s ease;
+}
+.videoZone:hover, .videoZone:focus-visible { border-color: var(--blue); outline: none; }
+.videoZoneActive { border-color: var(--bordeaux); background: rgba(182,58,58,.04); }
 
 .uploadButton {
   display: inline-flex;
@@ -194,6 +214,22 @@
   font-weight: 700;
 }
 .uploadButton:hover { border-color: var(--bordeaux); color: var(--bordeaux); }
+
+.videoQueue { display: flex; flex-direction: column; gap: .6rem; width: 100%; }
+
+.videoQueueItem {
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-md);
+  background: var(--porcelain);
+  padding: .75rem .9rem;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.videoQueueInfo strong { display: block; font-size: .78rem; font-weight: 700; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.videoQueueInfo small { display: block; font-size: .66rem; color: var(--text-faint); margin-top: .15rem; }
+.videoQueueActions { display: flex; gap: .5rem; margin-top: .5rem; }
 
 .uploadProgressRow { display: flex; align-items: center; gap: .6rem; }
 .uploadProgressTrack { height: 6px; width: 9rem; border-radius: 999px; background: var(--porcelain); overflow: hidden; }
