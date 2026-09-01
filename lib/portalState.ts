@@ -1,13 +1,15 @@
 // Shared types for the Lessons portal content (Course / Recordings /
-// Resources / Test & Assignments), persisted as a single JSON document in
-// R2 (see app/api/portal-state/route.ts) so admin edits reach the student
-// view regardless of device or browser — the same pattern already used
-// for Messages.
+// Resources / Quiz), persisted as a single JSON document in R2 (see
+// app/api/portal-state/route.ts) so admin edits reach the student view
+// regardless of device or browser — the same pattern already used for
+// Messages.
 
 import type { CourseItem } from "./courseCatalog";
 import type { Recording } from "./recordingData";
 import type { Resource } from "./resourceData";
-import type { Assignment } from "./testData";
+import { defaultQuizLevel, type QuizLevel, type QuizSession } from "./quizData";
+
+export const PORTAL_STATE_KEY = "data/portal-state.json";
 
 export type PortalState = {
   zoomLink: string;
@@ -24,9 +26,14 @@ export type PortalState = {
   resourceOverrides: Record<string, Partial<Resource>>;
   hiddenResourceIds: string[];
 
-  assignments: Assignment[];
-  assignmentOverrides: Record<string, Partial<Assignment>>;
-  hiddenAssignmentIds: string[];
+  // The student's CEFR level, set by the admin, used to pitch AI-generated
+  // quiz questions at the right difficulty.
+  quizLevel: QuizLevel;
+  // Completed quiz sessions (AI-generated questions + grading + remark),
+  // newest first. Appended directly by /api/quiz/submit rather than via a
+  // PortalStateAction — grading and the daily-limit check must happen
+  // server-side in one place, not be replayable from the client.
+  quizSessions: QuizSession[];
 };
 
 export const defaultPortalState: PortalState = {
@@ -44,9 +51,8 @@ export const defaultPortalState: PortalState = {
   resourceOverrides: {},
   hiddenResourceIds: [],
 
-  assignments: [],
-  assignmentOverrides: {},
-  hiddenAssignmentIds: [],
+  quizLevel: defaultQuizLevel,
+  quizSessions: [],
 };
 
 export type PortalStateAction =
@@ -60,9 +66,7 @@ export type PortalStateAction =
   | { type: "addResource"; resource: Resource }
   | { type: "removeResource"; id: string }
   | { type: "updateResource"; id: string; patch: Partial<Resource> }
-  | { type: "addAssignment"; assignment: Assignment }
-  | { type: "removeAssignment"; id: string }
-  | { type: "updateAssignment"; id: string; patch: Partial<Assignment> };
+  | { type: "setQuizLevel"; level: QuizLevel };
 
 // Pure reducer shared by the API route (authoritative, persisted write) and
 // the client hook (optimistic local update, applied instantly so the UI
@@ -98,15 +102,8 @@ export function applyPortalAction(state: PortalState, action: PortalStateAction)
         ...state,
         resourceOverrides: { ...state.resourceOverrides, [action.id]: { ...state.resourceOverrides[action.id], ...action.patch } },
       };
-    case "addAssignment":
-      return { ...state, assignments: [action.assignment, ...state.assignments] };
-    case "removeAssignment":
-      return { ...state, hiddenAssignmentIds: [...state.hiddenAssignmentIds, action.id] };
-    case "updateAssignment":
-      return {
-        ...state,
-        assignmentOverrides: { ...state.assignmentOverrides, [action.id]: { ...state.assignmentOverrides[action.id], ...action.patch } },
-      };
+    case "setQuizLevel":
+      return { ...state, quizLevel: action.level };
     default:
       return state;
   }

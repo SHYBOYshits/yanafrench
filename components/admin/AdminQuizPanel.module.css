@@ -1,0 +1,33 @@
+.panel { display: flex; flex-direction: column; gap: 1.8rem; }
+
+.sectionLabel { display: block; font-size: .58rem; font-weight: 700; letter-spacing: .1em; color: var(--bordeaux); margin-bottom: .6rem; }
+.hint { font-size: .74rem; color: var(--text-faint); line-height: 1.6; margin: 0 0 .8rem; max-width: 60ch; }
+
+.levelBox { max-width: 420px; }
+.levelSelect {
+  border: 1px solid var(--hairline-ink);
+  border-radius: var(--r-md);
+  padding: .55rem .8rem;
+  font-size: .82rem;
+  background: none;
+  color: var(--text-primary);
+}
+.levelSelect:focus { outline: none; border-color: var(--blue); }
+
+.sessionList { display: flex; flex-direction: column; gap: .6rem; max-width: 720px; }
+
+.sessionRow { border: 1px solid var(--hairline-ink); border-radius: var(--r-lg); padding: 1rem 1.2rem; }
+.sessionHead { width: 100%; display: flex; align-items: center; justify-content: space-between; border: 0; background: none; padding: 0; text-align: left; }
+.sessionHead div { display: flex; flex-direction: column; gap: .15rem; }
+.sessionHead strong { font-family: var(--serif); font-weight: 400; font-size: .95rem; color: var(--text-primary); }
+.sessionHead small { font-size: .64rem; color: var(--text-faint); }
+.sessionScore { font-size: .78rem; font-weight: 700; color: var(--blue); }
+.sessionSummary { font-size: .76rem; color: var(--text-faint); line-height: 1.6; margin: .5rem 0 0; }
+
+.sessionItems { margin-top: .9rem; padding-top: .9rem; border-top: 1px dashed var(--hairline-ink); display: flex; flex-direction: column; gap: .7rem; }
+.remarkLine { font-size: .74rem; color: var(--text-faint); line-height: 1.6; margin: 0; }
+
+.item { border-top: 1px solid var(--hairline-ink); padding-top: .6rem; }
+.itemTop { display: flex; align-items: center; justify-content: space-between; font-size: .6rem; font-weight: 700; letter-spacing: .08em; color: var(--bordeaux); text-transform: uppercase; }
+.item p { font-size: .78rem; color: var(--text-primary); margin: .3rem 0; }
+.item small { font-size: .7rem; color: var(--text-faint); }

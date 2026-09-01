@@ -31,16 +31,15 @@ function buildPath() {
 const currentLevelCode = "B1";
 
 export function ProgressPage() {
-  const { assignments: allAssignments } = usePortalState();
-  const assignments = allAssignments.filter((a) => a.published);
+  const { quizSessions } = usePortalState();
   const currentIndex = cefrLevels.findIndex((l) => l.code === currentLevelCode);
   const nextLevel = cefrLevels[currentIndex + 1];
   const currentLevel = cefrLevels[currentIndex];
   const [selected, setSelected] = useState<CefrLevel | null>(null);
   const speakingHistory = getSpeakingHistory();
   const vocabCount = getVocabulary().length + getSavedWords().length;
-  const skills = computeSkillProgress(assignments, speakingHistory, vocabCount);
-  const overallProgress = computeOverallProgress(lessons, assignments, speakingHistory);
+  const skills = computeSkillProgress(quizSessions, speakingHistory, vocabCount);
+  const overallProgress = computeOverallProgress(lessons, quizSessions, speakingHistory);
 
   return (
     <DashboardShell>

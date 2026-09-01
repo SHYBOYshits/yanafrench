@@ -3,13 +3,13 @@
 import { useState } from "react";
 import type { CourseItem } from "@/lib/courseCatalog";
 import type { Recording } from "@/lib/recordingData";
-import { assignmentCategories, type AssignmentStatus } from "@/lib/testData";
 import { usePortalState } from "@/lib/usePortalState";
 import { DashboardShell } from "./DashboardShell";
-import { IconAttachment, IconPlay, IconVideoFrame } from "./Icons";
+import { IconPlay, IconVideoFrame } from "./Icons";
+import { QuizPractice } from "./QuizPractice";
 import styles from "./LessonsPage.module.css";
 
-const tabs = ["Course", "Recordings", "Resources", "Test and Assignments"] as const;
+const tabs = ["Course", "Recordings", "Resources", "Quiz"] as const;
 type Tab = (typeof tabs)[number];
 
 function getYouTubeEmbedUrl(url: string): string | null {
@@ -59,22 +59,6 @@ function VideoEmbed({ url, title, className }: { url: string; title: string; cla
     </a>
   );
 }
-
-const statusStyles: Record<AssignmentStatus, string> = {
-  "Not started": "statusNeutral",
-  "In progress": "statusActive",
-  Submitted: "statusPending",
-  Reviewed: "statusDone",
-  Completed: "statusDone",
-};
-
-const actionLabel: Record<AssignmentStatus, string> = {
-  "Not started": "Start →",
-  "In progress": "Continue →",
-  Submitted: "View →",
-  Reviewed: "View →",
-  Completed: "View →",
-};
 
 function CourseLessons({ course }: { course: CourseItem }) {
   const [activeVideoId, setActiveVideoId] = useState(course.videos[0]?.id ?? null);
@@ -166,21 +150,20 @@ function RecordingsPlaylist({ recordings }: { recordings: Recording[] }) {
 
 export function LessonsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Course");
-  const [category, setCategory] = useState<(typeof assignmentCategories)[number]>("All");
   const {
     loaded,
     zoomLink,
     courses: allCourses,
     recordings: allRecordings,
     resources: allResources,
-    assignments: allAssignments,
+    quizLevel,
+    quizSessions,
+    refresh,
   } = usePortalState();
 
   const courses = allCourses.filter((c) => c.published);
   const recordings = allRecordings.filter((r) => r.published);
   const resources = allResources.filter((r) => r.published);
-  const publishedAssignments = allAssignments.filter((a) => a.published);
-  const filteredAssignments = category === "All" ? publishedAssignments : publishedAssignments.filter((a) => a.category === category);
 
   return (
     <DashboardShell>
@@ -284,50 +267,8 @@ export function LessonsPage() {
         )
       )}
 
-      {activeTab === "Test and Assignments" && (
-        <>
-          <div className={styles.filterRow}>
-            {assignmentCategories.map((c) => (
-              <button key={c} type="button" className={category === c ? styles.chipActive : styles.chip} onClick={() => setCategory(c)}>{c}</button>
-            ))}
-          </div>
-
-          {filteredAssignments.length > 0 ? (
-            <div className={styles.assignmentList}>
-              {filteredAssignments.map((a) => (
-                <div key={a.id} className={styles.assignmentCard}>
-                  <div className={styles.assignmentTop}>
-                    <span className={styles.assignmentCategory}>{a.category.toUpperCase()}</span>
-                    <span className={styles[statusStyles[a.status]]}>{a.status}</span>
-                  </div>
-                  <strong>{a.title}</strong>
-                  <p>{a.description}</p>
-                  {a.attachmentUrl && (
-                    <a href={a.attachmentUrl} target="_blank" rel="noreferrer" className={styles.assignmentAttachment}>
-                      <IconAttachment size={14} />
-                      {a.attachmentName ?? "View attachment"}
-                    </a>
-                  )}
-                  <div className={styles.assignmentFooter}>
-                    <div>
-                      <small className={styles.deadline}>{a.deadline}</small>
-                      {a.score && <small className={styles.score}>Score: {a.score}</small>}
-                    </div>
-                    <button type="button" className={styles.assignmentAction}>{actionLabel[a.status]}</button>
-                  </div>
-                  {a.feedback && (
-                    <div className={styles.feedback}>
-                      <span>FEEDBACK</span>
-                      <p>{a.feedback}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.empty}><p>Homework and tests will appear here.</p></div>
-          )}
-        </>
+      {activeTab === "Quiz" && (
+        <QuizPractice level={quizLevel} sessions={quizSessions} onSessionCompleted={refresh} />
       )}
       </>
       )}

@@ -62,11 +62,10 @@ function ProgressRing({ value }: { value: number }) {
 }
 
 export function StudentDashboard() {
-  const { assignments: allAssignments } = usePortalState();
-  const assignments = allAssignments.filter((a) => a.published);
+  const { quizSessions } = usePortalState();
   const speakingHistory = getSpeakingHistory();
   const lessonProgress = computeLessonProgress(lessons);
-  const overallProgress = computeOverallProgress(lessons, assignments, speakingHistory);
+  const overallProgress = computeOverallProgress(lessons, quizSessions, speakingHistory);
 
   return (
     <DashboardShell>

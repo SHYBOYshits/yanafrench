@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { CourseItem, CoursePdf, CourseVideo } from "@/lib/courseCatalog";
 import type { Recording } from "@/lib/recordingData";
 import type { Resource } from "@/lib/resourceData";
-import { assignmentCategories, type Assignment, type AssignmentStatus } from "@/lib/testData";
 import { usePortalState } from "@/lib/usePortalState";
 import { deleteFileFromR2 } from "@/lib/deleteFile";
 import { getFilesFromDataTransfer, matchesAccept } from "@/lib/dropFiles";
@@ -14,13 +13,11 @@ import { UploadDropzone } from "../UploadDropzone";
 import { AdminShell } from "../AdminShell";
 import { IconCheck, IconClose, IconPlay, IconUpload, IconVideoFrame } from "../Icons";
 import { AiEnhanceButton } from "./AiEnhanceButton";
+import { AdminQuizPanel } from "./AdminQuizPanel";
 import styles from "./AdminLessonsManager.module.css";
 
-const tabs = ["Course", "Recordings", "Resources", "Test and Assignments"] as const;
+const tabs = ["Course", "Recordings", "Resources", "Quiz"] as const;
 type Tab = (typeof tabs)[number];
-
-const statuses: AssignmentStatus[] = ["Not started", "In progress", "Submitted", "Reviewed", "Completed"];
-const realCategories = assignmentCategories.filter((c) => c !== "All");
 
 function todayLabel() {
   return new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" });
@@ -325,10 +322,9 @@ export function AdminLessonsManager() {
     addResource,
     removeResource,
     updateResource,
-    assignments,
-    addAssignment,
-    removeAssignment,
-    updateAssignment,
+    quizLevel,
+    quizSessions,
+    setQuizLevel,
   } = usePortalState();
 
   const [replacingId, setReplacingId] = useState<string | null>(null);
@@ -479,43 +475,6 @@ export function AdminLessonsManager() {
     } finally {
       setReplacingId(null);
     }
-  }
-
-  // Assignments
-  const [aTitle, setATitle] = useState("");
-  const [aDescription, setADescription] = useState("");
-  const [aCategory, setACategory] = useState<Assignment["category"]>(realCategories[0]);
-  const [aDeadline, setADeadline] = useState("");
-  const [aAttachment, setAAttachment] = useState<{ url: string; name: string } | null>(null);
-
-  function handleAddAssignment(e: FormEvent) {
-    e.preventDefault();
-    if (!aTitle.trim()) return;
-    addAssignment({
-      id: `assignment-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      title: aTitle.trim(),
-      description: aDescription.trim(),
-      category: aCategory,
-      deadline: aDeadline.trim() || "No deadline set",
-      status: "Not started",
-      published: true,
-      attachmentUrl: aAttachment?.url,
-      attachmentName: aAttachment?.name,
-    });
-    setATitle("");
-    setADescription("");
-    setADeadline("");
-    setAAttachment(null);
-  }
-
-  function handleReplaceAssignmentAttachment(assignment: Assignment, fileUrl: string, file: File) {
-    updateAssignment(assignment.id, { attachmentUrl: fileUrl, attachmentName: file.name });
-    deleteFileFromR2(assignment.attachmentUrl);
-  }
-
-  function removeAssignmentAttachment(assignment: Assignment) {
-    updateAssignment(assignment.id, { attachmentUrl: undefined, attachmentName: undefined });
-    deleteFileFromR2(assignment.attachmentUrl);
   }
 
   return (
@@ -781,146 +740,9 @@ export function AdminLessonsManager() {
         </div>
       )}
 
-      {activeTab === "Test and Assignments" && (
+      {activeTab === "Quiz" && (
         <div className={styles.tabPanel}>
-          <form className={styles.form} onSubmit={handleAddAssignment}>
-            <h2>New test / assignment</h2>
-            <div className={styles.fieldGrid}>
-              <label>
-                <span>Title</span>
-                <input value={aTitle} onChange={(e) => setATitle(e.target.value)} placeholder="e.g. Writing · Opinion essay" required />
-                <AiEnhanceButton kind="title" value={aTitle} context="a homework/test title for a French class" onApply={setATitle} />
-              </label>
-              <label>
-                <span>Category</span>
-                <select value={aCategory} onChange={(e) => setACategory(e.target.value as Assignment["category"])}>
-                  {realCategories.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </label>
-              <label>
-                <span>Deadline</span>
-                <input value={aDeadline} onChange={(e) => setADeadline(e.target.value)} placeholder="e.g. Due in 3 days" />
-              </label>
-            </div>
-            <label className={styles.fullWidth}>
-              <span>Description</span>
-              <textarea value={aDescription} onChange={(e) => setADescription(e.target.value)} placeholder="What the student needs to do…" />
-            </label>
-            <AiEnhanceButton kind="description" value={aDescription} context="a homework/test description for a French class" onApply={setADescription} />
-
-            <label className={styles.fullWidth}>
-              <span>Attachment (optional)</span>
-              {aAttachment ? (
-                <div className={styles.attachmentChip}>
-                  <span>{aAttachment.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      deleteFileFromR2(aAttachment.url);
-                      setAAttachment(null);
-                    }}
-                  >
-                    <IconClose size={12} />
-                  </button>
-                </div>
-              ) : (
-                <UploadDropzone
-                  accept=".mp3,.pdf,.ppt,.pptx,.jpg,.jpeg,.png"
-                  hint="MP3, PDF, PPT, JPG or PNG"
-                  multiple={false}
-                  onUploaded={(fileUrl, file) => setAAttachment({ url: fileUrl, name: file.name })}
-                />
-              )}
-            </label>
-
-            <button type="submit" className={styles.save}>Add</button>
-          </form>
-
-          <div className={styles.assignmentList}>
-            {assignments.map((a) => (
-              <div key={a.id} className={a.published ? styles.assignmentRow : `${styles.assignmentRow} ${styles.draftRow}`}>
-                <div className={styles.assignmentHead}>
-                  <strong>{a.title}</strong>
-                  <small>{a.category}</small>
-                  <PublishToggle published={a.published} onToggle={() => updateAssignment(a.id, { published: !a.published })} />
-                </div>
-                <div className={styles.fieldGrid}>
-                  <label>
-                    <span>Status</span>
-                    <select value={a.status} onChange={(e) => updateAssignment(a.id, { status: e.target.value as AssignmentStatus })}>
-                      {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </label>
-                  <label>
-                    <span>Deadline</span>
-                    <input
-                      defaultValue={a.deadline}
-                      onBlur={(e) => e.target.value !== a.deadline && updateAssignment(a.id, { deadline: e.target.value })}
-                    />
-                  </label>
-                  <label>
-                    <span>Score</span>
-                    <input
-                      placeholder="e.g. 8.5 / 10"
-                      defaultValue={a.score ?? ""}
-                      onBlur={(e) => updateAssignment(a.id, { score: e.target.value || undefined })}
-                    />
-                  </label>
-                </div>
-                <label className={styles.fullWidth}>
-                  <span>Feedback</span>
-                  <textarea
-                    defaultValue={a.feedback ?? ""}
-                    onBlur={(e) => updateAssignment(a.id, { feedback: e.target.value || undefined })}
-                  />
-                </label>
-
-                <div className={styles.assignmentAttachmentRow}>
-                  {a.attachmentUrl ? (
-                    <>
-                      <a href={a.attachmentUrl} target="_blank" rel="noreferrer" className={styles.rowLink}>
-                        {a.attachmentName ?? "View attachment"}
-                      </a>
-                      <label className={styles.rowLink}>
-                        Replace
-                        <input
-                          type="file"
-                          hidden
-                          accept=".mp3,.pdf,.ppt,.pptx,.jpg,.jpeg,.png"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            e.target.value = "";
-                            if (!file) return;
-                            const fileUrl = await uploadFileToR2(file);
-                            handleReplaceAssignmentAttachment(a, fileUrl, file);
-                          }}
-                        />
-                      </label>
-                      <button type="button" className={styles.remove} onClick={() => removeAssignmentAttachment(a)}>Remove attachment</button>
-                    </>
-                  ) : (
-                    <label className={styles.rowLink}>
-                      + Add attachment
-                      <input
-                        type="file"
-                        hidden
-                        accept=".mp3,.pdf,.ppt,.pptx,.jpg,.jpeg,.png"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          e.target.value = "";
-                          if (!file) return;
-                          const fileUrl = await uploadFileToR2(file);
-                          updateAssignment(a.id, { attachmentUrl: fileUrl, attachmentName: file.name });
-                        }}
-                      />
-                    </label>
-                  )}
-                </div>
-
-                <button type="button" className={styles.remove} onClick={() => { removeAssignment(a.id); deleteFileFromR2(a.attachmentUrl); }}>Delete</button>
-              </div>
-            ))}
-          </div>
+          <AdminQuizPanel level={quizLevel} sessions={quizSessions} onLevelChange={setQuizLevel} />
         </div>
       )}
       </>

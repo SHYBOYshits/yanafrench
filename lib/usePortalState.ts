@@ -5,7 +5,7 @@ import { applyPortalAction, defaultPortalState, type PortalState, type PortalSta
 import { courses as seedCourses, type CourseItem } from "./courseCatalog";
 import { recordings as seedRecordings, type Recording } from "./recordingData";
 import { resources as seedResources, type Resource } from "./resourceData";
-import { assignments as seedAssignments, type Assignment } from "./testData";
+import type { QuizLevel } from "./quizData";
 
 const POLL_MS = 3000;
 
@@ -16,9 +16,9 @@ function mergeList<T extends { id: string }>(added: T[], seed: T[], overrides: R
 }
 
 // Polls the shared R2-backed portal state so any change made in the admin
-// panel (courses, recordings, resources, assignments) reaches the student
-// Lessons page across devices/browsers — the same pattern used for
-// Messages.
+// panel (courses, recordings, resources, quiz level/history) reaches the
+// student Lessons page across devices/browsers — the same pattern used
+// for Messages.
 export function usePortalState() {
   const [raw, setRaw] = useState<PortalState>(defaultPortalState);
   const [loaded, setLoaded] = useState(false);
@@ -84,16 +84,19 @@ export function usePortalState() {
   const courses = mergeList(raw.courses, seedCourses, raw.courseOverrides, raw.hiddenCourseIds);
   const recordings = mergeList(raw.recordings, seedRecordings, raw.recordingOverrides, raw.hiddenRecordingIds);
   const resources = mergeList(raw.resources, seedResources, raw.resourceOverrides, raw.hiddenResourceIds);
-  const assignments = mergeList(raw.assignments, seedAssignments, raw.assignmentOverrides, raw.hiddenAssignmentIds);
 
   return {
     loaded,
+    // The quiz flow writes sessions server-side (see /api/quiz/submit)
+    // rather than through `send`, since grading and the daily-limit check
+    // have to happen in one place — call this after a session finishes to
+    // pull the fresh state instead of going through the optimistic path.
+    refresh,
     zoomLink: raw.zoomLink,
     setZoomLink: (url: string) => send({ type: "setZoomLink", url }),
     courses,
     recordings,
     resources,
-    assignments,
     addCourse: (course: CourseItem) => send({ type: "addCourse", course }),
     removeCourse: (id: string) => send({ type: "removeCourse", id }),
     updateCourse: (id: string, patch: Partial<CourseItem>) => send({ type: "updateCourse", id, patch }),
@@ -103,8 +106,8 @@ export function usePortalState() {
     addResource: (resource: Resource) => send({ type: "addResource", resource }),
     removeResource: (id: string) => send({ type: "removeResource", id }),
     updateResource: (id: string, patch: Partial<Resource>) => send({ type: "updateResource", id, patch }),
-    addAssignment: (assignment: Assignment) => send({ type: "addAssignment", assignment }),
-    removeAssignment: (id: string) => send({ type: "removeAssignment", id }),
-    updateAssignment: (id: string, patch: Partial<Assignment>) => send({ type: "updateAssignment", id, patch }),
+    quizLevel: raw.quizLevel,
+    quizSessions: raw.quizSessions,
+    setQuizLevel: (level: QuizLevel) => send({ type: "setQuizLevel", level }),
   };
 }
