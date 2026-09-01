@@ -1,17 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import type { QuizSession } from "@/lib/quizData";
 import styles from "./AiEnhanceButton.module.css";
 
-// One click, no confirm step: with a word typed, it translates/glosses
-// that exact word and fills it straight in; left blank, it has the AI
-// pick a random one instead — both auto-apply immediately.
-export function WordOfWeekAiButton({
-  word,
+function buildContext(session: QuizSession | undefined): string {
+  if (!session) return "";
+  return `Last quiz session — level ${session.level}, overall score ${session.overallScore}/10. ${session.summary}`;
+}
+
+// One click, no confirm step: writes a short "Today's Note" and fills it
+// straight in — grounded in the student's latest quiz session when one
+// exists, otherwise a general encouraging note.
+export function TeacherNoteAiButton({
+  latestQuizSession,
   onApply,
 }: {
-  word: string;
-  onApply: (result: { word: string; meaning: string }) => void;
+  latestQuizSession: QuizSession | undefined;
+  onApply: (text: string) => void;
 }) {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -20,18 +26,18 @@ export function WordOfWeekAiButton({
     setStatus("loading");
     setError(null);
     try {
-      const res = await fetch("/api/word-of-week", {
+      const res = await fetch("/api/teacher-note", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word: word.trim() }),
+        body: JSON.stringify({ context: buildContext(latestQuizSession) }),
       });
       if (!res.ok) {
         setError(await res.text());
         setStatus("error");
         return;
       }
-      const result = (await res.json()) as { word: string; meaning: string };
-      onApply(result);
+      const { text } = (await res.json()) as { text: string };
+      onApply(text);
       setStatus("idle");
     } catch {
       setError("Couldn't reach the AI. Check your connection.");
@@ -42,7 +48,7 @@ export function WordOfWeekAiButton({
   return (
     <div className={styles.wrap}>
       <button type="button" className={styles.trigger} onClick={generate} disabled={status === "loading"}>
-        {status === "loading" ? "Thinking…" : word.trim() ? "✨ Translate with AI" : "✨ Surprise me"}
+        {status === "loading" ? "Writing…" : "✨ Write with AI"}
       </button>
       {status === "error" && <p className={styles.error}>{error}</p>}
     </div>

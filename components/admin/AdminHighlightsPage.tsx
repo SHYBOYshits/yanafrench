@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePortalState } from "@/lib/usePortalState";
 import { AdminShell } from "../AdminShell";
 import { WordOfWeekAiButton } from "./WordOfWeekAiButton";
+import { TeacherNoteAiButton } from "./TeacherNoteAiButton";
 import styles from "./AdminLessonsManager.module.css";
 
 function todayLabel() {
@@ -59,11 +60,45 @@ function WordOfWeekFields({
   );
 }
 
+/** Same controlled/remount pattern as WordOfWeekFields, for the note
+ * textarea — so the AI button can fill it in directly and save. */
+function TeacherNoteField({
+  text,
+  latestQuizSession,
+  onSave,
+}: {
+  text: string;
+  latestQuizSession: Parameters<typeof TeacherNoteAiButton>[0]["latestQuizSession"];
+  onSave: (next: string) => void;
+}) {
+  const [draft, setDraft] = useState(text);
+
+  function commit(next: string) {
+    setDraft(next);
+    if (next.trim() && next !== text) onSave(next.trim());
+  }
+
+  return (
+    <>
+      <label className={styles.fullWidth}>
+        <span>Note</span>
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={() => commit(draft)}
+          placeholder="A quick note for the student to see on their dashboard…"
+        />
+      </label>
+      <TeacherNoteAiButton latestQuizSession={latestQuizSession} onApply={commit} />
+    </>
+  );
+}
+
 // Word of the Week and Today's Note — small admin-authored highlights
 // shown on the student's dashboard (components/StudentDashboard.tsx),
 // stored on the same shared portal state as everything else under Lessons.
 export function AdminHighlightsPage() {
-  const { loaded, wordOfWeek, teacherNote, setWordOfWeek, setTeacherNote } = usePortalState();
+  const { loaded, wordOfWeek, teacherNote, quizSessions, setWordOfWeek, setTeacherNote } = usePortalState();
 
   return (
     <AdminShell>
@@ -86,15 +121,12 @@ export function AdminHighlightsPage() {
 
           <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
             <h2>Today&rsquo;s note</h2>
-            <label className={styles.fullWidth}>
-              <span>Note</span>
-              <textarea
-                key={teacherNote.text}
-                defaultValue={teacherNote.text}
-                placeholder="A quick note for the student to see on their dashboard…"
-                onBlur={(e) => e.target.value.trim() && e.target.value !== teacherNote.text && setTeacherNote({ text: e.target.value.trim(), date: todayLabel() })}
-              />
-            </label>
+            <TeacherNoteField
+              key={teacherNote.text}
+              text={teacherNote.text}
+              latestQuizSession={quizSessions[0]}
+              onSave={(text) => setTeacherNote({ text, date: todayLabel() })}
+            />
             {teacherNote.date && <p className={styles.tabHint}>Last updated {teacherNote.date}</p>}
           </form>
         </div>
