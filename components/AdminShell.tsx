@@ -5,7 +5,10 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import styles from "./AdminShell.module.css";
 
-const navItems = [{ label: "Lessons", href: "/admin" }];
+const navItems = [
+  { label: "Lessons", href: "/admin" },
+  { label: "Messages", href: "/admin/messages" },
+];
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
