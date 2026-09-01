@@ -6,7 +6,8 @@ import type { Recording } from "@/lib/recordingData";
 import type { Resource } from "@/lib/resourceData";
 import { assignmentCategories, type Assignment, type AssignmentStatus } from "@/lib/testData";
 import { usePortalState } from "@/lib/usePortalState";
-import { formatFileSize, presignUpload, putFileToR2, uploadFileToR2 } from "@/lib/uploadFile";
+import { formatFileSize, uploadFileToR2 } from "@/lib/uploadFile";
+import { UploadCancelledError, uploadVideoToR2, type VideoUploadHandle } from "@/lib/uploadVideoR2";
 import { UploadDropzone } from "../UploadDropzone";
 import { AdminShell } from "../AdminShell";
 import { IconCheck, IconClose, IconPlay, IconUpload, IconVideoFrame } from "../Icons";
@@ -50,7 +51,7 @@ function PublishToggle({ published, onToggle }: { published: boolean; onToggle: 
  */
 function VideoUploadWidget({ onUploaded }: { onUploaded: (fileUrl: string, file: File) => void }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const xhrRef = useRef<XMLHttpRequest | null>(null);
+  const uploadRef = useRef<VideoUploadHandle | null>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [done, setDone] = useState<{ fileName: string; previewUrl: string } | null>(null);
@@ -68,25 +69,26 @@ function VideoUploadWidget({ onUploaded }: { onUploaded: (fileUrl: string, file:
     setDone(null);
     setIsPlaying(false);
     setProgress(0);
+    const handle = uploadVideoToR2(file, (percent) => setProgress(percent));
+    uploadRef.current = handle;
     try {
-      const { uploadUrl, fileUrl } = await presignUpload(file);
-      const { promise, xhr } = putFileToR2(uploadUrl, file, (percent) => setProgress(percent));
-      xhrRef.current = xhr;
-      await promise;
-      xhrRef.current = null;
+      const fileUrl = await handle.promise;
+      uploadRef.current = null;
       setProgress(null);
       setDone({ fileName: file.name, previewUrl: URL.createObjectURL(file) });
       onUploaded(fileUrl, file);
     } catch (err) {
-      xhrRef.current = null;
+      uploadRef.current = null;
       setProgress(null);
-      setError(err instanceof Error ? err.message : "Upload failed.");
+      if (!(err instanceof UploadCancelledError)) {
+        setError(err instanceof Error ? err.message : "Upload failed.");
+      }
     }
   }
 
   function cancelUpload() {
-    xhrRef.current?.abort();
-    xhrRef.current = null;
+    uploadRef.current?.cancel();
+    uploadRef.current = null;
     setProgress(null);
   }
 
@@ -336,7 +338,7 @@ export function AdminLessonsManager() {
   async function handleReplaceRecording(recording: Recording, file: File) {
     setReplacingId(recording.id);
     try {
-      const fileUrl = await uploadFileToR2(file);
+      const fileUrl = await uploadVideoToR2(file, () => {}).promise;
       updateRecording(recording.id, { videoUrl: fileUrl, sizeBytes: file.size, date: todayLabel() });
     } finally {
       setReplacingId(null);
@@ -526,7 +528,7 @@ export function AdminLessonsManager() {
       {activeTab === "Recordings" && (
         <div className={styles.tabPanel}>
           <p className={styles.tabHint}>Upload Zoom class recordings for students to watch.</p>
-          <UploadDropzone accept="video/*" hint="Video files — multiple supported" onUploaded={handleRecordingUploaded} />
+          <VideoUploadWidget onUploaded={handleRecordingUploaded} />
 
           <button type="button" className={styles.linkToggle} onClick={() => setAddingRecordingLink((v) => !v)}>
             {addingRecordingLink ? "Cancel" : "+ Add Recording (external link)"}

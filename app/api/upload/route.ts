@@ -1,6 +1,6 @@
-import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getR2Client } from "@/lib/r2";
+import { buildUploadKey, getR2Client, resolveFileUrl } from "@/lib/r2";
 
 // Returns a presigned URL the browser uploads directly to R2 — the file
 // never passes through this function. Routing large files (videos) through
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   const filename = typeof body?.filename === "string" && body.filename ? body.filename : "file";
   const contentType = typeof body?.contentType === "string" && body.contentType ? body.contentType : "application/octet-stream";
 
-  const key = `resources/${Date.now()}-${filename.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+  const key = buildUploadKey(filename);
 
   try {
     // A large video on a slow connection can take a while to finish
@@ -31,10 +31,7 @@ export async function POST(req: Request) {
       { expiresIn: 3600 }
     );
 
-    const publicBase = process.env.R2_PUBLIC_URL;
-    const fileUrl = publicBase
-      ? `${publicBase.replace(/\/$/, "")}/${key}`
-      : await getSignedUrl(r2.client, new GetObjectCommand({ Bucket: r2.bucket, Key: key }), { expiresIn: 60 * 60 * 24 * 7 });
+    const fileUrl = await resolveFileUrl(key);
 
     return Response.json({ key, uploadUrl, fileUrl });
   } catch (error) {
