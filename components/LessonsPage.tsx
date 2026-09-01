@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { CourseItem } from "@/lib/courseCatalog";
+import type { Recording } from "@/lib/recordingData";
 import { assignmentCategories, type AssignmentStatus } from "@/lib/testData";
 import { usePortalState } from "@/lib/usePortalState";
 import { DashboardShell } from "./DashboardShell";
@@ -121,10 +122,59 @@ function CourseLessons({ course }: { course: CourseItem }) {
   );
 }
 
+/** Same numbered-playlist + big-player layout as CourseLessons, but for
+ * the flat Recordings list — a class recording plays inline instead of
+ * sending the student off to another tab/site. */
+function RecordingsPlaylist({ recordings }: { recordings: Recording[] }) {
+  const [activeId, setActiveId] = useState(recordings[0]?.id ?? null);
+  const active = recordings.find((r) => r.id === activeId) ?? recordings[0] ?? null;
+
+  return (
+    <div className={styles.lessonLayout}>
+      <nav className={styles.lessonList}>
+        {recordings.map((r) => (
+          <button
+            key={r.id}
+            type="button"
+            className={r.id === active?.id ? styles.lessonRowActive : styles.lessonRow}
+            onClick={() => setActiveId(r.id)}
+          >
+            <IconPlay size={15} />
+            <span className={styles.lessonRowText}>
+              <small>{r.date}</small>
+              {r.title}
+            </span>
+          </button>
+        ))}
+      </nav>
+
+      <div className={styles.playerPane}>
+        {active?.videoUrl ? (
+          <VideoEmbed key={active.id} url={active.videoUrl} title={active.title} className={styles.videoPlayer} />
+        ) : (
+          <div className={styles.videoPlaceholder}>
+            <IconVideoFrame size={26} />
+            <span>Video coming soon</span>
+          </div>
+        )}
+        {active && <p className={styles.playerCaption}>{active.title}</p>}
+        {active?.date && <p className={styles.playerSubcaption}>{active.date}</p>}
+      </div>
+    </div>
+  );
+}
+
 export function LessonsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Course");
   const [category, setCategory] = useState<(typeof assignmentCategories)[number]>("All");
-  const { loaded, courses: allCourses, recordings: allRecordings, resources: allResources, assignments: allAssignments } = usePortalState();
+  const {
+    loaded,
+    zoomLink,
+    courses: allCourses,
+    recordings: allRecordings,
+    resources: allResources,
+    assignments: allAssignments,
+  } = usePortalState();
 
   const courses = allCourses.filter((c) => c.published);
   const recordings = allRecordings.filter((r) => r.published);
@@ -193,25 +243,19 @@ export function LessonsPage() {
       )}
 
       {activeTab === "Recordings" && (
-        recordings.length > 0 ? (
-          <div className={styles.simpleList}>
-            {recordings.map((r) => (
-              <div key={r.id} className={styles.simpleRow}>
-                <div>
-                  <strong>{r.title}</strong>
-                  <small>{r.date}</small>
-                </div>
-                {r.videoUrl ? (
-                  <a href={r.videoUrl} target="_blank" rel="noreferrer" className={styles.simpleAction}>Watch →</a>
-                ) : (
-                  <span className={styles.simpleActionStatic}>Watch →</span>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={styles.empty}><p>Class recordings will appear here after each session.</p></div>
-        )
+        <>
+          {zoomLink && (
+            <a href={zoomLink} target="_blank" rel="noreferrer" className={styles.zoomJoinBox}>
+              <span>Live Zoom Class</span>
+              <strong>Join meeting →</strong>
+            </a>
+          )}
+          {recordings.length > 0 ? (
+            <RecordingsPlaylist recordings={recordings} />
+          ) : (
+            <div className={styles.empty}><p>Class recordings will appear here after each session.</p></div>
+          )}
+        </>
       )}
 
       {activeTab === "Resources" && (

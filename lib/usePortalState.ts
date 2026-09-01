@@ -88,6 +88,8 @@ export function usePortalState() {
 
   return {
     loaded,
+    zoomLink: raw.zoomLink,
+    setZoomLink: (url: string) => send({ type: "setZoomLink", url }),
     courses,
     recordings,
     resources,

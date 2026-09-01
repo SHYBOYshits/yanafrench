@@ -10,6 +10,8 @@ import type { Resource } from "./resourceData";
 import type { Assignment } from "./testData";
 
 export type PortalState = {
+  zoomLink: string;
+
   courses: CourseItem[];
   courseOverrides: Record<string, Partial<CourseItem>>;
   hiddenCourseIds: string[];
@@ -28,6 +30,8 @@ export type PortalState = {
 };
 
 export const defaultPortalState: PortalState = {
+  zoomLink: "",
+
   courses: [],
   courseOverrides: {},
   hiddenCourseIds: [],
@@ -46,6 +50,7 @@ export const defaultPortalState: PortalState = {
 };
 
 export type PortalStateAction =
+  | { type: "setZoomLink"; url: string }
   | { type: "addCourse"; course: CourseItem }
   | { type: "removeCourse"; id: string }
   | { type: "updateCourse"; id: string; patch: Partial<CourseItem> }
@@ -64,6 +69,8 @@ export type PortalStateAction =
 // doesn't wait on a round trip to R2 before a delete/edit is reflected).
 export function applyPortalAction(state: PortalState, action: PortalStateAction): PortalState {
   switch (action.type) {
+    case "setZoomLink":
+      return { ...state, zoomLink: action.url };
     case "addCourse":
       return { ...state, courses: [action.course, ...state.courses] };
     case "removeCourse":

@@ -311,6 +311,8 @@ export function AdminLessonsManager() {
   const [activeTab, setActiveTab] = useState<Tab>("Course");
   const {
     loaded,
+    zoomLink,
+    setZoomLink,
     courses,
     addCourse,
     removeCourse,
@@ -622,59 +624,81 @@ export function AdminLessonsManager() {
 
       {activeTab === "Recordings" && (
         <div className={styles.tabPanel}>
-          <p className={styles.tabHint}>Upload Zoom class recordings for students to watch.</p>
-          <VideoUploadWidget onUploaded={handleRecordingUploaded} />
+          <div className={styles.recordingsLayout}>
+            <div className={styles.recordingsMain}>
+              <p className={styles.tabHint}>Upload Zoom class recordings for students to watch.</p>
+              <VideoUploadWidget onUploaded={handleRecordingUploaded} />
 
-          <button type="button" className={styles.linkToggle} onClick={() => setAddingRecordingLink((v) => !v)}>
-            {addingRecordingLink ? "Cancel" : "+ Add Recording (external link)"}
-          </button>
-          {addingRecordingLink && (
-            <form className={styles.inlineForm} onSubmit={handleAddRecordingLink}>
-              <input value={recLinkTitle} onChange={(e) => setRecLinkTitle(e.target.value)} placeholder="Recording title" required />
-              <input value={recLinkUrl} onChange={(e) => setRecLinkUrl(e.target.value)} placeholder="https://…" required />
-              <button type="submit" className={styles.save}>Add</button>
-            </form>
-          )}
+              <button type="button" className={styles.linkToggle} onClick={() => setAddingRecordingLink((v) => !v)}>
+                {addingRecordingLink ? "Cancel" : "+ Add Recording (external link)"}
+              </button>
+              {addingRecordingLink && (
+                <form className={styles.inlineForm} onSubmit={handleAddRecordingLink}>
+                  <input value={recLinkTitle} onChange={(e) => setRecLinkTitle(e.target.value)} placeholder="Recording title" required />
+                  <input value={recLinkUrl} onChange={(e) => setRecLinkUrl(e.target.value)} placeholder="https://…" required />
+                  <button type="submit" className={styles.save}>Add</button>
+                </form>
+              )}
 
-          <div className={styles.list}>
-            {recordings.map((r) => (
-              <div key={r.id} className={r.published ? styles.row : `${styles.row} ${styles.draftRow}`}>
-                <div>
-                  <input
-                    className={styles.rowTitleInput}
-                    defaultValue={r.title}
-                    onBlur={(e) => e.target.value !== r.title && updateRecording(r.id, { title: e.target.value })}
-                  />
-                  <small>{r.sizeBytes ? `${formatFileSize(r.sizeBytes)} · ` : ""}{r.date}</small>
-                </div>
-                <div className={styles.rowActions}>
-                  <PublishToggle published={r.published} onToggle={() => updateRecording(r.id, { published: !r.published })} />
-                  <label className={styles.rowLink}>
-                    {replacingId === r.id ? "Replacing…" : "Replace"}
-                    <input
-                      type="file"
-                      hidden
-                      accept="video/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleReplaceRecording(r, file);
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    className={styles.remove}
-                    onClick={() => {
-                      removeRecording(r.id);
-                      deleteFileFromR2(r.videoUrl);
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
+              <div className={styles.list}>
+                {recordings.map((r) => (
+                  <div key={r.id} className={r.published ? styles.row : `${styles.row} ${styles.draftRow}`}>
+                    <div>
+                      <input
+                        className={styles.rowTitleInput}
+                        defaultValue={r.title}
+                        onBlur={(e) => e.target.value !== r.title && updateRecording(r.id, { title: e.target.value })}
+                      />
+                      <small>{r.sizeBytes ? `${formatFileSize(r.sizeBytes)} · ` : ""}</small>
+                      <input
+                        className={styles.rowDateInput}
+                        defaultValue={r.date}
+                        placeholder="Class date & time, e.g. 14 Oct, 6:00–7:30 PM"
+                        onBlur={(e) => e.target.value !== r.date && updateRecording(r.id, { date: e.target.value })}
+                      />
+                    </div>
+                    <div className={styles.rowActions}>
+                      <PublishToggle published={r.published} onToggle={() => updateRecording(r.id, { published: !r.published })} />
+                      <label className={styles.rowLink}>
+                        {replacingId === r.id ? "Replacing…" : "Replace"}
+                        <input
+                          type="file"
+                          hidden
+                          accept="video/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleReplaceRecording(r, file);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className={styles.remove}
+                        onClick={() => {
+                          removeRecording(r.id);
+                          deleteFileFromR2(r.videoUrl);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            <aside className={styles.zoomBox}>
+              <span className={styles.sectionLabel}>ZOOM MEETING LINK</span>
+              <p className={styles.tabHint}>Students see a "Join meeting" link on the Recordings tab. Update it anytime — e.g. before each live class.</p>
+              <input
+                key={zoomLink}
+                className={styles.zoomInput}
+                defaultValue={zoomLink}
+                placeholder="https://zoom.us/j/…"
+                onBlur={(e) => e.target.value !== zoomLink && setZoomLink(e.target.value.trim())}
+              />
+            </aside>
           </div>
         </div>
       )}
