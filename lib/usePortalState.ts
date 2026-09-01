@@ -24,16 +24,30 @@ export function usePortalState() {
   const [loaded, setLoaded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Edits sent but not yet confirmed persisted. A background poll's
+  // response is a snapshot from whenever *it* started — if it lands after
+  // an optimistic edit but before that edit's own POST resolves, applying
+  // it verbatim would momentarily un-delete/un-edit whatever's still
+  // pending (a visible flash back to the old state). Replaying every
+  // pending action on top of any server snapshot — poll or POST response —
+  // keeps the UI consistent with the latest local edit no matter which
+  // response lands first.
+  const pendingRef = useRef<PortalStateAction[]>([]);
+  const applyPending = useCallback(
+    (state: PortalState) => pendingRef.current.reduce(applyPortalAction, state),
+    []
+  );
+
   const refresh = useCallback(async () => {
     try {
       const res = await fetch("/api/portal-state", { cache: "no-store" });
-      if (res.ok) setRaw(await res.json());
+      if (res.ok) setRaw(applyPending(await res.json()));
     } catch {
       // stay on last-known state if a poll fails
     } finally {
       setLoaded(true);
     }
-  }, []);
+  }, [applyPending]);
 
   useEffect(() => {
     refresh();
@@ -48,6 +62,7 @@ export function usePortalState() {
   // the background; the response — or the next poll — reconciles with the
   // authoritative server state.
   const send = useCallback(async (action: PortalStateAction) => {
+    pendingRef.current = [...pendingRef.current, action];
     setRaw((prev) => applyPortalAction(prev, action));
     try {
       const res = await fetch("/api/portal-state", {
@@ -55,11 +70,16 @@ export function usePortalState() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(action),
       });
-      if (res.ok) setRaw(await res.json());
+      if (res.ok) {
+        const serverState = await res.json();
+        pendingRef.current = pendingRef.current.filter((a) => a !== action);
+        setRaw(applyPending(serverState));
+      }
     } catch {
-      // next poll will reconcile
+      // Leave it pending — it keeps getting replayed on top of every poll
+      // until a retry succeeds, instead of silently reverting.
     }
-  }, []);
+  }, [applyPending]);
 
   const courses = mergeList(raw.courses, seedCourses, raw.courseOverrides, raw.hiddenCourseIds);
   const recordings = mergeList(raw.recordings, seedRecordings, raw.recordingOverrides, raw.hiddenRecordingIds);
