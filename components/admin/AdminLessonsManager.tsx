@@ -14,10 +14,9 @@ import { AdminShell } from "../AdminShell";
 import { IconCheck, IconClose, IconPlay, IconUpload, IconVideoFrame } from "../Icons";
 import { AiEnhanceButton } from "./AiEnhanceButton";
 import { AdminQuizPanel } from "./AdminQuizPanel";
-import { AdminBatchesPanel } from "./AdminBatchesPanel";
 import styles from "./AdminLessonsManager.module.css";
 
-const tabs = ["Course", "Recordings", "Resources", "Batches", "Quiz"] as const;
+const tabs = ["Course", "Recordings", "Resources", "Quiz"] as const;
 type Tab = (typeof tabs)[number];
 
 function todayLabel() {
@@ -326,11 +325,6 @@ export function AdminLessonsManager() {
     quizLevel,
     quizSessions,
     setQuizLevel,
-    batches,
-    addBatch,
-    removeBatch,
-    updateBatch,
-    setCurrentBatch,
   } = usePortalState();
 
   const [replacingId, setReplacingId] = useState<string | null>(null);
@@ -743,12 +737,6 @@ export function AdminLessonsManager() {
               </div>
             ))}
           </div>
-        </div>
-      )}
-
-      {activeTab === "Batches" && (
-        <div className={styles.tabPanel}>
-          <AdminBatchesPanel batches={batches} onAdd={addBatch} onUpdate={updateBatch} onRemove={removeBatch} onSetCurrent={setCurrentBatch} />
         </div>
       )}
 
