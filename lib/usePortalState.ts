@@ -109,5 +109,9 @@ export function usePortalState() {
     quizLevel: raw.quizLevel,
     quizSessions: raw.quizSessions,
     setQuizLevel: (level: QuizLevel) => send({ type: "setQuizLevel", level }),
+    wordOfWeek: raw.wordOfWeek,
+    teacherNote: raw.teacherNote,
+    setWordOfWeek: (wordOfWeek: { word: string; meaning: string }) => send({ type: "setWordOfWeek", wordOfWeek }),
+    setTeacherNote: (teacherNote: { text: string; date: string }) => send({ type: "setTeacherNote", teacherNote }),
   };
 }

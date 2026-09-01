@@ -7,6 +7,7 @@ import styles from "./AdminShell.module.css";
 
 const navItems = [
   { label: "Lessons", href: "/admin" },
+  { label: "Highlights", href: "/admin/highlights" },
   { label: "Messages", href: "/admin/messages" },
 ];
 

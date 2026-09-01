@@ -34,6 +34,10 @@ export type PortalState = {
   // PortalStateAction — grading and the daily-limit check must happen
   // server-side in one place, not be replayable from the client.
   quizSessions: QuizSession[];
+
+  // Admin-authored highlights shown on the student's dashboard.
+  wordOfWeek: { word: string; meaning: string };
+  teacherNote: { text: string; date: string };
 };
 
 export const defaultPortalState: PortalState = {
@@ -53,6 +57,9 @@ export const defaultPortalState: PortalState = {
 
   quizLevel: defaultQuizLevel,
   quizSessions: [],
+
+  wordOfWeek: { word: "pourtant", meaning: "however · yet" },
+  teacherNote: { text: "Better rhythm today.", date: "" },
 };
 
 export type PortalStateAction =
@@ -66,7 +73,9 @@ export type PortalStateAction =
   | { type: "addResource"; resource: Resource }
   | { type: "removeResource"; id: string }
   | { type: "updateResource"; id: string; patch: Partial<Resource> }
-  | { type: "setQuizLevel"; level: QuizLevel };
+  | { type: "setQuizLevel"; level: QuizLevel }
+  | { type: "setWordOfWeek"; wordOfWeek: { word: string; meaning: string } }
+  | { type: "setTeacherNote"; teacherNote: { text: string; date: string } };
 
 // Pure reducer shared by the API route (authoritative, persisted write) and
 // the client hook (optimistic local update, applied instantly so the UI
@@ -104,6 +113,10 @@ export function applyPortalAction(state: PortalState, action: PortalStateAction)
       };
     case "setQuizLevel":
       return { ...state, quizLevel: action.level };
+    case "setWordOfWeek":
+      return { ...state, wordOfWeek: action.wordOfWeek };
+    case "setTeacherNote":
+      return { ...state, teacherNote: action.teacherNote };
     default:
       return state;
   }

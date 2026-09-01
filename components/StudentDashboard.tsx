@@ -33,8 +33,6 @@ const nextClass = {
 };
 
 const weeklyFocus = { text: "Speak with more natural connectors", tag: "TEF · Expression orale" };
-const wordOfWeek = { word: "pourtant", meaning: "however · yet" };
-const teacherNote = { text: "Better rhythm today.", cta: "One thing to revisit" };
 const currentLevelCode = "B1";
 const streak = 12;
 
@@ -62,7 +60,7 @@ function ProgressRing({ value }: { value: number }) {
 }
 
 export function StudentDashboard() {
-  const { quizSessions } = usePortalState();
+  const { quizSessions, wordOfWeek, teacherNote } = usePortalState();
   const speakingHistory = getSpeakingHistory();
   const lessonProgress = computeLessonProgress(lessons);
   const overallProgress = computeOverallProgress(lessons, quizSessions, speakingHistory);
@@ -131,7 +129,7 @@ export function StudentDashboard() {
         <div className={styles.featured}>
           <div className={styles.featuredTop}><span>TODAY&apos;S NOTE</span></div>
           <strong>{teacherNote.text}</strong>
-          <small>{teacherNote.cta} →</small>
+          {teacherNote.date && <small>{teacherNote.date}</small>}
         </div>
       </div>
     </DashboardShell>
