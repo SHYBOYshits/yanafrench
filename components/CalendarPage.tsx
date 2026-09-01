@@ -2,10 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { eventTypeLabels, getStaticEvents, type CalendarEventType } from "@/lib/calendarData";
-import { generateClassEvents } from "@/lib/batchData";
+import { generateClassEvents, type BatchCourse } from "@/lib/batchData";
 import { usePortalState } from "@/lib/usePortalState";
 import { DashboardShell } from "./DashboardShell";
 import styles from "./CalendarPage.module.css";
+
+type CategoryFilter = "All" | BatchCourse;
+const CATEGORIES: CategoryFilter[] = ["All", "TEF", "TCF", "DELF"];
 
 const typeClass: Record<CalendarEventType, string> = {
   class: "dotClass",
@@ -21,11 +24,17 @@ function isSameDay(a: Date, b: Date) {
 
 export function CalendarPage() {
   const { batches, zoomLink } = usePortalState();
-  const currentBatch = batches.find((b) => b.isCurrent);
+  const [category, setCategory] = useState<CategoryFilter>("All");
+
+  const currentBatches = useMemo(
+    () => batches.filter((b) => b.isCurrent && (category === "All" || b.course === category)),
+    [batches, category]
+  );
+
   const events = useMemo(() => {
-    const classEvents = currentBatch ? generateClassEvents(currentBatch, zoomLink) : [];
+    const classEvents = currentBatches.flatMap((b) => generateClassEvents(b, zoomLink));
     return [...classEvents, ...getStaticEvents()].sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [currentBatch, zoomLink]);
+  }, [currentBatches, zoomLink]);
   const today = useMemo(() => new Date(), []);
   const [selected, setSelected] = useState<Date | null>(null);
 
@@ -50,6 +59,21 @@ export function CalendarPage() {
       <div className={styles.head}>
         <small>LE HUB</small>
         <h1>Calendar.</h1>
+      </div>
+
+      <div className={styles.categoryRow} role="tablist" aria-label="Filter by course">
+        {CATEGORIES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            role="tab"
+            aria-selected={category === c}
+            className={category === c ? styles.chipActive : styles.chip}
+            onClick={() => setCategory(c)}
+          >
+            {c}
+          </button>
+        ))}
       </div>
 
       <div className={styles.layout}>

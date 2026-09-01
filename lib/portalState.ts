@@ -137,8 +137,17 @@ export function applyPortalAction(state: PortalState, action: PortalStateAction)
       return { ...state, batches: state.batches.filter((b) => b.id !== action.id) };
     case "updateBatch":
       return { ...state, batches: state.batches.map((b) => (b.id === action.id ? { ...b, ...action.patch } : b)) };
-    case "setCurrentBatch":
-      return { ...state, batches: state.batches.map((b) => ({ ...b, isCurrent: b.id === action.id })) };
+    case "setCurrentBatch": {
+      const target = state.batches.find((b) => b.id === action.id);
+      if (!target) return state;
+      // Scoped per course, not globally — the student can have a current
+      // TEF batch and a current DELF batch at once (see the calendar's
+      // course picker), just never two current batches in the same course.
+      return {
+        ...state,
+        batches: state.batches.map((b) => (b.course === target.course ? { ...b, isCurrent: b.id === action.id } : b)),
+      };
+    }
     default:
       return state;
   }

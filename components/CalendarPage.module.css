@@ -9,6 +9,19 @@
   margin: .5rem 0 2rem;
 }
 
+.categoryRow { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.6rem; }
+.chip, .chipActive {
+  border: 1px solid var(--hairline-ink);
+  background: none;
+  color: var(--text-primary);
+  padding: .5rem 1rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+.chip:hover { border-color: var(--blue); }
+.chipActive { background: var(--blue); border-color: var(--blue); color: #fff; }
+
 .layout { display: grid; grid-template-columns: 1fr .8fr; gap: 1.4rem; align-items: start; }
 
 .calendarCard { border: 1px solid var(--hairline-ink); border-radius: var(--r-lg); background: var(--card-surface); box-shadow: var(--shadow-lift); padding: 1.6rem; }
