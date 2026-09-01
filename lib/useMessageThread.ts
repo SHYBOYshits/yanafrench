@@ -34,19 +34,26 @@ export function useMessageThread() {
   // the response to the most-recently-started request is ever applied.
   const seqRef = useRef(0);
 
+  // A sent message not yet confirmed by its own POST response — shown
+  // immediately instead of waiting on the R2 round trip, and replayed on
+  // top of every poll/response until that POST resolves (same pattern as
+  // lib/usePortalState.ts), so it can't flicker away in the meantime.
+  const pendingRef = useRef<ThreadMessage[]>([]);
+  const applyPending = useCallback((list: ThreadMessage[]) => [...list, ...pendingRef.current], []);
+
   const refresh = useCallback(async () => {
     const seq = ++seqRef.current;
     try {
       const res = await fetch("/api/messages", { cache: "no-store" });
       if (!res.ok) return;
       const data = await res.json();
-      if (seq === seqRef.current) setMessages(data);
+      if (seq === seqRef.current) setMessages(applyPending(data));
     } catch {
       // stay on last-known messages if a poll fails
     } finally {
       setLoaded(true);
     }
-  }, []);
+  }, [applyPending]);
 
   useEffect(() => {
     refresh();
@@ -59,6 +66,11 @@ export function useMessageThread() {
   const send = useCallback(async (from: "student" | "teacher", text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
+
+    const optimistic: ThreadMessage = { id: `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`, from, text: trimmed, time: Date.now() };
+    pendingRef.current = [...pendingRef.current, optimistic];
+    setMessages((prev) => [...prev, optimistic]);
+
     const seq = ++seqRef.current;
     try {
       const res = await fetch("/api/messages", {
@@ -68,12 +80,13 @@ export function useMessageThread() {
       });
       if (res.ok) {
         const data = await res.json();
-        if (seq === seqRef.current) setMessages(data);
+        pendingRef.current = pendingRef.current.filter((m) => m !== optimistic);
+        if (seq === seqRef.current) setMessages(applyPending(data));
       }
     } catch {
-      // next poll will reconcile
+      // Leave it pending — replayed on every poll until a retry succeeds.
     }
-  }, []);
+  }, [applyPending]);
 
   return { messages, loaded, send };
 }
