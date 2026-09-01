@@ -3,16 +3,9 @@
 import { useState } from "react";
 import styles from "./AiEnhanceButton.module.css";
 
-// One click, no confirm step: with a word typed, it translates/glosses
-// that exact word and fills it straight in; left blank, it has the AI
-// pick a random one instead — both auto-apply immediately.
-export function WordOfWeekAiButton({
-  word,
-  onApply,
-}: {
-  word: string;
-  onApply: (result: { word: string; meaning: string }) => void;
-}) {
+// One click, no confirm step: the AI always picks a random French word (or
+// connector/idiom) and its short meaning, and fills both fields in.
+export function WordOfWeekAiButton({ onApply }: { onApply: (result: { word: string; meaning: string }) => void }) {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -20,11 +13,7 @@ export function WordOfWeekAiButton({
     setStatus("loading");
     setError(null);
     try {
-      const res = await fetch("/api/word-of-week", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word: word.trim() }),
-      });
+      const res = await fetch("/api/word-of-week", { method: "POST" });
       if (!res.ok) {
         setError(await res.text());
         setStatus("error");
@@ -42,7 +31,7 @@ export function WordOfWeekAiButton({
   return (
     <div className={styles.wrap}>
       <button type="button" className={styles.trigger} onClick={generate} disabled={status === "loading"}>
-        {status === "loading" ? "Thinking…" : word.trim() ? "✨ Translate with AI" : "✨ Surprise me"}
+        {status === "loading" ? "Thinking…" : "✨ Write with AI"}
       </button>
       {status === "error" && <p className={styles.error}>{error}</p>}
     </div>

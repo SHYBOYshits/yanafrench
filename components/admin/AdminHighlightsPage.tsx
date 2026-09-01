@@ -55,22 +55,14 @@ function WordOfWeekFields({
           />
         </label>
       </div>
-      <WordOfWeekAiButton word={wordDraft} onApply={commit} />
+      <WordOfWeekAiButton onApply={commit} />
     </>
   );
 }
 
 /** Same controlled/remount pattern as WordOfWeekFields, for the note
  * textarea — so the AI button can fill it in directly and save. */
-function TeacherNoteField({
-  text,
-  latestQuizSession,
-  onSave,
-}: {
-  text: string;
-  latestQuizSession: Parameters<typeof TeacherNoteAiButton>[0]["latestQuizSession"];
-  onSave: (next: string) => void;
-}) {
+function TeacherNoteField({ text, onSave }: { text: string; onSave: (next: string) => void }) {
   const [draft, setDraft] = useState(text);
 
   function commit(next: string) {
@@ -86,10 +78,10 @@ function TeacherNoteField({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={() => commit(draft)}
-          placeholder="A quick note for the student to see on their dashboard…"
+          placeholder="A short motivational note, e.g. “You’ve got this!”"
         />
       </label>
-      <TeacherNoteAiButton latestQuizSession={latestQuizSession} onApply={commit} />
+      <TeacherNoteAiButton onApply={commit} />
     </>
   );
 }
@@ -98,7 +90,7 @@ function TeacherNoteField({
 // shown on the student's dashboard (components/StudentDashboard.tsx),
 // stored on the same shared portal state as everything else under Lessons.
 export function AdminHighlightsPage() {
-  const { loaded, wordOfWeek, teacherNote, quizSessions, setWordOfWeek, setTeacherNote } = usePortalState();
+  const { loaded, wordOfWeek, teacherNote, setWordOfWeek, setTeacherNote } = usePortalState();
 
   return (
     <AdminShell>
@@ -124,7 +116,6 @@ export function AdminHighlightsPage() {
             <TeacherNoteField
               key={teacherNote.text}
               text={teacherNote.text}
-              latestQuizSession={quizSessions[0]}
               onSave={(text) => setTeacherNote({ text, date: todayLabel() })}
             />
             {teacherNote.date && <p className={styles.tabHint}>Last updated {teacherNote.date}</p>}

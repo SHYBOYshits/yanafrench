@@ -7,20 +7,20 @@ const wordSchema = z.object({
   meaning: z.string().describe('A short, gloss-style English meaning — a few words, not a sentence (e.g. "however · yet")'),
 });
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json().catch(() => null);
-    const word = typeof body?.word === "string" ? body.word.trim() : "";
+// Picking a random word type server-side and naming it in the prompt keeps
+// results varied — left to its own sampling the model tends to collapse to
+// the same word (or two) call after call.
+const WORD_TYPES = ["connector", "idiom or fixed expression", "reflexive verb", "adjective", "adverb", "everyday noun", "phrasal expression"];
 
+export async function POST() {
+  try {
+    const type = WORD_TYPES[Math.floor(Math.random() * WORD_TYPES.length)];
     const { output } = await generateText({
       model: google("gemini-3.5-flash-lite"),
       system:
-        "You help a French teacher pick a 'Word of the Week' to show a French-learning student on their dashboard. " +
+        "You help a French teacher pick a 'Word of the Day' to show a French-learning student on their dashboard. " +
         "Keep the meaning short and gloss-style — a few words separated by · if there are multiple senses, never a full sentence.",
-      prompt: word
-        ? `Give the short English meaning of this French word or phrase: "${word}"`
-        : "Pick one useful French word, connector, or short idiom worth an intermediate (B1/B2) learner knowing this week — " +
-          "vary the type each time (don't default to common connectors every time) — and give its short English meaning.",
+      prompt: `Pick one useful French ${type} worth an intermediate (B1/B2) learner knowing today, and give its short English meaning.`,
       output: Output.object({ schema: wordSchema }),
     });
 
