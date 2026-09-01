@@ -27,12 +27,20 @@ export function useMessageThread() {
   const [loaded, setLoaded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // A poll and a send() can both be in flight at once. Without a sequence
+  // guard, a poll that started before a send resolves can land after it
+  // and overwrite the thread with its (older) snapshot — the message you
+  // just sent would flash away until the next poll fetched it back. Only
+  // the response to the most-recently-started request is ever applied.
+  const seqRef = useRef(0);
+
   const refresh = useCallback(async () => {
+    const seq = ++seqRef.current;
     try {
       const res = await fetch("/api/messages", { cache: "no-store" });
       if (!res.ok) return;
       const data = await res.json();
-      setMessages(data);
+      if (seq === seqRef.current) setMessages(data);
     } catch {
       // stay on last-known messages if a poll fails
     } finally {
@@ -51,6 +59,7 @@ export function useMessageThread() {
   const send = useCallback(async (from: "student" | "teacher", text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
+    const seq = ++seqRef.current;
     try {
       const res = await fetch("/api/messages", {
         method: "POST",
@@ -58,7 +67,8 @@ export function useMessageThread() {
         body: JSON.stringify({ from, text: trimmed }),
       });
       if (res.ok) {
-        setMessages(await res.json());
+        const data = await res.json();
+        if (seq === seqRef.current) setMessages(data);
       }
     } catch {
       // next poll will reconcile
